@@ -1,12 +1,14 @@
 name: Push-to-EC2
 on:
   pull_request:
-    branches: [ "main" ]
+    types:
+      - closed
     paths-ignore:
          - '.github/**'
 
 jobs:
   deploy:
+    if: github.event.pull_request.merged == true
     name: Deploy to EC2
     runs-on: ubuntu-latest
 
