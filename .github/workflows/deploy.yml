@@ -3,9 +3,7 @@ name: Deployment Push-to-EC2
 concurrency: production
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - 'main'
     paths-ignore:
