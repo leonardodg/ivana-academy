@@ -1,8 +1,13 @@
-name: Push-to-EC2
+name: Deployment Push-to-EC2
+
+concurrency: production
+
 on:
   pull_request:
     types:
       - closed
+    branches:
+      - 'main'
     paths-ignore:
          - '.github/**'
 
