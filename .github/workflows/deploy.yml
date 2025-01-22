@@ -19,8 +19,8 @@ jobs:
       - name: Copy files with SSH
         uses: easingthemes/ssh-deploy@main
         env:
-          SSH_PRIVATE_KEY: ${{secrets.EC2_SSH_KEY}}
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           SOURCE: "./"
-          REMOTE_HOST: ${{secrets.REMOTE_HOST}}
-          REMOTE_USER: "ec2-user"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: "admin"
           TARGET: "/var/www/html"
