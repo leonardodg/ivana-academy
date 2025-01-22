@@ -1,6 +1,6 @@
 name: Deployment Push-to-EC2
 
-concurrency: production
+concurrency: PRODUCTION
 
 on:
   push:
