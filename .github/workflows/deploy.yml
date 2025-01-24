@@ -36,9 +36,10 @@ jobs:
 
   deploy:
     needs: docker
-    runs-on: self-hosted
-
+    runs-on: ubuntu-latest
     steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
       - name: Deploy via SSH by RSYNC
         uses: easingthemes/ssh-deploy@main
         with:
