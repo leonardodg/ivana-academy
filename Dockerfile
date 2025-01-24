@@ -1,4 +1,4 @@
-FROM moodlehq/moodle-php-apache:8.0
+FROM moodlehq/moodle-php-apache:8.1
 
 ARG MOODLE_DBTYPE=mysqli
 ARG MOODLE_DBLIB=native
