@@ -25,7 +25,13 @@ jobs:
         with:
           context: .
           push: true
-          tags: leodg/moodle-academy:4.5.1
+          tags: leodg/moodle-academy:latest
+          build-args: |
+            MOODLE_DBHOST{{ secrets.MOODLE_DBHOST }}
+            MOODLE_DBNAME{{ secrets.MOODLE_DBNAME }}
+            MOODLE_DBUSER={{ secrets.MOODLE_DBUSER }}
+            MOODLE_DBPASS={{ secrets.MOODLE_DBPASS }}
+            MOODLE_URL={{ vars.MOODLE_URL }}
 
 
   deploy:
@@ -49,7 +55,7 @@ jobs:
             whoami
             ls -al
             echo $RSYNC_STDOUT
-#            cp ${{ vars.REMOTE_TARGET }}/config-docker.php ${{ vars.REMOTE_TARGET }}/config.php
+            cp ${{ vars.REMOTE_TARGET }}/config-docker.php ${{ vars.REMOTE_TARGET }}/config.php
 
       - name: Deploy to EC2 Instance
         uses: appleboy/ssh-action@v1.2.0
