@@ -50,6 +50,7 @@ jobs:
             whoami
             ls -al
             echo $RSYNC_STDOUT
+            cp ${{ secrets.REMOTE_TARGET }}/config-docker.php ${{ secrets.REMOTE_TARGET }}/config.php
 
       - name: Deploy to EC2 Instance
         uses: appleboy/ssh-action@v1.2.0
