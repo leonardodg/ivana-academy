@@ -6,12 +6,9 @@ on:
       - main
 
 jobs:
-  build:
+  docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -36,14 +33,14 @@ jobs:
 
 
   deploy:
-    needs: build
+    needs: docker
     runs-on: self-hosted
 
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Deploy to Staging server
+      - name: Deploy via SSH by RSYNC
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -57,3 +54,16 @@ jobs:
             whoami
             ls -al
             echo $RSYNC_STDOUT
+
+      - name: Deploy to EC2 Instance
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker stop moodle || true
+            docker rm moodle || true
+            docker pull leodg/moodle-academy:latest
+            docker run --name moodle -p 80:80 -v $PWD:/var/www/html
+
