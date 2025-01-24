@@ -26,8 +26,8 @@ jobs:
           context: .
           push: true
           tags: leodg/moodle-academy:latest
-        env:
-          MOODLE_URL: ${{ vars.MOODLE_URL }}
+          build-args: |
+            MOODLE_URL=${{ vars.MOODLE_URL }}
 
 
   deploy:
