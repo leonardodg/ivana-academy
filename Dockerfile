@@ -20,6 +20,14 @@ ENV MOODLE_URL=http://127.0.0.1
 ENV MOODLE_DATA=/var/www/moodledata
 ENV MOODLE_ADMIN=admin
 
+ENV MOODLE_DBTYPE=mysqli
+ENV MOODLE_DBLIB=native
+ENV MOODLE_DBPFX=mdl_
+ENV MOODLE_DBCOLL=utf8mb4_bin
+ENV MOODLE_URL=http://127.0.0.1
+ENV MOODLE_DATA=/var/www/moodledata
+ENV MOODLE_ADMIN=admin
+
 WORKDIR /var/www/html
 
 # SSL Enable + Letsencrypt
