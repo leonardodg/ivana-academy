@@ -20,12 +20,12 @@ ENV MOODLE_ADMIN=admin
 
 WORKDIR /var/www/html
 
-EXPOSE 80 443
-
 # SSL Enable + Letsencrypt
-RUN copy .github/workflows/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
-RUN copy /home/admin/local/letsencrypt/ /etc/ssl/certs/letsencrypt/
+COPY .github/workflows/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
+COPY /home/admin/local/letsencrypt/ /etc/ssl/certs/letsencrypt/
 RUN a2enmod ssl && a2ensite default-ssl
+
+EXPOSE 80 443
 
 CMD ["apache2-foreground"]
 ENTRYPOINT ["moodle-docker-php-entrypoint"]
