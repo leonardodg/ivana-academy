@@ -22,7 +22,6 @@ WORKDIR /var/www/html
 
 # SSL Enable + Letsencrypt
 COPY .github/workflows/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
-COPY /home/admin/local/letsencrypt/ /etc/ssl/certs/letsencrypt/
 RUN a2enmod ssl && a2ensite default-ssl
 
 EXPOSE 80 443
