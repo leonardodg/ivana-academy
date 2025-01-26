@@ -60,5 +60,5 @@ jobs:
             sudo docker stop moodle || true
             sudo docker rm moodle || true
             sudo docker pull leodg/moodle-academy:latest
-            sudo docker run --name moodle -p 80:80 -v ${{ secrets.REMOTE_TARGET }}:/var/www/html -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -d leodg/moodle-academy:latest
+            sudo docker run --name moodle -p 80:80 p 443:443 -v ${{ secrets.REMOTE_TARGET }}:/var/www/html -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -d leodg/moodle-academy:latest
 
