@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   docker:
@@ -25,12 +25,13 @@ jobs:
         with:
           context: .
           push: true
-          tags: leodg/moodle-academy:latest
+          tags: leodg/moodle-academy:develop:4.5.1
 
 
   deploy:
     needs: docker
     runs-on: ubuntu-latest
+    environment: development
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
@@ -41,14 +42,14 @@ jobs:
           ARGS: "-rlgoDzvc -i"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: ${{ secrets.REMOTE_TARGET }}
+          TARGET: ${{ vars.REMOTE_TARGET }}
           SCRIPT_BEFORE: |
             sudo apt install rsync -y
           SCRIPT_AFTER: |
             whoami
             ls -al
             echo $RSYNC_STDOUT
-            cp ${{ secrets.REMOTE_TARGET }}/config-docker.php ${{ secrets.REMOTE_TARGET }}/config.php
+            cp ${{ vars.REMOTE_TARGET }}/config-docker.php ${{ vars.REMOTE_TARGET }}/config.php
 
       - name: Deploy to EC2 Instance
         uses: appleboy/ssh-action@v1.2.0
@@ -59,5 +60,5 @@ jobs:
           script: |
             sudo docker stop moodle || true
             sudo docker rm moodle || true
-            sudo docker pull leodg/moodle-academy:latest
-            sudo docker run --restart=always --name moodle -p 80:80 -p 443:443 -v ${{ secrets.REMOTE_TARGET }}:/var/www/html -v /home/admin/moodledata:${{ vars.MOODLE_DATA }} -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -e MOODLE_DATA=${{ vars.MOODLE_DATA }} -d leodg/moodle-academy:latest
+            sudo docker pull leodg/moodle-academy:develop:4.5.1
+            sudo docker run --restart=always --name moodle -p 80:80 -p 443:443 -v ${{ vars.REMOTE_TARGET }}:/var/www/html -v /home/admin/moodledata:${{ vars.MOODLE_DATA }} -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -e MOODLE_DATA=${{ vars.MOODLE_DATA }} -d leodg/moodle-academy:develop:4.5.1
