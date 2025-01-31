@@ -10,7 +10,7 @@ ENV MOODLE_DBNAME=$MOODLE_DBNAME
 ENV MOODLE_DBUSER=$MOODLE_DBUSER
 ENV MOODLE_DBPASS=$MOODLE_DBPASS
 
-ENV ENVIRONMENT=development
+ARG ENVIRONMENT=development
 ENV MOODLE_DBTYPE=mysqli
 ENV MOODLE_DBLIB=native
 ENV MOODLE_DBPFX=mdl_
@@ -23,7 +23,7 @@ WORKDIR /var/www/html
 
 # SSL Enable + Letsencrypt
 COPY .github/workflows/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
-RUN if [ "${ENVIRONMENT}" = "development" ]; then sed -i 's/ivana.academy/dev.ivana.academy/g' /etc/apache2/sites-enabled/dev-ssl.conf; fi
+RUN if [ "$ENVIRONMENT" = "development" ]; then sed -i 's/ivana.academy/dev.ivana.academy/g' /etc/apache2/sites-available/default-ssl.conf; fi
 RUN a2enmod ssl && a2ensite default-ssl
 
 EXPOSE 80 443
