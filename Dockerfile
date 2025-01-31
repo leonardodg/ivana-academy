@@ -23,7 +23,7 @@ WORKDIR /var/www/html
 
 # SSL Enable + Letsencrypt
 COPY .github/workflows/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
-RUN if [ "$ENVIRONMENT" = "development" ]; then sed -i 's/ivana.academy/dev.ivana.academy/' /etc/apache2/sites-available/default-ssl.conf; fi
+RUN if [ "$ENVIRONMENT" = "development" ]; then sed -i '0,/ivana.academy/{s//dev.ivana.academy/}' /etc/apache2/sites-available/default-ssl.conf; fi
 RUN a2enmod ssl && a2ensite default-ssl
 
 EXPOSE 80 443
