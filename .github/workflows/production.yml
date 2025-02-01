@@ -49,7 +49,7 @@ jobs:
             whoami
             ls -al
             echo $RSYNC_STDOUT
-            cp ${{ vars.REMOTE_TARGET }}/config-docker.php ${{ vars.REMOTE_TARGET }}/config.php
+#            cp ${{ vars.REMOTE_TARGET }}/config-docker.php ${{ vars.REMOTE_TARGET }}/config.php
 
       - name: Deploy to EC2 Instance
         uses: appleboy/ssh-action@v1.2.0
@@ -58,7 +58,7 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sudo docker stop moodle || true
-            sudo docker rm moodle || true
-            sudo docker pull leodg/moodle-academy:4.5.1
-            sudo docker run --restart=always --name moodle -p 80:80 -p 443:443 -v ${{ vars.REMOTE_TARGET }}:/var/www/html -v /home/admin/moodledata:${{ vars.MOODLE_DATA }} -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -e MOODLE_DATA=${{ vars.MOODLE_DATA }} -e ENVIRONMENT=production -d leodg/moodle-academy:4.5.1
+            docker stop moodle || true
+            docker rm moodle || true
+            docker pull leodg/moodle-academy:4.5.1
+            docker run --restart=always --name moodle -p 80:80 -p 443:443 -v ${{ vars.REMOTE_TARGET }}:/var/www/html -v /home/admin/moodledata:${{ vars.MOODLE_DATA }} -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -e MOODLE_DATA=${{ vars.MOODLE_DATA }} -e ENVIRONMENT=production -d leodg/moodle-academy:4.5.1
