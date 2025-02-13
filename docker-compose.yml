@@ -1,6 +1,6 @@
 services:
   webserver:
-    image: "moodlehq/moodle-php-apache:8.0"
+    image: "moodlehq/moodle-php-apache:8.1"
     depends_on:
       - db
     volumes:
