@@ -1,7 +1,7 @@
 #page-footer {
     margin: 0 -15px;
-    background-color: #282829;
-    color: #fff;
+    background-color: #ffd0e5;
+    color: #662f47;
 
     a:not(.btn) {
         color: #fff;
@@ -13,10 +13,10 @@
     }
 
     .popover.footer .popover-body .footer-section {
-        color: #1d2125;
+        color: #662f47;
 
         a {
-            color: #1d2125;
+            color: #662f47;
         }
     }
 
@@ -46,7 +46,7 @@
 
                 a {
                     text-decoration: none;
-                    color: #fff;
+                    color: #662f47;
                     width: 38px;
                     height: 38px;
 
@@ -161,7 +161,7 @@
         background-color: $moodle-color;
         text-align: center;
         min-height: inherit;
-        color: #fff;
+        color: #662f47;
         margin-bottom: 0;
 
         .madeby {
