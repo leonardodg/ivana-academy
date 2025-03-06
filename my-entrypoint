@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# Start Apache
+echo "Apache is running"
+apachectl -D FOREGROUND
+echo
+
+# Start Moodle Docker PHP Entrypoint
+echo "Moodle Docker PHP Entrypoint"
+moodle-docker-php-entrypoint
+echo
+
+# Start CRON
+echo "CRON Jobs"
+cron -f
+echo
