@@ -7,6 +7,7 @@ on:
 
 jobs:
   docker:
+    name: Push Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source
@@ -27,6 +28,72 @@ jobs:
           push: true
           tags: leodg/moodle-academy:develop
 
+  integration:
+    name: Integration checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checking out moodle-docker
+        uses: actions/checkout@v4
+
+      - name: Checking out moodle
+        uses: actions/checkout@v4
+        with:
+          repository: leonardodg/ivana-academy
+
+      - name: Prepare moodle-docker environment
+        run: |
+          cp config.docker-template.php moodle/config.php
+          export thisfile=$( readlink "${BASH_SOURCE[0]}" ) || thisfile="${BASH_SOURCE[0]}"
+          export basedir="$( cd "$( dirname "$thisfile" )/../" && pwd -P )"
+          echo "Running integration tests from $basedir"
+          export ASSETDIR="${basedir}/assets"
+          export MOODLE_DOCKER_WWWROOT="${basedir}/moodle"
+          docker compose -f "${basedir}/docker-compose-develop.yml" up -d
+
+      - name: Run moodle-docker tests
+        run: |
+          export thisfile=$( readlink "${BASH_SOURCE[0]}" ) || thisfile="${BASH_SOURCE[0]}"
+          export basedir="$( cd "$( dirname "$thisfile" )/../" && pwd -P )"
+          echo "Checking that PHP CLI is available"
+          docker compose exec -T webserver php -r 'echo "Up!";'
+          echo "Checking that the web server is up"
+          curl -s -f 'http://localhost:8000'
+
+      - name: Stop moodle-docker
+        run: |
+          export basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
+          echo "Stopping down container"
+          docker compose -f "${basedir}/docker-compose-develop.yml" down
+
+
+  PHPUnit:
+    needs: integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checking out moodle-docker
+        uses: actions/checkout@v4
+
+      - name: Checking out moodle
+        uses: actions/checkout@v4
+        with:
+          repository: leonardodg/ivana-academy
+
+      - name: Run moodle-docker TESTS environment
+        run: |
+          cp config.docker-template.php moodle/config.php
+          export thisfile=$( readlink "${BASH_SOURCE[0]}" ) || thisfile="${BASH_SOURCE[0]}"
+          export basedir="$( cd "$( dirname "$thisfile" )/../" && pwd -P )"
+          echo "START PHPUNIT tests from $basedir"
+          export ASSETDIR="${basedir}/assets"
+          export MOODLE_DOCKER_WWWROOT="${basedir}/moodle"
+          docker compose -f "${basedir}/docker-compose-develop.yml" up -d
+          docker compose exec -T webserver php admin/tool/phpunit/cli/init.php
+          echo "Running PHPUNIT tests"
+          docker compose exec -T webserver vendor/bin/phpunit
+          echo "Stopping down container"
+          docker compose -f "${basedir}/docker-compose-develop.yml" down
 
   deploy:
     needs: docker
