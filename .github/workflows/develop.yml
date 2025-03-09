@@ -49,7 +49,7 @@ jobs:
           echo ${basedir}
           echo ${MOODLE_DOCKER_WWWROOT}
           export ASSETDIR="${basedir}/assets"
-          docker compose -f "docker-compose-develop.yml" up -d -v ${{ github.workspace }}:/var/www/html
+          docker compose -f "docker-compose-develop.yml" up -d
         env:
           MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
 
