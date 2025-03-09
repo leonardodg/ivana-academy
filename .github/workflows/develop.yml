@@ -58,7 +58,7 @@ jobs:
           echo "Checking that PHP CLI is available"
           docker compose exec -T webserver php -r 'echo "Up!";'
           echo "Checking that the web server is up"
-          curl -s -f 'http://localhost'
+          curl -s -f 'http://127.0.0.1/'
           echo "Checking that the web server is up and running"
 
       - name: Stop moodle-docker
