@@ -11,12 +11,7 @@ $CFG->dbname    = getenv('MOODLE_DBNAME');
 $CFG->dbuser    = getenv('MOODLE_DBUSER');
 $CFG->dbpass    = getenv('MOODLE_DBPASS');
 $CFG->prefix    = getenv('MOODLE_DBPFX');
-$CFG->dboptions = array(
-  'dbpersist' => 0,
-  'dbport' => '',
-  'dbsocket' => '',
-  'dbcollation' => getenv('MOODLE_DBCOLL'),
-);
+$CFG->dboptions = array('dbcollation' => getenv('MOODLE_DBCOLL'));
 
 $CFG->wwwroot   = getenv('MOODLE_URL');
 $CFG->dataroot  = getenv('MOODLE_DATA');
