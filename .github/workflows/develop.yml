@@ -55,18 +55,16 @@ jobs:
 
       - name: Run moodle-docker tests
         run: |
-          export thisfile=$( readlink "${BASH_SOURCE[0]}" ) || thisfile="${BASH_SOURCE[0]}"
-          export basedir="$( cd "$( dirname "$thisfile" )/../" && pwd -P )"
           echo "Checking that PHP CLI is available"
           docker compose exec -T webserver php -r 'echo "Up!";'
           echo "Checking that the web server is up"
-          curl -s -f 'http://localhost:8000'
+          curl -s -f 'http://localhost'
+          echo "Checking that the web server is up and running"
 
       - name: Stop moodle-docker
         run: |
-          export basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
           echo "Stopping down container"
-          docker compose -f "${basedir}/docker-compose-develop.yml" down
+          docker compose -f "docker-compose-develop.yml" down
 
 
   PHPUnit:
