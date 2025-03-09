@@ -65,7 +65,8 @@ jobs:
           echo "Stopping down container"
           basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
           docker compose -f "${{ github.workspace }}/docker-compose-develop.yml" down
-
+        env:
+          MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
 
   PHPUnit:
     needs: integration
