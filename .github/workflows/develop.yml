@@ -43,15 +43,14 @@ jobs:
       - name: Prepare moodle-docker environment
         run: |
           cp config.docker-develop.php config.php
-          export thisfile=$( readlink "${BASH_SOURCE[0]}" ) || thisfile="${BASH_SOURCE[0]}"
-          export basedir="$( cd "$( dirname "$thisfile" )/../" && pwd -P )"
           echo "Running integration tests from ${basedir}"
           echo ${basedir}
           echo ${MOODLE_DOCKER_WWWROOT}
           export ASSETDIR="${basedir}/assets"
           docker compose -f "docker-compose-develop.yml" up -d
         env:
-          MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
+          MOODLE_DOCKER_WWWROOT: /var/www/html
+          basedir: ${{ github.workspace }}
 
       - name: Run moodle-docker tests
         shell: bash
@@ -63,10 +62,10 @@ jobs:
       - name: Stop moodle-docker
         run: |
           echo "Stopping down container"
-          basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
-          docker compose -f "${{ github.workspace }}/docker-compose-develop.yml" down
+          docker compose -f "${basedir}/docker-compose-develop.yml" down
         env:
-          MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
+          MOODLE_DOCKER_WWWROOT: /var/www/html
+          basedir: ${{ github.workspace }}
 
   PHPUnit:
     needs: integration
@@ -88,12 +87,13 @@ jobs:
           echo "Running PHPUNIT tests"
           docker compose exec -T webserver vendor/bin/phpunit
           echo "Stopping down container"
-          docker compose -f "${{ github.workspace }}/docker-compose-develop.yml" down
+          docker compose -f "${basedir}/docker-compose-develop.yml" down
         env:
-          MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
+          MOODLE_DOCKER_WWWROOT: /var/www/html
+          basedir: ${{ github.workspace }}
 
   deploy:
-    needs: docker
+    needs: [docker, PHPUnit]
     runs-on: ubuntu-latest
     environment: development
     steps:
