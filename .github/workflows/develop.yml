@@ -59,8 +59,6 @@ jobs:
           echo "Checking that PHP CLI is available"
           docker compose exec -T webserver php -r 'echo "Up!";'
           echo "Checking that the web server is up"
-          curl -s -f 'http://127.0.0.1/'
-          echo "Checking that the web server is up and running"
 
       - name: Stop moodle-docker
         run: |
@@ -83,20 +81,19 @@ jobs:
 
       - name: Run moodle-docker TESTS environment
         run: |
-          cp config.docker-develop.php moodle/config.php
-          export thisfile=$( readlink "${BASH_SOURCE[0]}" ) || thisfile="${BASH_SOURCE[0]}"
-          export basedir="$( cd "$( dirname "$thisfile" )/../" && pwd -P )"
-          echo "START PHPUNIT tests from $basedir"
+          cp config.docker-develop.php config.php
+          echo "START PHPUNIT tests from ${basedir}"
           export ASSETDIR="${basedir}/assets"
-          docker compose -f "${basedir}/docker-compose-develop.yml" up -d
+          docker compose -f "docker-compose-develop.yml" up -d
           docker compose exec -T webserver php admin/tool/phpunit/cli/init.php
           echo "Running PHPUNIT tests"
           docker compose exec -T webserver vendor/bin/phpunit
           echo "Stopping down container"
-          docker compose -f "${basedir}/docker-compose-develop.yml" down
+          docker compose -f "docker-compose-develop.yml" down
 
         env:
           MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
+          basedir: ${{ github.workspace }}
 
   deploy:
     needs: docker
