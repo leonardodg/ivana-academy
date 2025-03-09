@@ -49,7 +49,7 @@ jobs:
           export ASSETDIR="${basedir}/assets"
           docker compose -f "docker-compose-develop.yml" up -d
         env:
-          MOODLE_DOCKER_WWWROOT: /var/www/html
+          MOODLE_DOCKER_WWWROOT: /var/www/html/
           basedir: ${{ github.workspace }}
 
       - name: Run moodle-docker tests
@@ -64,7 +64,7 @@ jobs:
           echo "Stopping down container"
           docker compose -f "${basedir}/docker-compose-develop.yml" down
         env:
-          MOODLE_DOCKER_WWWROOT: /var/www/html
+          MOODLE_DOCKER_WWWROOT: /var/www/html/
           basedir: ${{ github.workspace }}
 
   PHPUnit:
@@ -89,7 +89,7 @@ jobs:
           echo "Stopping down container"
           docker compose -f "${basedir}/docker-compose-develop.yml" down
         env:
-          MOODLE_DOCKER_WWWROOT: /var/www/html
+          MOODLE_DOCKER_WWWROOT: /var/www/html/
           basedir: ${{ github.workspace }}
 
   deploy:
