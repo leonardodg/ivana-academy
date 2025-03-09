@@ -54,6 +54,7 @@ jobs:
           MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
 
       - name: Run moodle-docker tests
+        shell: bash
         run: |
           echo "Checking that PHP CLI is available"
           docker compose exec -T webserver php -r 'echo "Up!";'
