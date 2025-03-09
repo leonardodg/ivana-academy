@@ -73,9 +73,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checking out moodle-docker
-        uses: actions/checkout@v4
-
       - name: Checking out moodle
         uses: actions/checkout@v4
         with:
@@ -91,10 +88,9 @@ jobs:
           echo "Running PHPUNIT tests"
           docker compose exec -T webserver vendor/bin/phpunit
           echo "Stopping down container"
-          docker compose -f "docker-compose-develop.yml" down
-
+          docker compose -f "${{ github.workspace }}/docker-compose-develop.yml" down
         env:
-          basedir: ${{ github.workspace }}
+          MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
 
   deploy:
     needs: docker
