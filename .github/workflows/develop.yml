@@ -46,8 +46,10 @@ jobs:
           export thisfile=$( readlink "${BASH_SOURCE[0]}" ) || thisfile="${BASH_SOURCE[0]}"
           export basedir="$( cd "$( dirname "$thisfile" )/../" && pwd -P )"
           echo "Running integration tests from ${basedir}"
+          echo ${basedir}
+          echo ${MOODLE_DOCKER_WWWROOT}
           export ASSETDIR="${basedir}/assets"
-          docker compose -f "${basedir}/docker-compose-develop.yml" up -d
+          docker compose -f "docker-compose-develop.yml" up -d
         env:
           MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
 
