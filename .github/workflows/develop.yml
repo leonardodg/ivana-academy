@@ -38,7 +38,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: leonardodg/ivana-academy
-          path: moodle
           ref: develop
 
       - name: Prepare moodle-docker environment
@@ -50,7 +49,7 @@ jobs:
           export ASSETDIR="${basedir}/assets"
           docker compose -f "${basedir}/docker-compose-develop.yml" up -d
         env:
-          MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}/moodle
+          MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
 
       - name: Run moodle-docker tests
         run: |
@@ -96,7 +95,7 @@ jobs:
           docker compose -f "${basedir}/docker-compose-develop.yml" down
 
         env:
-          MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}/moodle
+          MOODLE_DOCKER_WWWROOT: ${{ github.workspace }}
 
   deploy:
     needs: docker
