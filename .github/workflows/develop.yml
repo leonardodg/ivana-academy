@@ -7,6 +7,7 @@ on:
 
 jobs:
   docker:
+    name: Push Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source
@@ -27,9 +28,72 @@ jobs:
           push: true
           tags: leodg/moodle-academy:develop
 
+  integration:
+    name: Integration checks
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - name: Checking out moodle
+        uses: actions/checkout@v4
+        with:
+          repository: leonardodg/ivana-academy
+          ref: develop
+
+      - name: Prepare moodle-docker environment
+        run: |
+          cp config.docker-develop.php config.php
+          echo "Running integration tests from ${basedir}"
+          echo ${basedir}
+          echo ${MOODLE_DOCKER_WWWROOT}
+          export ASSETDIR="${basedir}/assets"
+          docker compose -f "docker-compose-develop.yml" up -d
+        env:
+          MOODLE_DOCKER_WWWROOT: /var/www/html/
+          basedir: ${{ github.workspace }}
+
+      - name: Run moodle-docker tests
+        shell: bash
+        run: |
+          echo "Checking that PHP CLI is available"
+          docker compose exec -T webserver php -r 'echo "Up!";'
+          echo "Checking that the web server is up"
+
+      - name: Stop moodle-docker
+        run: |
+          echo "Stopping down container"
+          docker compose -f "${basedir}/docker-compose-develop.yml" down
+        env:
+          MOODLE_DOCKER_WWWROOT: /var/www/html/
+          basedir: ${{ github.workspace }}
+
+  PHPUnit:
+    needs: integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checking out moodle
+        uses: actions/checkout@v4
+        with:
+          repository: leonardodg/ivana-academy
+
+      - name: Run moodle-docker TESTS environment
+        run: |
+          cp config.docker-develop.php config.php
+          echo "START PHPUNIT tests from ${basedir}"
+          export ASSETDIR="${basedir}/assets"
+          docker compose -f "docker-compose-develop.yml" up -d
+          docker compose exec -T webserver php admin/tool/phpunit/cli/init.php
+          echo "Running PHPUNIT tests"
+          docker compose exec -T webserver vendor/bin/phpunit
+          echo "Stopping down container"
+          docker compose -f "${basedir}/docker-compose-develop.yml" down
+        env:
+          MOODLE_DOCKER_WWWROOT: /var/www/html/
+          basedir: ${{ github.workspace }}
 
   deploy:
-    needs: docker
+    needs: [docker, PHPUnit]
     runs-on: ubuntu-latest
     environment: development
     steps:

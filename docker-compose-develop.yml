@@ -1,0 +1,25 @@
+services:
+  webserver:
+    image: "moodlehq/moodle-php-apache:8.1"
+    depends_on:
+      - db
+    volumes:
+      - "${MOODLE_DOCKER_WWWROOT}:/var/www/html"
+    environment:
+      MOODLE_DOCKER_RUNNING: 1
+      MOODLE_DOCKER_DBNAME: moodle
+      MOODLE_DOCKER_DBUSER: moodle
+      MOODLE_DOCKER_DBPASS: "m@0dl3ing"
+      MOODLE_DOCKER_DBTYPE: mysqli
+      MOODLE_DOCKER_DBCOLLATION: utf8mb4_bin
+  db:
+    image: mysql:8.0
+    command: >
+                --character-set-server=utf8mb4
+                --collation-server=utf8mb4_bin
+                --skip-log-bin
+    environment:
+      MYSQL_ROOT_PASSWORD: "m@0dl3ing"
+      MYSQL_USER: moodle
+      MYSQL_PASSWORD: "m@0dl3ing"
+      MYSQL_DATABASE: moodle

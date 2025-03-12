@@ -27,7 +27,15 @@ COPY .github/workflows/default-ssl.conf /etc/apache2/sites-available/default-ssl
 RUN if [ $ENVIRONMENT = "develop" ]; then sed -i 's/ivana.academy/dev.ivana.academy/g' /etc/apache2/sites-available/default-ssl.conf; fi
 RUN a2enmod ssl && a2ensite default-ssl
 
-EXPOSE 80 443
+# Add Script Entrypoint
+COPY my-entrypoint /usr/local/bin/my-entrypoint
+RUN chmod +x /usr/local/bin/my-entrypoint
 
-CMD ["apache2-foreground"]
-ENTRYPOINT ["moodle-docker-php-entrypoint"]
+# CRONTAB
+RUN apt update && apt install -y cron
+COPY my-cron /etc/cron.d/my-cron
+RUN chmod 0644 /etc/cron.d/my-cron
+RUN crontab -u www-data /etc/cron.d/my-cron
+
+EXPOSE 80 443
+ENTRYPOINT ["my-entrypoint"]
