@@ -35,6 +35,7 @@ RUN chmod +x /usr/local/bin/my-entrypoint
 RUN apt update && apt install -y cron
 COPY my-cron /etc/cron.d/my-cron
 RUN chmod 0644 /etc/cron.d/my-cron
+RUN crontab -u www-data /etc/cron.d/my-cron
 
 EXPOSE 80 443
 ENTRYPOINT ["my-entrypoint"]
