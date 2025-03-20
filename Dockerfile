@@ -1,8 +1,5 @@
 FROM moodlehq/moodle-php-apache:8.1
 
-WORKDIR /var/www/html
-USER www-data
-
 ARG MOODLE_DBHOST
 ARG MOODLE_DBNAME
 ARG MOODLE_DBUSER
@@ -22,6 +19,8 @@ ENV MOODLE_DBCOLL=utf8mb4_bin
 ENV MOODLE_URL=http://127.0.0.1
 ENV MOODLE_DATA=/var/www/moodledata
 ENV MOODLE_ADMIN=admin
+
+WORKDIR /var/www/html
 
 # SSL Enable + Letsencrypt
 COPY .github/workflows/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
