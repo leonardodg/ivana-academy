@@ -1,6 +1,8 @@
 services:
   webserver:
-    image: "moodlehq/moodle-php-apache:8.1"
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
       - db
     volumes:
