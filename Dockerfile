@@ -1,8 +1,5 @@
 FROM moodlehq/moodle-php-apache:8.1
 
-WORKDIR /var/www/html
-USER www-data
-
 ARG MOODLE_DBHOST
 ARG MOODLE_DBNAME
 ARG MOODLE_DBUSER
@@ -23,6 +20,8 @@ ENV MOODLE_URL=http://127.0.0.1
 ENV MOODLE_DATA=/var/www/moodledata
 ENV MOODLE_ADMIN=admin
 
+WORKDIR /var/www/html
+
 # SSL Enable + Letsencrypt
 COPY .github/workflows/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
 RUN if [ $ENVIRONMENT = "develop" ]; then sed -i 's/ivana.academy/dev.ivana.academy/g' /etc/apache2/sites-available/default-ssl.conf; fi
@@ -36,7 +35,6 @@ RUN chmod +x /usr/local/bin/my-entrypoint
 RUN apt update && apt install -y cron
 COPY my-cron /etc/cron.d/my-cron
 RUN chmod 0644 /etc/cron.d/my-cron && touch /var/log/moodle-cron.log && chmod 0666 /var/log/moodle-cron.log
-
 
 EXPOSE 80 443
 ENTRYPOINT ["my-entrypoint"]
