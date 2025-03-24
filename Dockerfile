@@ -33,7 +33,6 @@ RUN chmod +x /usr/local/bin/my-entrypoint
 
 # CRONTAB
 RUN apt update && apt install -y cron nano
-COPY my-cron /etc/cron.d/moodle-cron
 RUN touch /var/log/moodle-cron.log && chmod 0666 /var/log/moodle-cron.log
 
 RUN echo "* * * * * root echo 'Crontab is working - watchdog 1' > /proc/1/fd/1 2>/proc/1/fd/2" > /etc/crontab
