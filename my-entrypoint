@@ -11,6 +11,4 @@ moodle-docker-php-entrypoint
 # Start CRON
 echo "RUN CRON Jobs"
 env >> /etc/environment
-cron -f
-crontab -u root /etc/cron.d/moodle-cron
 service cron restart
