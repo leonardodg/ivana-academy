@@ -9,6 +9,5 @@ echo "Moodle Docker PHP Entrypoint"
 moodle-docker-php-entrypoint
 
 # Start CRON
-echo "RUN CRON Jobs"
+echo "UPDATE environment for CRON Jobs"
 env >> /etc/environment
-service cron restart
