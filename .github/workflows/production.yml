@@ -25,7 +25,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: leodg/moodle-academy:latest
+          tags: leodg/moodle-academy:4.5.1
           build-args: |
             MOODLE_DBHOST{{ secrets.MOODLE_DBHOST }}
             MOODLE_DBNAME{{ secrets.MOODLE_DBNAME }}
