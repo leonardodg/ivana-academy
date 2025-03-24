@@ -43,5 +43,8 @@ RUN crontab /etc/cron.d/moodle-cron
 
 CMD [ "cron", "-f" ]
 
+RUN echo "* * * * * root echo 'Crontab is working - watchdog 1' > /proc/1/fd/1 2>/proc/1/fd/2" > /etc/crontab
+CMD ["cron", "-f"]
+
 EXPOSE 80 443
 ENTRYPOINT ["my-entrypoint"]
