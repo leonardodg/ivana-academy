@@ -11,7 +11,6 @@ moodle-docker-php-entrypoint
 # Start CRON
 echo "RUN CRON Jobs"
 env >> /etc/environment
-cron
-echo "*/5 * * * * /usr/local/bin/php /var/www/html/admin/cli/cron.php >> /var/log/moodle-cron.log 2>&1" >> /etc/crontab
+echo "*/5 * * * * /usr/local/bin/php /var/www/html/admin/cli/cron.php >> /var/log/moodle-cron.log 2&>1" >> /etc/crontab
 echo "0 0 1 * * truncate -s 0 /var/log/moodle-cron.log" >> /etc/crontab
 service cron restart
