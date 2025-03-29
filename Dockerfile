@@ -32,7 +32,7 @@ COPY my-entrypoint /usr/local/bin/my-entrypoint
 RUN chmod +x /usr/local/bin/my-entrypoint
 
 # CRONTAB
-RUN apt update && apt install -y cron
+RUN apt update && apt install -y cron nano
 RUN touch /var/log/moodle-cron.log && chmod 0666 /var/log/moodle-cron.log
 
 EXPOSE 80 443
