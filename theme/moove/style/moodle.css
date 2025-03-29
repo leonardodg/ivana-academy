@@ -40172,86 +40172,6 @@ body.has-secondarynavigation .drawer-toggles .drawer-toggler {
 #page-footer .contact ul li a.btn-rounded {
   border-radius: 50%;
 }
-#page-footer .socialnetworks ul li a.website,
-#page-footer .contact ul li a.website {
-  background-color: #0f47ad;
-}
-#page-footer .socialnetworks ul li a.website:hover,
-#page-footer .contact ul li a.website:hover {
-  background-color: #07204f;
-}
-#page-footer .socialnetworks ul li a.mobile,
-#page-footer .contact ul li a.mobile {
-  background-color: #0f47ad;
-}
-#page-footer .socialnetworks ul li a.mobile:hover,
-#page-footer .contact ul li a.mobile:hover {
-  background-color: #07204f;
-}
-#page-footer .socialnetworks ul li a.mail,
-#page-footer .contact ul li a.mail {
-  background-color: #0f47ad;
-}
-#page-footer .socialnetworks ul li a.mail:hover,
-#page-footer .contact ul li a.mail:hover {
-  background-color: #07204f;
-}
-#page-footer .socialnetworks ul li a.facebook,
-#page-footer .contact ul li a.facebook {
-  background-color: #4167B2;
-}
-#page-footer .socialnetworks ul li a.facebook:hover,
-#page-footer .contact ul li a.facebook:hover {
-  background-color: #263c67;
-}
-#page-footer .socialnetworks ul li a.twitter,
-#page-footer .contact ul li a.twitter {
-  background-color: #55acee;
-}
-#page-footer .socialnetworks ul li a.twitter:hover,
-#page-footer .contact ul li a.twitter:hover {
-  background-color: #147bc9;
-}
-#page-footer .socialnetworks ul li a.linkedin,
-#page-footer .contact ul li a.linkedin {
-  background-color: #007bb5;
-}
-#page-footer .socialnetworks ul li a.linkedin:hover,
-#page-footer .contact ul li a.linkedin:hover {
-  background-color: #00364f;
-}
-#page-footer .socialnetworks ul li a.youtube,
-#page-footer .contact ul li a.youtube {
-  background-color: #cc181e;
-}
-#page-footer .socialnetworks ul li a.youtube:hover,
-#page-footer .contact ul li a.youtube:hover {
-  background-color: #710d11;
-}
-#page-footer .socialnetworks ul li a.instagram,
-#page-footer .contact ul li a.instagram {
-  background-color: #8a3ab9;
-}
-#page-footer .socialnetworks ul li a.instagram:hover,
-#page-footer .contact ul li a.instagram:hover {
-  background-color: #50226b;
-}
-#page-footer .socialnetworks ul li a.whatsapp,
-#page-footer .contact ul li a.whatsapp {
-  background-color: #25d366;
-}
-#page-footer .socialnetworks ul li a.whatsapp:hover,
-#page-footer .contact ul li a.whatsapp:hover {
-  background-color: #167c3c;
-}
-#page-footer .socialnetworks ul li a.telegram,
-#page-footer .contact ul li a.telegram {
-  background-color: #0088cc;
-}
-#page-footer .socialnetworks ul li a.telegram:hover,
-#page-footer .contact ul li a.telegram:hover {
-  background-color: #004466;
-}
 #page-footer .socialnetworks ul li a.telegram .fa,
 #page-footer .contact ul li a.telegram .fa {
   margin-left: -1px;
@@ -40274,7 +40194,6 @@ body.has-secondarynavigation .drawer-toggles .drawer-toggler {
   max-width: 160px;
 }
 #page-footer .copyright {
-  background-color: #f98012;
   text-align: center;
   min-height: inherit;
   color: #fff;

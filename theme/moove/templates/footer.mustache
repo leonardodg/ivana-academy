@@ -32,101 +32,98 @@
     }
 }}
 
+
+            <div class="col-md-4 column-left">
+                    <ul>
+
+
+
+
+                    </ul>
+            </div>
+
+
+
 <footer id="page-footer">
     <div class="moove-container-fluid footer-columns">
         <div class="row">
             <div class="col-md-4 column-left">
-                <div class="contact">
-                    <h3 class="footer-title">{{#str}}contactus, theme_moove{{/str}}</h3>
-
-                    <ul>
-                        {{#website}}
+                <div class="row">
+                    <div class="col-md">
+                        <div class="socialnetworks">
+                            <ul class="mb-0">
                             <li>
-                                <a href="{{{website}}}" target="_blank" class="website btn btn-link">
-                                    <i class="fa fa-globe"></i>
-                                </a>
-                            </li>
-                        {{/website}}
-                        {{#mobile}}
-                            <li>
-                                <a href="tel:{{{mobile}}}" target="_blank" class="mobile btn btn-link">
-                                    <i class="fa fa-phone"></i>
-                                </a>
-                            </li>
-                        {{/mobile}}
-                        {{#mail}}
-                            <li>
-                                <a href="mailto:{{{mail}}}" target="_blank" class="mail btn btn-link">
-                                    <i class="fa fa-envelope"></i>
-                                </a>
-                            </li>
-                        {{/mail}}
-                    </ul>
-                </div>
-
-                <div class="socialnetworks">
-                    <h3 class="footer-title">{{#str}}followus, theme_moove{{/str}}</h3>
-
-                    <ul class="mb-0">
-                        {{#facebook}}
-                            <li>
-                                <a href="{{{facebook}}}" target="_blank" class="facebook btn btn-link btn-rounded">
-                                    <i class="fa fa-facebook"></i>
-                                </a>
-                            </li>
-                        {{/facebook}}
-
-                        {{#twitter}}
-                            <li>
-                                <a href="{{{twitter}}}" target="_blank" class="twitter btn btn-link btn-rounded">
-                                    <i class="fa fa-twitter"></i>
-                                </a>
-                            </li>
-                        {{/twitter}}
-
-                        {{#linkedin}}
-                            <li>
-                                <a href="{{{linkedin}}}" target="_blank" class="linkedin btn btn-link btn-rounded">
-                                    <i class="fa fa-linkedin"></i>
-                                </a>
-                            </li>
-                        {{/linkedin}}
-
-                        {{#youtube}}
-                            <li>
-                                <a href="{{{youtube}}}" target="_blank" class="youtube btn btn-link btn-rounded">
+                                <a href="https://www.youtube.com/@ivanalerea719" target="_blank" class="youtube btn btn-link btn-rounded">
                                     <i class="fa fa-youtube"></i>
                                 </a>
                             </li>
-                        {{/youtube}}
 
-                        {{#instagram}}
                             <li>
-                                <a href="{{{instagram}}}" target="_blank" class="instagram btn btn-link btn-rounded">
+                                <a href="https://www.tiktok.com/@ivanalerea" target="_blank" class="youtube btn btn-link btn-rounded">
+                                    <i class="fa-brands fa-tiktok"></i>
+                                </a>
+                            </li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md">
+                        <div class="socialnetworks">
+                            <ul class="mb-0">
+
+                                <li>
+                                    <a href="https://www.facebook.com/profile.php?id=100092594777140" target="_blank" class="youtube btn btn-link btn-rounded">
+                                        <i class="fa-brands fa-facebook"></i>
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="https://www.instagram.com/ivana_da_mora" target="_blank" class="instagram btn btn-link btn-rounded">
+                                        <i class="fa fa-instagram"></i>
+                                    </a>
+                                </li>
+                                <li>  <img src="{{config.wwwroot}}/theme/moove/pix/brazil.svg" alt="Brasil" style="height: 24px; with: 24px"></li>
+
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <div class="socialnetworks">
+                            <ul class="mb-0">
+
+                            <li>
+                                <a href="https://www.facebook.com/profile.php?id=100059997320063" target="_blank" class="youtube btn btn-link btn-rounded">
+                                    <i class="fa-brands fa-facebook"></i>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="https://www.instagram.com/ivana_de_mi_taller_" target="_blank" class="instagram btn btn-link btn-rounded">
                                     <i class="fa fa-instagram"></i>
                                 </a>
                             </li>
-                        {{/instagram}}
 
-                        {{#whatsapp}}
-                            <li>
-                                <a href="https://api.whatsapp.com/send?phone={{{whatsapp}}}" target="_blank" class="whatsapp btn btn-link btn-rounded">
-                                    <i class="fa fa-whatsapp"></i>
-                                </a>
-                            </li>
-                        {{/whatsapp}}
+                            <li> <img src="{{config.wwwroot}}/theme/moove/pix/argentina.svg" alt="Argentina" style="height: 24px; with: 24px"></li>
 
-                        {{#telegram}}
-                            <li>
-                                <a href="{{{telegram}}}" target="_blank" class="telegram btn btn-link btn-rounded">
-                                    <i class="fa fa-telegram"></i>
-                                </a>
-                            </li>
-                        {{/telegram}}
-                    </ul>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
+
             </div>
             <div class="col-md-4 column-center">
+                <div class="madeby">
+                    <p>{{#str}}themedevelopedby, theme_moove{{/str}}</p>
+                    <a href="https://www.linkedin.com/in/le0dg/" target="_blank">
+                        <img src="{{config.wwwroot}}/theme/moove/pix/leodg.svg" alt="Conecti.me" style="height: 60px; with: 20px">
+                    </a>
+                </div>
             </div>
             <div class="col-md-4 column-right">
                 {{#enablemobilewebservice}}
