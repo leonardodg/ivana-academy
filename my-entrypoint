@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+set -e
+
+# Start the run once job.
+echo "Docker container has been started"
+# Setup a cron schedule
+declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID' > /container.env
+crontab moodle-cron
+service cron restart
 
 # Start Apache
 echo "Apache is running"
@@ -7,7 +15,3 @@ apachectl -D FOREGROUND
 # Start Moodle Docker PHP Entrypoint
 echo "Moodle Docker PHP Entrypoint"
 moodle-docker-php-entrypoint
-
-# Start CRON
-echo "UPDATE environment for CRON Jobs"
-env >> /etc/environment

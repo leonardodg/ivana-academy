@@ -34,17 +34,6 @@ RUN chmod +x /usr/local/bin/my-entrypoint
 # CRONTAB
 RUN apt update && apt install -y cron nano
 RUN touch /var/log/moodle-cron.log && chmod 0666 /var/log/moodle-cron.log
-RUN touch /var/log/test-cron.log && chmod 0666 /var/log/test-cron.log
-
-# Setting up crontab
-COPY my-cron /etc/cron.d/moodle-cron
-RUN chmod 0644 /etc/cron.d/moodle-cron
-RUN crontab /etc/cron.d/moodle-cron
-
-CMD [ "cron", "-f" ]
-
-RUN echo "* * * * * root echo 'Crontab is working - watchdog 1' > /proc/1/fd/1 2>/proc/1/fd/2" > /etc/crontab
-CMD ["cron", "-f"]
 
 EXPOSE 80 443
 ENTRYPOINT ["my-entrypoint"]
