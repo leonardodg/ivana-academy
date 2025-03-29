@@ -3,18 +3,10 @@ set -e
 
 # Start the run once job.
 echo "Docker container has been started"
-
-declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID' > /container.env
-
 # Setup a cron schedule
-echo "SHELL=/bin/bash
-BASH_ENV=/container.env
-*/5 * * * * /usr/local/bin/php /var/www/html/admin/cli/cron.php >> /var/log/moodle-cron.log 2>&1
-0 0 1 * * truncate -s 0 /var/log/moodle-cron.log
-" > moodle-cron
-
+declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID' > /container.env
 crontab moodle-cron
-cron -f
+service cron restart
 
 # Start Apache
 echo "Apache is running"
