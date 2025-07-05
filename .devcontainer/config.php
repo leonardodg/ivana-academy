@@ -23,8 +23,8 @@ $CFG->dboptions = array(
   'dbcollation' => 'utf8mb4_bin',
 );
 
-$CFG->wwwroot   = 'http://127.0.0.1';
-$CFG->dataroot  = '/var/www/moodledata';
+$CFG->wwwroot   = 'http://127.0.0.1:8080';
+$CFG->dataroot  = '/var/www/moodledata-academy';
 $CFG->admin     = 'admin';
 
 $CFG->directorypermissions = 0777;

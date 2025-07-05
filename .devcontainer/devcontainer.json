@@ -1,0 +1,83 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"name": "Moodle 4.5.1+ for Ivana Academy By LeoDG",
+	"dockerComposeFile": "docker-compose-local.yml",
+	"service": "webserver",
+	"runServices": [
+		"webserver"
+	],
+	"workspaceFolder": "/var/www/html",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/common-utils:2": {},
+		"ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
+		"ghcr.io/devcontainers-extra/features/zsh-plugins:0": {}
+	},
+
+	// Mounts are used to share configuration files and SSH keys between the host and the container.
+	"mounts": [
+				{
+					"source": "${localEnv:HOME}/.gitconfig",
+					"target": "/root/.gitconfig",
+					"type": "bind"
+				},
+				{
+					"source": "${localEnv:HOME}/.ssh",
+					"target": "/root/.ssh",
+					"type": "bind"
+				},
+				{
+					"source": "${localEnv:HOME}/.ssh/known_hosts",
+					"target": "/root/.ssh/known_hosts",
+					"type": "bind"
+				},
+				{
+					"source": "../../moodle-academy-bashhistory",
+					"target": "/commandhistory",
+					"type": "bind"
+				},
+				{
+					"source": "${localEnv:HOME}/.zsh_history",
+					"target": "/root/.zsh_history",
+					"type": "bind"
+				},
+				{
+					"source": "../../moodledata-academy",
+					"target": "/var/www/moodledata-academy",
+					"type": "bind"
+				}
+			],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": {
+		"Fix Volume Permissions": "sudo chown -R $(whoami): /commandhistory",
+		"Fix Moodle Data Permissions": "sudo chown -R www-data:www-data /var/www/moodledata-academy",
+		"Fix Moodle Code Permissions": "sudo chown -R www-data:www-data /var/www/html",
+	},
+
+	// Configure tool-specific properties.
+	"customizations": {
+
+		"vscode": {
+			// Add the IDs of extensions you want to install.
+			"extensions": [
+				"ms-vscode-remote.remote-containers",
+			],
+			// Add custom VS Code settings.
+			"settings": {
+				"terminal.integrated.shell.linux": "/bin/bash",
+				"terminal.integrated.defaultProfile.linux": "bash"
+			}
+		}
+	},
+
+	"containerEnv": {
+		"MY_CONTAINER_VAR": "some-value-here2",
+		"MY_CONTAINER_VAR2": "${localEnv:SOME_LOCAL_VAR}"
+	},
+	"remoteEnv": {
+		"PATH": "${containerEnv:PATH}:/some/other/path"
+	}
+}

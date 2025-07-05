@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -e
+
+#set -e
 
 # Start the run once job.
 echo "Docker container has been started"
