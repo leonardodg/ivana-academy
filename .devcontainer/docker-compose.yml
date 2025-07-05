@@ -1,20 +1,21 @@
 services:
   webserver:
-    image: "moodlehq/moodle-php-apache:8.0"
+    build:
+      context: ../
+      dockerfile: .devcontainer/Dockerfile
     depends_on:
       - db
     volumes:
-      - "./:/var/www/html"
-      - "./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini"
+      - "../:/var/www/html"
+      - "../../moodledata-academy:/var/www/moodledata-academy"
+      - "../../phpu_moodledata:/var/www/phpu_moodledata"
+      - "../../moodle-academy-bashhistory:/commandhistory"
+      - "./php.ini-development:/usr/local/etc/php/conf.d/uploads.ini"
+    working_dir: /var/www/html
     ports:
-      - "80:80"
-    environment:
-      MOODLE_DOCKER_RUNNING: 1
-      MOODLE_DOCKER_DBNAME: moodle
-      MOODLE_DOCKER_DBUSER: moodle
-      MOODLE_DOCKER_DBPASS: "m@0dl3ing"
-      MOODLE_DOCKER_DBTYPE: mysqli
-      MOODLE_DOCKER_DBCOLLATION: utf8mb4_bin
+      - "8080:80"
+      - "444:443"
+    env_file: devcontainer.env
   db:
     image: mysql:8.0
     command: >
@@ -23,8 +24,9 @@ services:
                 --skip-log-bin
     ports:
       - "3306:3306/tcp"
-    environment:
-      MYSQL_ROOT_PASSWORD: "m@0dl3ing"
-      MYSQL_USER: moodle
-      MYSQL_PASSWORD: "m@0dl3ing"
-      MYSQL_DATABASE: moodle
+    volumes:
+      - vol_academy_mysql_data:/var/lib/mysql
+    env_file: devcontainer.env
+
+volumes:
+  vol_academy_mysql_data:

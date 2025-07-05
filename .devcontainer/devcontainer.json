@@ -1,7 +1,7 @@
 // See https://containers.dev/implementors/json_reference/ for configuration reference
 {
 	"name": "Moodle 4.5.1+ for Ivana Academy By LeoDG",
-	"dockerComposeFile": "docker-compose-local.yml",
+	"dockerComposeFile": "docker-compose.yml",
 	"service": "webserver",
 	"runServices": [
 		"webserver"
