@@ -54,7 +54,7 @@
 	"postCreateCommand": {
 		"Fix Volume Permissions": "sudo chown -R $(whoami): /commandhistory",
 		"Fix Moodle Data Permissions": "sudo chown -R www-data:www-data /var/www/moodledata-academy",
-		"Fix Moodle Code Permissions": "sudo chown -R www-data:www-data /var/www/html",
+		"Fix Moodle Code Permissions": "sudo chown -R www-data:www-data /var/www/html"
 	},
 
 	// Configure tool-specific properties.
@@ -64,6 +64,25 @@
 			// Add the IDs of extensions you want to install.
 			"extensions": [
 				"ms-vscode-remote.remote-containers",
+				"LMSCloud.mdlcode",
+				"shardulm94.trailing-spaces",
+				"shuworks.vscode-table-formatter",
+				"stevejpurves.cucumber",
+				"shevaua.phpcs",
+				"DEVSENSE.profiler-php-vscode",
+				"MehediDracula.php-namespace-resolver",
+				"xdebug.php-pack",
+				"xdebug.php-debug",
+				"DEVSENSE.phptools-vscode",
+				"imgildev.vscode-mustache-snippets",
+				"imgildev.vscode-moodle-snippets",
+				"eamodio.gitlens",
+				"dbaeumer.vscode-eslint",
+				"cweijan.dbclient-jdbc",
+				"cweijan.vscode-database-client2",
+				"ms-azuretools.vscode-containers",
+				"DEVSENSE.composer-php-vscode",
+				"neilbrayfield.php-docblocker"
 			],
 			// Add custom VS Code settings.
 			"settings": {
@@ -74,7 +93,7 @@
 	},
 
 	"containerEnv": {
-		"MY_CONTAINER_VAR": "some-value-here2",
+		"MY_CONTAINER_VAR": "some-value-here",
 		"MY_CONTAINER_VAR2": "${localEnv:SOME_LOCAL_VAR}"
 	},
 	"remoteEnv": {

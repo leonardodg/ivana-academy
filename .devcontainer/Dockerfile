@@ -32,12 +32,17 @@ COPY .devcontainer/my-entrypoint /usr/local/bin/my-entrypoint
 RUN chmod +x /usr/local/bin/my-entrypoint
 
 # Install Moodle
+
 COPY .devcontainer/config.php /var/www/html/config.php
 
 # CRONTAB
 # RUN apt update && apt install -y cron nano
 # RUN touch /var/log/moodle-cron.log && chmod 0666 /var/log/moodle-cron.log
 
+# SSL Enable + Letsencrypt
+COPY .devcontainer/apache-conf/*.conf /etc/apache2/sites-available/
+COPY .devcontainer/certificate /etc/ssl/certs/letsencrypt/moodle-local/
+RUN a2enmod ssl && a2ensite default-ssl
 
 # BASH HISTORY
 # This snippet enables bash history logging in the container.
