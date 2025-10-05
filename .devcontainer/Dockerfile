@@ -1,4 +1,4 @@
-FROM moodlehq/moodle-php-apache:8.1
+FROM moodlehq/moodle-php-apache:8.2
 
 ARG MOODLE_DBHOST
 ARG MOODLE_DBNAME
