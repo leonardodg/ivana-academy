@@ -63,6 +63,9 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          timeout: 60s          # increase from default 30s
+          command_timeout: 10m
           script: |
             docker stop moodle || true
             docker rm moodle || true
