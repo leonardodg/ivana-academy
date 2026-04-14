@@ -1,9 +1,6 @@
 name: Deploy DEVELOP Sandbox to GCP
 
-on:
-  push:
-    branches:
-      - develop
+on: [push]
 
 jobs:
   start-sandbox:
