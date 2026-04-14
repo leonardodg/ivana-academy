@@ -15,11 +15,20 @@ jobs:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
       - name: Start VM
         run: |
-          gcloud compute instances start ${{ secrets.GCP_VM_NAME }} --zone=${{ secrets.GCP_ZONE }} || echo "Recurso esgotado no Google Cloud agora."
+          STATUS=$(gcloud compute instances describe ${{ secrets.GCP_VM_NAME }} \
+            --zone=${{ secrets.GCP_ZONE }} \
+            --format='get(status)')
+
+          if [ "$STATUS" != "RUNNING" ]; then
+            echo "A VM está $STATUS. Ligando agora..."
+            gcloud compute instances start ${{ secrets.GCP_VM_NAME }} --zone=${{ secrets.GCP_ZONE }} || echo "Recurso esgotado no Google Cloud agora."
+            sleep 15 # Espera o boot apenas se ela estava desligada
+          else
+            echo "A VM já está ligada. Status: $STATUS"
+          fi
       - name: Get IP
         id: get_ip
         run: |
-          sleep 5
           VM_IP=$(gcloud compute instances describe ${{ secrets.GCP_VM_NAME }} \
             --zone=${{ secrets.GCP_ZONE }} \
             --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
