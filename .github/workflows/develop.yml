@@ -107,6 +107,13 @@ jobs:
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
+      - name: Diagnóstico de IP
+        run: |
+          echo "O IP vindo do step anterior é: ${{ steps.get_ip.outputs.ip }}"
+          if [ -z "${{ steps.get_ip.outputs.ip }}" ]; then
+            echo "ERRO: O output 'ip' está vazio!"
+            exit 1
+          fi
       - name: Deploy via SSH by RSYNC
         uses: easingthemes/ssh-deploy@main
         with:
