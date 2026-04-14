@@ -17,16 +17,17 @@
 /**
  * Version information for Enrol Dates
  *
+ * Documentation: {@link https://moodledev.io/docs/apis/plugintypes/availability}
+ *
  * @package    availability_enrol_dates
- * @copyright  2026 YOUR NAME <your@email.com>
+ * @copyright  2026 LeoDG <callme@leodg.dev>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component    = 'availability_enrol_dates';
-$plugin->release      = '1.0';
-$plugin->version      = 2026031800;
+$plugin->release      = '1.0.0 (Build: 2026033000)';
+$plugin->version      = 2026033000;
 $plugin->requires     = 2024100700;
-$plugin->supported    = [405, 501];
 $plugin->maturity     = MATURITY_STABLE;

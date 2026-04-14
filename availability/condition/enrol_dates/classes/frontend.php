@@ -24,35 +24,39 @@ namespace availability_enrol_dates;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class frontend extends \core_availability\frontend {
-       protected function get_javascript_strings() {
-        // You can return a list of names within your language file and the
-        // system will include them here.
-        // Should you need strings from another language file, you can also
-        // call $PAGE->requires->strings_for_js manually from here.)
-        return [];
+    /**
+     * Get the JavaScript strings to load for this plugin.
+     *
+     * @return array Array of strings
+     */
+    public function get_javascript_strings() {
+        return [
+            'title',
+            'before',
+            'after',
+            'select_direction',
+            'select_timevaluecheck',
+            'select_timeperiod',
+            'coursetimestart',
+            'coursetimeend',
+            'enroltimestart',
+            'enroltimeend',
+            'hours',
+            'days',
+            'months',
+            'error_invalid_timenumber',
+            'error_missing_direction',
+            'error_missing_timevaluecheck',
+            'error_missing_timeperiod',
+        ];
     }
 
-    protected function get_javascript_init_params(
-        $course,
-        \cm_info $cm = null,
-        \section_info $section = null
-    ) {
-        // If you want, you can add some parameters here which will be
-        // passed into your JavaScript init method. If you don't include
-        // this function, there will be no parameters.
-        return ['frog'];
-    }
-
-    protected function allow_add(
-        $course,
-        \cm_info $cm = null,
-        \section_info $section = null
-    ) {
-        // This function lets you control whether the 'add' button for your
-        // plugin appears. For example, the grouping plugin does not appear
-        // if there are no groupings on the course. This helps to simplify
-        // the user interface. If you don't include this function, it will
-        // appear.
+    /**
+     * Determines whether the plugin can be added to an item.
+     *
+     * @return bool True if it can be added
+     */
+    protected function allow_add($course, ?\cm_info $cm = null, ?\section_info $section = null) {
         return true;
     }
 }

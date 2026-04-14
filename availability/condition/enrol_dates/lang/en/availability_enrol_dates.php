@@ -19,12 +19,39 @@
  *
  * @package    availability_enrol_dates
  * @category   string
- * @copyright  2026 YOUR NAME <your@email.com>
+ * @copyright  2026 LeoDG <callme@leodg.dev>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['access'] = 'Access is after';
+$string['after'] = 'after';
+$string['before'] = 'before';
+$string['coursetimeend'] = 'course end date';
+$string['coursetimestart'] = 'course start date';
+$string['days'] = 'days';
 $string['description'] = 'Allow only students who belong to a specific period in relation to the chosen date';
-$string['pluginname'] = 'Restriction by Enrol Dates (timestart/timeend) or Course Dates (timestart/timeend)';
+$string['direction'] = 'Direction';
+$string['edithelp'] = 'Edit my condition';
+$string['enroltimeend'] = 'enrolment end date';
+$string['enroltimestart'] = 'enrolment start date';
+$string['error_invalid_timenumber'] = 'Invalid time number';
+$string['error_missing_direction'] = 'Please select a direction';
+$string['error_missing_timeperiod'] = 'Please select a time period';
+$string['error_missing_timevaluecheck'] = 'Please select a time value';
+$string['hours'] = 'hours';
+$string['label'] = 'My Condition Value';
+$string['met'] = 'The condition is met';
+$string['months'] = 'months';
+$string['notmet'] = 'The condition is not met';
+$string['pluginname'] = 'Enrol Dates';
+$string['select_direction'] = '(Select Direction)';
+$string['select_timeperiod'] = '(Select Period)';
+$string['select_timevaluecheck'] = '(Select Time)';
+$string['setting'] = 'Default Value';
+$string['settingdesc'] = 'Default value for the condition';
+$string['timenumber'] = 'Number of time units';
+$string['timeperiod'] = 'Time period';
+$string['timevaluecheck'] = 'Time value to compare against';
 $string['title'] = 'Enrol Dates';

@@ -3,7 +3,7 @@
   "builds": {
     "moodle-availability_enrol_dates-form": {
       "jsfiles": [
-        "form.js"
+        "js/form.js"
       ]
     }
   }
