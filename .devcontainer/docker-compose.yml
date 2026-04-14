@@ -1,0 +1,32 @@
+services:
+  webserver:
+    build:
+      context: ../
+      dockerfile: .devcontainer/Dockerfile
+    depends_on:
+      - db
+    volumes:
+      - "../:/var/www/html"
+      - "../../moodledata-academy:/var/www/moodledata-academy"
+      - "../../phpu_moodledata:/var/www/phpu_moodledata"
+      - "../../moodle-academy-bashhistory:/commandhistory"
+      - "./php.ini-development:/usr/local/etc/php/conf.d/uploads.ini"
+    working_dir: /var/www/html
+    ports:
+      - "8080:80"
+      - "444:443"
+    env_file: devcontainer.env
+  db:
+    image: mysql:8.0
+    command: >
+                --character-set-server=utf8mb4
+                --collation-server=utf8mb4_bin
+                --skip-log-bin
+    ports:
+      - "3306:3306/tcp"
+    volumes:
+      - vol_academy_mysql_data:/var/lib/mysql
+    env_file: devcontainer.env
+
+volumes:
+  vol_academy_mysql_data:

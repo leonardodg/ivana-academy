@@ -23,8 +23,9 @@ $CFG->dboptions = array(
   'dbcollation' => 'utf8mb4_bin',
 );
 
-$CFG->wwwroot   = 'http://127.0.0.1';
-$CFG->dataroot  = '/var/www/moodledata';
+// $CFG->wwwroot   = 'http://localhost:8080';
+$CFG->wwwroot   = 'https://moodle.leodg.duckdns.org';
+$CFG->dataroot  = '/var/www/moodledata-academy';
 $CFG->admin     = 'admin';
 
 $CFG->directorypermissions = 0777;
