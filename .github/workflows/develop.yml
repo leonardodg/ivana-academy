@@ -6,7 +6,8 @@ jobs:
   start-sandbox:
     runs-on: ubuntu-latest
     environment: development
-
+    outputs:
+      vm_ip: ${{ steps.get_ip.outputs.ip }}
     steps:
       - uses: actions/checkout@v3
       - id: 'auth'
@@ -99,27 +100,27 @@ jobs:
           MOODLE_DOCKER_WWWROOT: /var/www/html/
           basedir: ${{ github.workspace }}
 
-  deploy:
+  deploy-sandbox:
     name: Deploy to GCP VM
     needs: [start-sandbox, docker, integration]
     runs-on: ubuntu-latest
     environment: development
     steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
       - name: Diagnóstico de IP
         run: |
-          echo "O IP vindo do step anterior é: ${{ steps.get_ip.outputs.ip }}"
-          if [ -z "${{ steps.get_ip.outputs.ip }}" ]; then
-            echo "ERRO: O output 'ip' está vazio!"
+          echo "the IP of JOB previous is: ${{ needs.start-sandbox.outputs.vm_ip }}"
+          if [ -z "${{ needs.start-sandbox.outputs.vm_ip }}" ]; then
+            echo "ERRO: The output 'IP' is EMPTY!"
             exit 1
           fi
+      - name: Checkout Source
+        uses: actions/checkout@v4
       - name: Deploy via SSH by RSYNC
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rlgoDzvc -i"
-          REMOTE_HOST: ${{ steps.get_ip.outputs.ip }}
+          REMOTE_HOST: ${{ needs.start-sandbox.outputs.vm_ip }}
           REMOTE_USER: leonardodg
           TARGET: /home/leonardodg/public_html
           SCRIPT_BEFORE: |
