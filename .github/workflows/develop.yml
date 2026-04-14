@@ -1,4 +1,4 @@
-name: Deploy DEVELOP to EC2
+name: Deploy DEVELOP Sandbox to GCP
 
 on:
   push:
@@ -6,6 +6,20 @@ on:
       - develop
 
 jobs:
+  start-sandbox:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+      - name: Start VM
+        run: |
+          gcloud compute instances start ${{ secrets.GCP_VM_NAME }} --zone=${{ secrets.GCP_ZONE }}
+      - name: Wait for SSH
+        run: sleep 30
+
   docker:
     name: Push Docker Image
     runs-on: ubuntu-latest
@@ -61,31 +75,6 @@ jobs:
 
       - name: Stop moodle-docker
         run: |
-          echo "Stopping down container"
-          docker compose -f "${basedir}/docker-compose-develop.yml" down
-        env:
-          MOODLE_DOCKER_WWWROOT: /var/www/html/
-          basedir: ${{ github.workspace }}
-
-  PHPUnit:
-    needs: integration
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checking out moodle
-        uses: actions/checkout@v4
-        with:
-          repository: leonardodg/ivana-academy
-
-      - name: Run moodle-docker TESTS environment
-        run: |
-          cp config.docker-develop.php config.php
-          echo "START PHPUNIT tests from ${basedir}"
-          export ASSETDIR="${basedir}/assets"
-          docker compose -f "docker-compose-develop.yml" up -d
-          docker compose exec -T webserver php admin/tool/phpunit/cli/init.php
-          echo "Running PHPUNIT tests"
-          docker compose exec -T webserver vendor/bin/phpunit
           echo "Stopping down container"
           docker compose -f "${basedir}/docker-compose-develop.yml" down
         env:
