@@ -15,7 +15,7 @@ jobs:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
       - name: Start VM
         run: |
-          gcloud compute instances start ${{ secrets.GCP_VM_NAME }} --zone=${{ secrets.GCP_ZONE }}
+          gcloud compute instances start ${{ secrets.GCP_VM_NAME }} --zone=${{ secrets.GCP_ZONE }} || echo "Recurso esgotado no Google Cloud agora."
       - name: Get IP
         id: get_ip
         run: |
