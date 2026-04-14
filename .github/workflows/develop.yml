@@ -16,6 +16,16 @@ jobs:
       - name: Start VM
         run: |
           gcloud compute instances start ${{ secrets.GCP_VM_NAME }} --zone=${{ secrets.GCP_ZONE }}
+      - name: Get IP
+        id: get-ip
+        run: |
+
+          VM_IP=$(gcloud compute instances describe ${{ secrets.GCP_VM_NAME }} \
+            --zone=${{ secrets.GCP_ZONE }} \
+            --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+
+          echo "IP_DA_VM=$VM_IP" >> $GITHUB_ENV
+          echo "Conectando ao IP: $VM_IP"
       - name: Wait for SSH
         run: sleep 30
 
@@ -81,7 +91,8 @@ jobs:
           basedir: ${{ github.workspace }}
 
   deploy:
-    needs: docker
+    name: Deploy to GCP VM
+    needs: [start-sandbox, docker, integration]
     runs-on: ubuntu-latest
     environment: development
     steps:
@@ -92,30 +103,30 @@ jobs:
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rlgoDzvc -i"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: ${{ vars.REMOTE_TARGET }}
+          REMOTE_HOST: ${{ env.IP_DA_VM }}
+          REMOTE_USER: ubuntu
+          TARGET: /home/admin/public_html
           SCRIPT_BEFORE: |
             sudo apt install rsync -y
           SCRIPT_AFTER: |
             whoami
             ls -al
             echo $RSYNC_STDOUT
-            cp ${{ vars.REMOTE_TARGET }}/config-docker.php ${{ vars.REMOTE_TARGET }}/config.php
+            cp /home/admin/public_html/config-docker.php /home/admin/public_html/config.php
 
       - name: Deploy to EC2 Instance
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
+          host: ${{ env.IP_DA_VM }}
+          username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             sudo docker stop moodle || true
             sudo docker rm moodle || true
             sudo docker pull leodg/moodle-academy:latest
-            sudo docker run --name moodle -p 80:80 p 443:443 -v ${{ vars.REMOTE_TARGET }}:/var/www/html -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -d leodg/moodle-academy:latest
+            sudo docker run --name moodle -p 80:80 p 443:443 -v /home/admin/public_html:/var/www/html -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -d leodg/moodle-academy:latest
 
             sudo docker stop moodle || true
             sudo docker rm moodle || true
             sudo docker pull leodg/moodle-academy:develop
-            sudo docker run --restart=always --name moodle -p 80:80 -p 443:443 -v ${{ vars.REMOTE_TARGET }}:/var/www/html -v /home/admin/moodledata:${{ vars.MOODLE_DATA }} -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -e MOODLE_DATA=${{ vars.MOODLE_DATA }} -e ENVIRONMENT=develop -d leodg/moodle-academy:develop
+            sudo docker run --restart=always --name moodle -p 80:80 -p 443:443 -v /home/admin/public_html:/var/www/html -v /home/admin/moodledata:/var/www/moodledata -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -e MOODLE_DATA=/var/www/moodledata -e ENVIRONMENT=develop -d leodg/moodle-academy:develop
