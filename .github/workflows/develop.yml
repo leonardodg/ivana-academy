@@ -5,6 +5,8 @@ on: [push]
 jobs:
   start-sandbox:
     runs-on: ubuntu-latest
+    environment: development
+
     steps:
       - uses: actions/checkout@v3
       - id: 'auth'
