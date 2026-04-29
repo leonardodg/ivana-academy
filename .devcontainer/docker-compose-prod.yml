@@ -3,6 +3,4 @@ name: ivana-academy
 
 include:
   - path: ./compose/base.yml
-  - path: ./compose/db.yml
-  - path: ./compose/dev.yml
-  - path: ./compose/build-dev.yml
+  - path: ./compose/prod.yml

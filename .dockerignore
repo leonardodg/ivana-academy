@@ -1,10 +1,94 @@
-# The .dockerignore file excludes files from the container build process.
-#
-# https://docs.docker.com/engine/reference/builder/#dockerignore-file
+# ============================================================
+# .dockerignore — Ivana Academy
+# Exclui arquivos desnecessários e SENSÍVEIS do build context
+# ============================================================
 
-# Exclude "build-time" ignore files.
-.dockerignore
+.git
+.github
+.vscode
+node_modules
+npm-debug.log
+composer.phar
+vendor_old
+*.bak
+*.swp
 
+# Dependências locais (reconstruídas no build)
+node_modules/
+vendor/
 
-# Exclude git history and configuration.
+# Secrets e certificados — NUNCA na imagem
+.devcontainer/secrets/
+.devcontainer/certs/
+.devcontainer/secrets/*
+.devcontainer/certs/*
+secrets/
+secrets/*
+*.key
+*.pem
+*.p12
+
+# Version Control
+.git/
 .gitignore
+.gitattributes
+
+.gitlab-ci.yml
+Jenkinsfile
+
+# Moodle Data & Temporary Files (Should be handled via Volumes)
+moodledata/
+cache/
+localcache/
+sessions/
+temp/
+trashdir/
+
+# Moodle Specific
+config.php
+# (Only ignore config.php if you provide it via environment variables or
+#  a separate volume mount to avoid baking credentials into the image)
+
+# Docker/Development Files
+docker-compose.yml
+.dockerignore
+.env
+
+# Arquivos de desenvolvimento
+docker-compose*.yml
+compose/
+Dockerfile
+*.Dockerfile
+
+# Node/Frontend Build (If applicable)
+node_modules/
+npm-debug.log
+package-lock.json
+
+# IDE e OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Documentação
+docs/
+*.md
+CHANGELOG
+LICENSE
+COPYING
+
+# Logs e temporários
+*.log
+*.tmp
+*.cache
+.cache/
+/tmp/
+
+# Testes
+tests/
+phpunit.xml
+phpunit.xml.dist
+*.test.php

@@ -61,4 +61,11 @@ jsconfig.json
 UPGRADING-CURRENT.md
 
 
-.devcontainer/devcontainer.env
+.devcontainer/env/*
+.devcontainer/certs/*
+.devcontainer/secrets/*
+!.devcontainer/env/*.example
+!.devcontainer/certs/*.example
+!.devcontainer/secrets/*.example
+
+.claude/

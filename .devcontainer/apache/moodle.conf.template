@@ -1,0 +1,17 @@
+<VirtualHost *:80>
+    ServerAdmin callme@leodg.dev
+
+    ServerName localhost
+    ServerAlias ServerName ${MOODLE_URL_CLEAN}
+
+    DocumentRoot ${APACHE_DOCUMENT_ROOT}
+
+    <Directory "/var/www/html">
+		Options Indexes FollowSymLinks
+		AllowOverride All
+		Require all granted
+	</Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/moodle_error.log
+    CustomLog ${APACHE_LOG_DIR}/moodle_access.log combined
+</VirtualHost>
