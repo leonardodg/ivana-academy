@@ -1,6 +1,0 @@
-# .devcontainer/docker-compose.yml
-name: ivana-academy
-
-include:
-  - path: ./compose/base.yml
-  - path: ./compose/prod.yml
