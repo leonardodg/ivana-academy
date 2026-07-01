@@ -1,11 +1,42 @@
-name: Deploy DEVELOP to EC2
+name: Deploy DEVELOP Sandbox to GCP
 
-on:
-  push:
-    branches:
-      - develop
+on: [push]
 
 jobs:
+  start-sandbox:
+    runs-on: ubuntu-latest
+    environment: development
+    outputs:
+      vm_ip: ${{ steps.get_ip.outputs.ip }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+      - name: Start VM
+        run: |
+          STATUS=$(gcloud compute instances describe ${{ secrets.GCP_VM_NAME }} \
+            --zone=${{ secrets.GCP_ZONE }} \
+            --format='get(status)')
+
+          if [ "$STATUS" != "RUNNING" ]; then
+            echo "A VM está $STATUS. Ligando agora..."
+            gcloud compute instances start ${{ secrets.GCP_VM_NAME }} --zone=${{ secrets.GCP_ZONE }} || echo "Recurso esgotado no Google Cloud agora."
+            sleep 20
+          else
+            echo "The VM is already connected. Status: $STATUS"
+          fi
+      - name: Get IP
+        id: get_ip
+        run: |
+          VM_IP=$(gcloud compute instances describe ${{ secrets.GCP_VM_NAME }} \
+            --zone=${{ secrets.GCP_ZONE }} \
+            --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+
+          echo "ip=$VM_IP" >> $GITHUB_OUTPUT
+          echo "Connecting to IP: $VM_IP"
+
   docker:
     name: Push Docker Image
     runs-on: ubuntu-latest
@@ -67,36 +98,19 @@ jobs:
           MOODLE_DOCKER_WWWROOT: /var/www/html/
           basedir: ${{ github.workspace }}
 
-  PHPUnit:
-    needs: integration
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checking out moodle
-        uses: actions/checkout@v4
-        with:
-          repository: leonardodg/ivana-academy
-
-      - name: Run moodle-docker TESTS environment
-        run: |
-          cp config.docker-develop.php config.php
-          echo "START PHPUNIT tests from ${basedir}"
-          export ASSETDIR="${basedir}/assets"
-          docker compose -f "docker-compose-develop.yml" up -d
-          docker compose exec -T webserver php admin/tool/phpunit/cli/init.php
-          echo "Running PHPUNIT tests"
-          docker compose exec -T webserver vendor/bin/phpunit
-          echo "Stopping down container"
-          docker compose -f "${basedir}/docker-compose-develop.yml" down
-        env:
-          MOODLE_DOCKER_WWWROOT: /var/www/html/
-          basedir: ${{ github.workspace }}
-
-  deploy:
-    needs: docker
+  deploy-sandbox:
+    name: Deploy to GCP VM
+    needs: [start-sandbox, docker, integration]
     runs-on: ubuntu-latest
     environment: development
     steps:
+      - name: Diagnóstico de IP
+        run: |
+          echo "the IP of JOB previous is: ${{ needs.start-sandbox.outputs.vm_ip }}"
+          if [ -z "${{ needs.start-sandbox.outputs.vm_ip }}" ]; then
+            echo "ERRO: The output 'IP' is EMPTY!"
+            exit 1
+          fi
       - name: Checkout Source
         uses: actions/checkout@v4
       - name: Deploy via SSH by RSYNC
@@ -104,30 +118,25 @@ jobs:
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rlgoDzvc -i"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: ${{ vars.REMOTE_TARGET }}
+          REMOTE_HOST: ${{ needs.start-sandbox.outputs.vm_ip }}
+          REMOTE_USER: leonardodg
+          TARGET: /home/leonardodg/public_html
           SCRIPT_BEFORE: |
             sudo apt install rsync -y
           SCRIPT_AFTER: |
             whoami
             ls -al
             echo $RSYNC_STDOUT
-            cp ${{ vars.REMOTE_TARGET }}/config-docker.php ${{ vars.REMOTE_TARGET }}/config.php
+            cp /home/leonardodg/public_html/config-docker.php /home/leonardodg/public_html/config.php
 
-      - name: Deploy to EC2 Instance
+      - name: Deploy to GCP VM Instance
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
+          host: ${{ needs.start-sandbox.outputs.vm_ip }}
+          username: leonardodg
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sudo docker stop moodle || true
-            sudo docker rm moodle || true
-            sudo docker pull leodg/moodle-academy:latest
-            sudo docker run --name moodle -p 80:80 p 443:443 -v ${{ vars.REMOTE_TARGET }}:/var/www/html -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -d leodg/moodle-academy:latest
-
-            sudo docker stop moodle || true
-            sudo docker rm moodle || true
-            sudo docker pull leodg/moodle-academy:develop
-            sudo docker run --restart=always --name moodle -p 80:80 -p 443:443 -v ${{ vars.REMOTE_TARGET }}:/var/www/html -v /home/admin/moodledata:${{ vars.MOODLE_DATA }} -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -e MOODLE_DATA=${{ vars.MOODLE_DATA }} -e ENVIRONMENT=develop -d leodg/moodle-academy:develop
+            docker stop moodle || true
+            docker rm moodle || true
+            docker pull leodg/moodle-academy:develop
+            docker run --restart=always --name moodle -p 80:80 -p 443:443 -v /home/leonardodg/public_html:/var/www/html -v /home/leonardodg/moodledata:/var/www/moodledata -v /etc/letsencrypt/:/etc/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -e MOODLE_DATA=/var/www/moodledata -e ENVIRONMENT=develop -d leodg/moodle-academy:develop

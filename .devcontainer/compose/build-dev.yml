@@ -1,0 +1,37 @@
+# =============================================================================
+# DEVELOPMENT OVERRIDE — Local development with hot-reload
+# =============================================================================
+# Usage:
+#     docker compose -f .devcontainer/compose/base.yml -f .devcontainer/compose/db.yml -f .devcontainer/compose/dev.yml -f .devcontainer/compose/build.dev.yml up --build -d
+# =============================================================================
+
+services:
+  moodle:
+    build:
+      context: ../../
+      dockerfile: .devcontainer/build/moodle.Dockerfile
+      target: development
+      args:
+        - ENVIRONMENT=development
+        - TZ=America/Sao_Paulo
+      cache_from:
+        - moodle-academy:development
+    environment:
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: 1
+      MOODLE_URL: https://develop.local
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: client_host=host.docker.internal
+    volumes:
+      - "../../phpu_moodledata:/var/www/phpu_moodledata"
+      - "../php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini"
+      - /var/www/html/.devcontainer
+      - composer_cache:/root/.composer
+    ports:
+      - "9003:9003" # Xdebug
+
+# =============================================================================
+#                      DEVELOPMENT-ONLY RESOURCES
+# =============================================================================
+volumes:
+  composer_cache:
+    name: moodle_composer_cache
