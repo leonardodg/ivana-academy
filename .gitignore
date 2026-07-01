@@ -1,4 +1,4 @@
-# This file specifies intentionally untracked files that all Moodle git
+q# This file specifies intentionally untracked files that all Moodle git
 # repositories should ignore. It is recommended not to modify this file in your
 # local clone. Instead, use .git/info/exclude and add new records there as
 # needed.
@@ -59,3 +59,10 @@ moodle-plugin-ci.phar
 phpcs.xml
 jsconfig.json
 UPGRADING-CURRENT.md
+
+
+# Secrets e certificados locais de dev - nunca versionar
+.devcontainer/secrets/
+.devcontainer/certs/*.key
+.devcontainer/certs/*.crt
+!.devcontainer/certs/*.example
