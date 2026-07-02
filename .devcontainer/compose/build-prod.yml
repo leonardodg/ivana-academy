@@ -1,0 +1,18 @@
+# =============================================================================
+# PRODUCTION OVERRIDE — Optimized for production deployment
+# =============================================================================
+# Usage:
+#     docker compose -f .devcontainer/compose/base.yml -f .devcontainer/compose/prod.yml -f .devcontainer/compose/build.prod.yml up --build -d
+# =============================================================================
+
+services:
+  moodle:
+    build:
+      context: ../../
+      dockerfile: .devcontainer/build/moodle.Dockerfile
+      target: production
+      args:
+        - ENVIRONMENT=production
+        - TZ=America/Sao_Paulo
+      cache_from:
+        - moodle-academy:production
