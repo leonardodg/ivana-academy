@@ -29,8 +29,8 @@ jobs:
           fi
       - name: Auto-Shutdown
         run: |
-              echo "Auto-shutdown script executed." \
-              sudo shutdown -h +60'
+              echo "Auto-shutdown script executed."
+              sudo shutdown -h +60
       - name: Get IP
         id: get_ip
         run: |
