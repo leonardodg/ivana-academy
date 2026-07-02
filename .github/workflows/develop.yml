@@ -27,6 +27,10 @@ jobs:
           else
             echo "The VM is already connected. Status: $STATUS"
           fi
+      - name: Auto-Shutdown
+        run: |
+              echo "Auto-shutdown script executed." \
+              sudo shutdown -h +60'
       - name: Get IP
         id: get_ip
         run: |
@@ -43,6 +47,10 @@ jobs:
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -56,8 +64,12 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: .devcontainer/build/moodle.Dockerfile
+          target: development
           push: true
-          tags: leodg/moodle-academy:develop
+          tags: |
+            leodg/moodle-academy:develop
+            leodg/moodle-academy:${{ github.sha }}
 
   integration:
     name: Integration checks
