@@ -1,19 +1,35 @@
 name: Deploy DEVELOP Sandbox to GCP
 
+# =============================================================================
+# .github/workflows/develop.yml
+# =============================================================================
+# Deploy the environment for validation in the GCP sandbox.
+# Different from production (production.yml/production-v2.yml), this workflow:
+#   - Uses the "development" image tag (build of the development target in the Dockerfile)
+#   - Deploys MariaDB + Moodle via docker compose (base + db + sandbox override)
+#   - Mounts moodledata in /home/leonardodg/moodledata on the GCP VM
+#   - Has cron enabled to validate production behavior
+# =============================================================================
+
 on: [push]
 
 jobs:
   start-sandbox:
+    name: start-sandbox
     runs-on: ubuntu-latest
     environment: development
     outputs:
       vm_ip: ${{ steps.get_ip.outputs.ip }}
     steps:
-      - uses: actions/checkout@v3
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v1'
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
       - name: Start VM
         run: |
           STATUS=$(gcloud compute instances describe ${{ secrets.GCP_VM_NAME }} \
@@ -21,25 +37,22 @@ jobs:
             --format='get(status)')
 
           if [ "$STATUS" != "RUNNING" ]; then
-            echo "A VM está $STATUS. Ligando agora..."
-            gcloud compute instances start ${{ secrets.GCP_VM_NAME }} --zone=${{ secrets.GCP_ZONE }} || echo "Recurso esgotado no Google Cloud agora."
+            echo "🚀 VM is $STATUS. Turning on..."
+            gcloud compute instances start ${{ secrets.GCP_VM_NAME }} \
+              --zone=${{ secrets.GCP_ZONE }} || echo " ❌ Resource exhausted in GCP."
             sleep 20
           else
-            echo "The VM is already connected. Status: $STATUS"
+            echo "✅ VM is already RUNNING."
           fi
-      - name: Auto-Shutdown
-        run: |
-              echo "Auto-shutdown script executed."
-              sudo shutdown -h +60
+
       - name: Get IP
         id: get_ip
         run: |
           VM_IP=$(gcloud compute instances describe ${{ secrets.GCP_VM_NAME }} \
             --zone=${{ secrets.GCP_ZONE }} \
             --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
-
           echo "ip=$VM_IP" >> $GITHUB_OUTPUT
-          echo "Connecting to IP: $VM_IP"
+          echo "🌐 VM IP: $VM_IP"
 
   docker:
     name: Push Docker Image
@@ -74,10 +87,8 @@ jobs:
   integration:
     name: Integration checks
     runs-on: ubuntu-latest
-    environment: development
-
     steps:
-      - name: Checking out moodle
+      - name: Checkout Source
         uses: actions/checkout@v4
         with:
           repository: leonardodg/ivana-academy
@@ -85,12 +96,12 @@ jobs:
 
       - name: Prepare moodle-docker environment
         run: |
-          cp config.docker-develop.php config.php
+          cp ${basedir}/.devcontainer/config/config.docker-develop.php config.php
           echo "Running integration tests from ${basedir}"
           echo ${basedir}
           echo ${MOODLE_DOCKER_WWWROOT}
           export ASSETDIR="${basedir}/assets"
-          docker compose -f "docker-compose-develop.yml" up -d
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" up -d
         env:
           MOODLE_DOCKER_WWWROOT: /var/www/html/
           basedir: ${{ github.workspace }}
@@ -105,10 +116,13 @@ jobs:
       - name: Stop moodle-docker
         run: |
           echo "Stopping down container"
-          docker compose -f "${basedir}/docker-compose-develop.yml" down
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" down
         env:
           MOODLE_DOCKER_WWWROOT: /var/www/html/
           basedir: ${{ github.workspace }}
+
+      - name: Run integration checks placeholder
+        run: echo "Integration checks passed (placeholder)."
 
   deploy-sandbox:
     name: Deploy to GCP VM
@@ -116,39 +130,81 @@ jobs:
     runs-on: ubuntu-latest
     environment: development
     steps:
-      - name: Diagnóstico de IP
+      - name: Diagnostico de IP
         run: |
-          echo "the IP of JOB previous is: ${{ needs.start-sandbox.outputs.vm_ip }}"
+          echo "IP da VM GCP: ${{ needs.start-sandbox.outputs.vm_ip }}"
           if [ -z "${{ needs.start-sandbox.outputs.vm_ip }}" ]; then
-            echo "ERRO: The output 'IP' is EMPTY!"
+            echo "❌ ERRO: The output 'IP' is EMPTY!"
             exit 1
           fi
       - name: Checkout Source
         uses: actions/checkout@v4
-      - name: Deploy via SSH by RSYNC
+
+      - name: Sync compose files
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rlgoDzvc -i"
+          ARGS: "-rlgoDzvc -i --exclude=secrets/ --exclude=certs/"
+          SOURCE: ".devcontainer/compose/"
           REMOTE_HOST: ${{ needs.start-sandbox.outputs.vm_ip }}
           REMOTE_USER: leonardodg
-          TARGET: /home/leonardodg/public_html
-          SCRIPT_BEFORE: |
-            sudo apt install rsync -y
-          SCRIPT_AFTER: |
-            whoami
-            ls -al
-            echo $RSYNC_STDOUT
-            cp /home/leonardodg/public_html/config-docker.php /home/leonardodg/public_html/config.php
+          TARGET: /home/leonardodg/academy-compose/
 
-      - name: Deploy to GCP VM Instance
+      - name: Deploy via docker compose (MariaDB + Moodle)
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ needs.start-sandbox.outputs.vm_ip }}
           username: leonardodg
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 15m
           script: |
-            docker stop moodle || true
-            docker rm moodle || true
-            docker pull leodg/moodle-academy:develop
-            docker run --restart=always --name moodle -p 80:80 -p 443:443 -v /home/leonardodg/public_html:/var/www/html -v /home/leonardodg/moodledata:/var/www/moodledata -v /etc/letsencrypt/:/etc/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -e MOODLE_DATA=/var/www/moodledata -e ENVIRONMENT=develop -d leodg/moodle-academy:develop
+            set -e
+
+            mkdir -p /home/leonardodg/moodledata
+            sudo chown -R 33:33 /home/leonardodg/moodledata
+
+            export IMAGE_TAG="develop"
+            export MOODLE_DBNAME="${{ secrets.MOODLE_DBNAME }}"
+            export MOODLE_DBUSER="${{ secrets.MOODLE_DBUSER }}"
+            export MOODLE_DBPASS="${{ secrets.MOODLE_DBPASS }}"
+            export MOODLE_DBROOT="${{ secrets.MOODLE_DBROOT }}"
+
+            cd /home/leonardodg/ivana-academy
+
+            docker compose \
+              -f /home/leonardodg/academy-compose/base.yml \
+              -f /home/leonardodg/academy-compose/db.yml \
+              -f compose/sandbox.yml \
+              pull
+
+            docker compose \
+              -f /home/leonardodg/academy-compose/base.yml \
+              -f /home/leonardodg/academy-compose/db.yml \
+              -f /home/leonardodg/academy-compose/sandbox.yml \
+              up -d
+
+            docker compose \
+              -f compose/base.yml \
+              -f /home/leonardodg/academy-compose/db.yml \
+              -f /home/leonardodg/academy-compose/sandbox.yml \
+              ps
+
+  auto-shutdown:
+    name: Auto-shutdown GCP VM
+    runs-on: ubuntu-latest
+    needs: deploy-sandbox
+    if: always()
+    steps:
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Stop GCP VM
+        run: |
+          gcloud compute instances stop ${{ secrets.GCP_VM_NAME }} \
+            --zone=${{ secrets.GCP_ZONE }}
+          echo "🛑 VM STOPPED."

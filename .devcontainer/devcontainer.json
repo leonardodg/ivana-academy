@@ -13,7 +13,6 @@
         "db"
 	],
 	"workspaceFolder": "/var/www/html",
-    "overrideCommand": false,
     "remoteUser": "www-data",
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
@@ -53,8 +52,6 @@
 				}
 			],
 
-    "postStartCommand": "moodle-entrypoint apache2-foreground &",
-    
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": {
 		"Fix Volume Permissions": "sudo chown -R $(whoami): /commandhistory",
@@ -95,13 +92,5 @@
 				"terminal.integrated.defaultProfile.linux": "bash"
 			}
 		}
-	},
-
-	"containerEnv": {
-		"MY_CONTAINER_VAR": "some-value-here",
-		"MY_CONTAINER_VAR2": "${localEnv:SOME_LOCAL_VAR}"
-	},
-	"remoteEnv": {
-		"PATH": "${containerEnv:PATH}:/some/other/path"
 	}
 }
