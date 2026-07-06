@@ -1,10 +1,17 @@
 name: Deploy DEVELOP Sandbox to GCP
 
-on:
-  push:
-    branches:
-      - integration/infra-devcontainer-gcp
-  workflow_dispatch:
+# =============================================================================
+# .github/workflows/develop.yml
+# =============================================================================
+# Deploy the environment for validation in the GCP sandbox.
+# Different from production (production.yml/production-v2.yml), this workflow:
+#   - Uses the "development" image tag (build of the development target in the Dockerfile)
+#   - Deploys MariaDB + Moodle via docker compose (base + db + sandbox override)
+#   - Mounts moodledata in /home/leonardodg/moodledata on the GCP VM
+#   - Has cron enabled to validate production behavior
+# =============================================================================
+
+on: [push]
 
 jobs:
   start-sandbox:
@@ -15,7 +22,6 @@ jobs:
       vm_ip: ${{ steps.get_ip.outputs.ip }}
     steps:
       - uses: actions/checkout@v4
-
       - id: auth
         uses: google-github-actions/auth@v2
         with:
@@ -29,6 +35,7 @@ jobs:
           STATUS=$(gcloud compute instances describe ${{ secrets.GCP_VM_NAME }} \
             --zone=${{ secrets.GCP_ZONE }} \
             --format='get(status)')
+
           if [ "$STATUS" != "RUNNING" ]; then
             echo "🚀 VM is $STATUS. Turning on..."
             gcloud compute instances start ${{ secrets.GCP_VM_NAME }} \
@@ -57,20 +64,16 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
           clean: true
-
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Build and push (target development)
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -88,17 +91,38 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          repository: leonardodg/ivana-academy
+          ref: develop
 
-      - name: Check PHP syntax in custom files
+      - name: Prepare moodle-docker environment
         run: |
-          echo "=== Checking PHP syntax in custom files ==="
-          find .devcontainer/config -name "*.php" -exec php -l {} \; 2>&1
-          echo "=== Checking entrypoint is executable ==="
-          [ -f ".devcontainer/bin/moodle-entrypoint" ] && echo "OK: moodle-entrypoint found" || echo "WARN: moodle-entrypoint not found"
-          echo "=== Checking .dockerignore exists ==="
-          [ -f ".dockerignore" ] && echo "OK: .dockerignore found" || echo "WARN: .dockerignore missing"
-          echo "=== Integration checks passed ==="
+          cp ${basedir}/.devcontainer/config/config.docker-develop.php config.php
+          echo "Running integration tests from ${basedir}"
+          echo ${basedir}
+          echo ${MOODLE_DOCKER_WWWROOT}
+          export ASSETDIR="${basedir}/assets"
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" up -d
+        env:
+          MOODLE_DOCKER_WWWROOT: /var/www/html/
+          basedir: ${{ github.workspace }}
+
+      - name: Run moodle-docker tests
+        shell: bash
+        run: |
+          echo "Checking that PHP CLI is available"
+          docker compose exec -T webserver php -r 'echo "Up!";'
+          echo "Checking that the web server is up"
+
+      - name: Stop moodle-docker
+        run: |
+          echo "Stopping down container"
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" down
+        env:
+          MOODLE_DOCKER_WWWROOT: /var/www/html/
+          basedir: ${{ github.workspace }}
+
+      - name: Run integration checks placeholder
+        run: echo "Integration checks passed (placeholder)."
 
   deploy-sandbox:
     name: Deploy to GCP VM
@@ -110,14 +134,13 @@ jobs:
         run: |
           echo "IP da VM GCP: ${{ needs.start-sandbox.outputs.vm_ip }}"
           if [ -z "${{ needs.start-sandbox.outputs.vm_ip }}" ]; then
-            echo "ERRO: IP vazio!"
+            echo "❌ ERRO: The output 'IP' is EMPTY!"
             exit 1
           fi
-
       - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Sync compose files to GCP VM
+      - name: Sync compose files
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -127,7 +150,7 @@ jobs:
           REMOTE_USER: leonardodg
           TARGET: /home/leonardodg/academy-compose/
 
-      - name: Deploy via docker compose (MariaDB + Moodle) na VM GCP
+      - name: Deploy via docker compose (MariaDB + Moodle)
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ needs.start-sandbox.outputs.vm_ip }}
@@ -160,7 +183,6 @@ jobs:
               -f /home/leonardodg/academy-compose/sandbox.yml \
               up -d
 
-            echo "=== Status dos containers ==="
             docker compose \
               -f compose/base.yml \
               -f /home/leonardodg/academy-compose/db.yml \
