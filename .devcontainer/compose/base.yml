@@ -1,6 +1,6 @@
 
 # =============================================================================
-# BASE COMPOSE — Shared configuration between all environments
+# BASE COMPOSE - Shared configuration between all environments
 # =============================================================================
 # Usage:
 #   Dev:  docker compose -f .devcontainer/compose/base.yml -f .devcontainer/compose/dev.yml up

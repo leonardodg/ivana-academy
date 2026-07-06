@@ -41,7 +41,7 @@ load_secret() {
         echo "✅ 🔑 Loaded Secret : $var_name "
     else
         export "$var_name=${!var_name:-$default_value}"
-        echo "⚠️ 🔑 Secret NOT FOUND, using value Default for: $var_name"
+        echo "⚠ 🔑 Secret NOT FOUND, using value Default for: $var_name"
     fi
 }
 
@@ -139,11 +139,11 @@ if [[ "${ENVIRONMENT:-production}" =~ ^(production|prod)$ ]]; then
         service cron restart 2>/dev/null || true
         echo "✅ Service Cron Configured"
     else
-        [ ! -f "/var/www/html/moodle-cron" ] && echo "⚠️ File moodle-cron NOT FOUND!"
-        command -v crontab >/dev/null 2>&1 || echo "⚠️ Command CRONTAB binary NOT FOUND!"
+        [ ! -f "/var/www/html/moodle-cron" ] && echo "⚠ File moodle-cron NOT FOUND!"
+        command -v crontab >/dev/null 2>&1 || echo "⚠ Command CRONTAB binary NOT FOUND!"
     fi
 else
-    echo "⏭️  Skipping Cron (Development mode)"
+    echo "⏭  Skipping Cron (Development mode)"
 fi
 
 # ======================== PERMISSIONS ========================
@@ -169,7 +169,7 @@ if [[ "${ENVIRONMENT}" =~ ^(development|dev)$ ]]; then
     echo "+-============================================================-+"
     echo "🔗 MOODLE_URL          = ${MOODLE_URL}"
     echo "🔗 ServerName          = ${MOODLE_URL_CLEAN}"
-    echo "🗄️  MOODLE_DBHOST       = ${MOODLE_DBHOST:-db}"
+    echo "🗄  MOODLE_DBHOST       = ${MOODLE_DBHOST:-db}"
     echo "📦 MOODLE_DBNAME       = ${MOODLE_DBNAME:-moodle}"
     echo "👤 MOODLE_DBUSER       = ${MOODLE_DBUSER}"
     echo "🔐 CERT_PATH           = ${CERT_PATH}"

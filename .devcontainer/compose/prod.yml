@@ -1,5 +1,5 @@
 # =============================================================================
-# PRODUCTION — Optimized for production deployment
+# PRODUCTION - Optimized for production deployment
 # =============================================================================
 # Usage:
 #     docker compose -f .devcontainer/compose/base.yml -f .devcontainer/compose/prod.yml up -d
@@ -10,7 +10,7 @@ services:
     image: leodg/moodle-academy:production
     restart: unless-stopped
     env_file:
-      - ../env/production.env
+      - ../env/prod.env
     environment:
       - MOODLE_URL=https://ivana.academy
       - ENVIRONMENT=production

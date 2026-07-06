@@ -1,5 +1,5 @@
 # =============================================================================
-# Ivana Academy — Moodle 4.5
+# Ivana Academy - Moodle 4.5
 # Multi-stage build: composer → base → production | development
 #
 # Build production:
@@ -10,7 +10,7 @@
 # =============================================================================
 
 # =============================================================================
-#            STAGE COMPOSER — resolve dependencies PHP isolated
+#            STAGE COMPOSER - resolve dependencies PHP isolated
 # =============================================================================
 FROM composer:lts AS composer-base
 
@@ -28,7 +28,7 @@ FROM composer:lts AS composer-base
     COPY composer.json composer.lock ./
 
 # =============================================================================
-#     STAGE COMPOSER-PROD — dependencies production sem dev packages
+#     STAGE COMPOSER-PROD - dependencies production sem dev packages
 # =============================================================================
 FROM composer-base AS composer-prod
 
@@ -41,7 +41,7 @@ FROM composer-base AS composer-prod
             --no-scripts
 
 # =============================================================================
-#     STAGE COMPOSER-DEV — dependencies development COM dev packages
+#     STAGE COMPOSER-DEV - dependencies development COM dev packages
 # =============================================================================
 FROM composer-base AS composer-dev
 
@@ -53,7 +53,7 @@ FROM composer-base AS composer-dev
             --no-scripts
 
 # =============================================================================
-#         STAGE BASE — SETUP SHARED BETWEEN DEVELOPMENT AND PRODUCTION
+#         STAGE BASE - SETUP SHARED BETWEEN DEVELOPMENT AND PRODUCTION
 # =============================================================================
 FROM moodlehq/moodle-php-apache:8.2 AS base
 
@@ -135,7 +135,7 @@ CMD ["apache2-foreground"]
 
 
 # =============================================================================
-#               STAGE PRODUCTION — Optimized for performance
+#               STAGE PRODUCTION - Optimized for performance
 # =============================================================================
 FROM base AS production
 
@@ -163,7 +163,10 @@ RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-int
 RUN rm /usr/bin/composer
 
 # =============================================================================
-#          STAGE DEVELOPMENT — Tools (hot-reload, xdebug, etc)
+#          STAGE DEVELOPMENT - Tools (hot-reload, xdebug, etc)
+# =============================================================================
+# =============================================================================
+#          STAGE DEVELOPMENT - Tools (hot-reload, xdebug, etc)
 # =============================================================================
 FROM base AS development
 
@@ -171,7 +174,7 @@ FROM base AS development
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=1 \
     ENVIRONMENT=development
 
-# Instala apenas o necessário, limpa cache no mesmo RUN
+# Instala apenas as ferramentas utilitárias e ativa o Xdebug já embutido
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        openssl \
@@ -183,11 +186,9 @@ RUN apt-get update \
        gnupg \
        gnupg2 \
        gpg \
-    && pecl install xdebug \
     && docker-php-ext-enable xdebug \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/pear
+    && rm -rf /var/lib/apt/lists/*
 
 COPY .devcontainer/php/opcache-dev.ini /usr/local/etc/php/conf.d/moodle-opcache.ini
 

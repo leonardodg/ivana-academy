@@ -1,5 +1,5 @@
 # =============================================================================
-# DEVELOPMENT — Local development with hot-reload
+# DEVELOPMENT - Local development with hot-reload
 # =============================================================================
 # Usage:
 #     docker compose -f .devcontainer/compose/base.yml -f .devcontainer/compose/db.yml -f .devcontainer/compose/dev.yml up -d
@@ -10,9 +10,9 @@ services:
     image: leodg/moodle-academy:development
     restart: no
     env_file:
-      - ../env/development.env
+      - ../env/dev.env
     environment:
-      - MOODLE_URL=https://develop.ivana.academy
+      - MOODLE_URL=https://dev.ivana.academy
       - ENVIRONMENT=development
       - PHP_OPCACHE_VALIDATE_TIMESTAMPS=1
       - MOODLE_DEBUG=DEVELOPER
