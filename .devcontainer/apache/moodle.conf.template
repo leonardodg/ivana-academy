@@ -2,7 +2,7 @@
     ServerAdmin callme@leodg.dev
 
     ServerName localhost
-    ServerAlias ServerName ${MOODLE_URL_CLEAN}
+    ServerAlias ${MOODLE_URL_CLEAN}
 
     DocumentRoot ${APACHE_DOCUMENT_ROOT}
 

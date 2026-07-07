@@ -66,6 +66,7 @@ UPGRADING-CURRENT.md
 .devcontainer/certs/*.key
 .devcontainer/certs/*.crt
 !.devcontainer/certs/*.example
+!.devcontainer/certs/*.example
 
 .devcontainer/env/db.env
 .devcontainer/env/dev.env

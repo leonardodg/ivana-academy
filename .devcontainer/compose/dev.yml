@@ -17,6 +17,7 @@ services:
       - PHP_OPCACHE_VALIDATE_TIMESTAMPS=1
       - MOODLE_DEBUG=DEVELOPER
       - MOODLE_DEBUG_DISPLAY=1
+      - MOODLE_DATA=${MOODLE_DOCKER_DATA:-/var/www/moodledata}
     depends_on:
       db:
         condition: service_healthy
@@ -30,8 +31,8 @@ services:
       - "${MOODLE_HTTPS_PORT:-443}:443"
       - "9003:9003" # Xdebug
     volumes:
-      - "../../:/var/www/html"
-      - "../../../moodledata:/var/www/moodledata"
+      - "${MOODLE_HOST_WWWROOT:-../../}:${MOODLE_DOCKER_WWWROOT:-/var/www/html}"
+      - "${MOODLE_HOST_DATA:-../../../moodledata}:${MOODLE_DOCKER_DATA:-/var/www/moodledata}"
       - /var/www/html/.devcontainer  # no show folder
       - composer_cache:/root/.composer
 

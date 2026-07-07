@@ -92,5 +92,8 @@
 				"terminal.integrated.defaultProfile.linux": "bash"
 			}
 		}
-	}
+	},
+    "containerEnv": {
+        "GIT_CONFIG_PARAMETERS": "'core.filemode=false'"
+    }
 }
