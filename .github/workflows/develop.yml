@@ -175,24 +175,30 @@ jobs:
             sudo cat /etc/letsencrypt/live/dev.ivana.academy/privkey.pem > certs/develop-local.key
 
             echo "🧹 Stopping and cleaning up old containers if they exist..."
-            docker compose -f compose/base.yml -f compose/db.yml -f compose/dev.yml down --remove-orphans || true
+            docker compose --env-file env/dev.env --env-file env/db.env -f compose/base.yml -f compose/db.yml -f compose/dev.yml down --remove-orphans || true
 
             # Garante a remoção forçada caso algum container tenha ficado preso ou órfão de outra execução
             docker rm -f ivana-academy-moodle-1 moodle ivana-academy-db-1 2>/dev/null || true
 
             docker compose \
+              --env-file env/db.env \
+              --env-file env/dev.env \
               -f compose/base.yml \
               -f compose/db.yml \
               -f compose/dev.yml \
               pull
 
             docker compose \
+              --env-file env/db.env \
+              --env-file env/dev.env \
               -f compose/base.yml \
               -f compose/db.yml \
               -f compose/dev.yml \
               up -d
 
             docker compose \
+              --env-file env/db.env \
+              --env-file env/dev.env \
               -f compose/base.yml \
               -f compose/db.yml \
               -f compose/dev.yml \
