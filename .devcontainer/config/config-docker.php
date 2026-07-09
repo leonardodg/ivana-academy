@@ -18,5 +18,14 @@ $CFG->dataroot  = getenv('MOODLE_DATA');
 $CFG->admin     = getenv('MOODLE_ADMIN');
 
 $CFG->directorypermissions = 0777;
+$CFG->sslproxy  = true;
+
+// MOODLE DEV PERFORMANCE SETTINGS
+$CFG->debug = 0;
+$CFG->debugdisplay = 0;
+$CFG->cachejs = true;
+$CFG->langstringcache = true;
+$CFG->preventexecpath = true;
+$CFG->localcachedir = '/var/www/moodledata/localcache';
 
 require_once(__DIR__ . '/lib/setup.php');

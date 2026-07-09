@@ -14,10 +14,11 @@ services:
     environment:
       - MOODLE_URL=https://dev.ivana.academy
       - ENVIRONMENT=development
-      - PHP_OPCACHE_VALIDATE_TIMESTAMPS=1
+      - PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
       - MOODLE_DEBUG=DEVELOPER
       - MOODLE_DEBUG_DISPLAY=1
       - MOODLE_DATA=${MOODLE_DOCKER_DATA:-/var/www/moodledata}
+      - APACHE_LOG_DIR=/var/log/apache2
     depends_on:
       db:
         condition: service_healthy
@@ -35,6 +36,16 @@ services:
       - "${MOODLE_HOST_DATA:-../../../moodledata}:${MOODLE_DOCKER_DATA:-/var/www/moodledata}"
       - /var/www/html/.devcontainer  # no show folder
       - composer_cache:/root/.composer
+      - ../php/opcache-sandbox.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
+      - ../php-dev-custom.ini:/usr/local/etc/php/conf.d/zzz-custom.ini:ro
+      - ../apache/moodle-dev-performance.conf:/etc/apache2/conf-enabled/moodle-performance.conf:ro
+
+    deploy:
+      resources:
+        limits:
+          memory: 450M
+        reservations:
+          memory: 256M
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]

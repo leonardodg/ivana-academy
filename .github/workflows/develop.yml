@@ -79,6 +79,7 @@ jobs:
           context: .
           file: .devcontainer/build/moodle.Dockerfile
           target: development
+          pull: true
           push: true
           tags: |
             leodg/moodle-academy:development

@@ -21,16 +21,26 @@ services:
       MARIADB_ROOT_HOST:     "%"  # opcional: allow connection from any host
     volumes:
       - dbdata:/var/lib/mysql
+      - ../config/mysql-dev.cnf:/etc/mysql/conf.d/custom.cnf:ro
     ports:
       - "3306:3306/tcp"
+    networks:
+      - moodle_network
+
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+        reservations:
+          memory: 128M
+
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
-    networks:
-      - moodle_network
+
     secrets:
       - db_root_password
       - db_user
