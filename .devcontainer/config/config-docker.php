@@ -4,18 +4,37 @@ unset($CFG);
 global $CFG;
 $CFG = new stdClass();
 
-$CFG->dbtype    = getenv('MOODLE_DBTYPE');
-$CFG->dblibrary = getenv('MOODLE_DBLIB');
-$CFG->dbhost    = getenv('MOODLE_DBHOST');
-$CFG->dbname    = getenv('MOODLE_DBNAME');
-$CFG->dbuser    = getenv('MOODLE_DBUSER');
-$CFG->dbpass    = getenv('MOODLE_DBPASS');
-$CFG->prefix    = getenv('MOODLE_DBPFX');
-$CFG->dboptions = array('dbcollation' => getenv('MOODLE_DBCOLLATION'));
+function get_moodle_setting($env_name, $secret_path = null) {
+    // 1. Tenta pegar da variável de ambiente tradicional
+    $val = getenv($env_name);
+    if ($val !== false && $val !== '') {
+        return $val;
+    }
 
-$CFG->wwwroot   = getenv('MOODLE_URL');
-$CFG->dataroot  = getenv('MOODLE_DATA');
-$CFG->admin     = getenv('MOODLE_ADMIN');
+    // 2. Se não achar e houver um caminho de secret, tenta ler o arquivo
+    if ($secret_path && file_exists($secret_path)) {
+        $secret_val = trim(file_get_contents($secret_path));
+        if ($secret_val !== '') {
+            return $secret_val;
+        }
+    }
+
+    return null;
+}
+
+$CFG->dbtype    = getenv('MOODLE_DBTYPE') ?: 'mariadb';
+$CFG->dblibrary = getenv('MOODLE_DBLIB') ?: 'native';
+$CFG->dbhost    = getenv('MOODLE_DBHOST') ?: 'db';
+$CFG->dbname    = getenv('MOODLE_DBNAME') ?: 'moodle';
+$CFG->prefix    = getenv('MOODLE_DBPFX') ?: 'mdl_';
+$CFG->dboptions = array('dbcollation' => getenv('MOODLE_DBCOLLATION') ?: 'utf8mb4_bin');
+
+$CFG->dbuser    = get_moodle_setting('MOODLE_DBUSER', '/run/secrets/db_user');
+$CFG->dbpass    = get_moodle_setting('MOODLE_DBPASS', '/run/secrets/db_password');
+
+$CFG->wwwroot   = getenv('MOODLE_URL') ?: 'https://develop.local';
+$CFG->dataroot  = getenv('MOODLE_DATA') ?: '/var/www/moodledata';
+$CFG->admin     = getenv('MOODLE_ADMIN') ?: 'admin';
 
 $CFG->directorypermissions = 0777;
 $CFG->sslproxy  = true;

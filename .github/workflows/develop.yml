@@ -4,14 +4,14 @@ name: Deploy DEVELOP Sandbox to GCP
 # .github/workflows/develop.yml
 # =============================================================================
 # Deploy the environment for validation in the GCP sandbox.
-# Different from production (production.yml/production-v2.yml), this workflow:
+# Different from production this workflow:
 #   - Uses the "development" image tag (build of the development target in the Dockerfile)
 #   - Deploys MariaDB + Moodle via docker compose (base + db + sandbox override)
-#   - Mounts moodledata in /home/leonardodg/moodledata on the GCP VM
-#   - Has cron enabled to validate production behavior
 # =============================================================================
 
-on: [push]
+on:
+  pull_request:
+    branches: [develop]
 
 jobs:
   start-sandbox:
@@ -92,8 +92,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: leonardodg/ivana-academy
-          # CHANGE TO DEVELOP BRANCH WHEN READY
-          ref: integration/infra-devcontainer-gcp
+          ref: develop
           fetch-depth: 1
 
       - name: Setup and Run Sandbox Checks
