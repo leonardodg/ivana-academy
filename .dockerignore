@@ -1,0 +1,23 @@
+# =============================================================================
+# Protege segredos e arquivos de desenvolvimento de entrarem no build context
+# (essencial para o estagio "production" do moodle.Dockerfile, que faz COPY . .)
+# =============================================================================
+
+# Nunca enviar secrets/certs reais para dentro da imagem
+.devcontainer/secrets/
+.devcontainer/certs/
+.devcontainer/env/*.env
+!.devcontainer/env/*.example
+
+# Git e CI
+.git/
+.github/
+
+# Dados locais de dev (nunca devem existir no contexto de build de qualquer forma)
+moodledata/
+phpu_moodledata/
+
+# Diversos
+*.log
+.devcontainer/devcontainer-lock.json
+node_modules/

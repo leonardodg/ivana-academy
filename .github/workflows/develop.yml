@@ -1,17 +1,69 @@
-name: Deploy DEVELOP to EC2
+name: Deploy DEVELOP Sandbox to GCP
+
+# =============================================================================
+# .github/workflows/develop.yml
+# =============================================================================
+# Deploy the environment for validation in the GCP sandbox.
+# Different from production this workflow:
+#   - Uses the "development" image tag (build of the development target in the Dockerfile)
+#   - Deploys MariaDB + Moodle via docker compose (base + db + sandbox override)
+# =============================================================================
 
 on:
-  push:
-    branches:
-      - develop
+  pull_request:
+    branches: [develop]
 
 jobs:
+  start-sandbox:
+    name: start-sandbox
+    runs-on: ubuntu-latest
+    environment: development
+    outputs:
+      vm_ip: ${{ steps.get_ip.outputs.ip }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Start VM
+        run: |
+          STATUS=$(gcloud compute instances describe ${{ secrets.GCP_VM_NAME }} \
+            --zone=${{ secrets.GCP_ZONE }} \
+            --format='get(status)')
+
+          if [ "$STATUS" != "RUNNING" ]; then
+            echo "🚀 VM is $STATUS. Turning on..."
+            gcloud compute instances start ${{ secrets.GCP_VM_NAME }} \
+              --zone=${{ secrets.GCP_ZONE }} || echo " ❌ Resource exhausted in GCP."
+            sleep 20
+          else
+            echo "✅ VM is already RUNNING."
+          fi
+
+      - name: Get IP
+        id: get_ip
+        run: |
+          VM_IP=$(gcloud compute instances describe ${{ secrets.GCP_VM_NAME }} \
+            --zone=${{ secrets.GCP_ZONE }} \
+            --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+          echo "ip=$VM_IP" >> $GITHUB_OUTPUT
+          echo "🌐 VM IP: $VM_IP"
+
   docker:
     name: Push Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -25,109 +77,153 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: .devcontainer/build/moodle.Dockerfile
+          target: development
+          pull: true
           push: true
-          tags: leodg/moodle-academy:develop
+          tags: |
+            leodg/moodle-academy:development
 
   integration:
     name: Integration checks
     runs-on: ubuntu-latest
-    environment: development
-
     steps:
-      - name: Checking out moodle
+      - name: Checkout Source
         uses: actions/checkout@v4
         with:
           repository: leonardodg/ivana-academy
           ref: develop
+          fetch-depth: 1
 
-      - name: Prepare moodle-docker environment
-        run: |
-          cp config.docker-develop.php config.php
-          echo "Running integration tests from ${basedir}"
-          echo ${basedir}
-          echo ${MOODLE_DOCKER_WWWROOT}
-          export ASSETDIR="${basedir}/assets"
-          docker compose -f "docker-compose-develop.yml" up -d
+      - name: Setup and Run Sandbox Checks
         env:
           MOODLE_DOCKER_WWWROOT: /var/www/html/
           basedir: ${{ github.workspace }}
-
-      - name: Run moodle-docker tests
         shell: bash
         run: |
-          echo "Checking that PHP CLI is available"
-          docker compose exec -T webserver php -r 'echo "Up!";'
-          echo "Checking that the web server is up"
-
-      - name: Stop moodle-docker
-        run: |
-          echo "Stopping down container"
-          docker compose -f "${basedir}/docker-compose-develop.yml" down
-        env:
-          MOODLE_DOCKER_WWWROOT: /var/www/html/
-          basedir: ${{ github.workspace }}
-
-  PHPUnit:
-    needs: integration
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checking out moodle
-        uses: actions/checkout@v4
-        with:
-          repository: leonardodg/ivana-academy
-
-      - name: Run moodle-docker TESTS environment
-        run: |
-          cp config.docker-develop.php config.php
-          echo "START PHPUNIT tests from ${basedir}"
+          echo "=== Preparing configuration ==="
+          cp "${basedir}/.devcontainer/config/config.docker-develop.php" config.php || touch config.php
           export ASSETDIR="${basedir}/assets"
-          docker compose -f "docker-compose-develop.yml" up -d
-          docker compose exec -T webserver php admin/tool/phpunit/cli/init.php
-          echo "Running PHPUNIT tests"
-          docker compose exec -T webserver vendor/bin/phpunit
-          echo "Stopping down container"
-          docker compose -f "${basedir}/docker-compose-develop.yml" down
-        env:
-          MOODLE_DOCKER_WWWROOT: /var/www/html/
-          basedir: ${{ github.workspace }}
 
-  deploy:
-    needs: docker
+          echo "=== Starting up containers ==="
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" up -d
+
+          echo "=== Waiting for environment stabilization (10s) ==="
+          sleep 10
+
+          echo "=== Checking container state ==="
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" ps
+
+          echo "=== Checking that PHP CLI is available ==="
+          # Using specific file context ensures compose finds the active webserver container
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T webserver php -r 'echo "🚀 PHP CLI is Up!\n";'
+
+          echo "=== Cleaning up testing sandbox ==="
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" down
+
+  deploy-sandbox:
+    name: Deploy to GCP VM
+    needs: [start-sandbox, docker, integration]
     runs-on: ubuntu-latest
     environment: development
     steps:
+      - name: Diagnostico de IP
+        run: |
+          echo "IP da VM GCP: ${{ needs.start-sandbox.outputs.vm_ip }}"
+          if [ -z "${{ needs.start-sandbox.outputs.vm_ip }}" ]; then
+            echo "❌ ERRO: The output 'IP' is EMPTY!"
+            exit 1
+          fi
       - name: Checkout Source
         uses: actions/checkout@v4
-      - name: Deploy via SSH by RSYNC
+
+      - name: Sync compose files
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rlgoDzvc -i"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: ${{ vars.REMOTE_TARGET }}
-          SCRIPT_BEFORE: |
-            sudo apt install rsync -y
-          SCRIPT_AFTER: |
-            whoami
-            ls -al
-            echo $RSYNC_STDOUT
-            cp ${{ vars.REMOTE_TARGET }}/config-docker.php ${{ vars.REMOTE_TARGET }}/config.php
+          ARGS: "-rlgoDzvc -i --exclude=secrets/ --exclude=certs/"
+          SOURCE: ".devcontainer/"
+          REMOTE_HOST: ${{ needs.start-sandbox.outputs.vm_ip }}
+          REMOTE_USER: leonardodg
+          TARGET: /home/leonardodg/devcontainer/
 
-      - name: Deploy to EC2 Instance
+      - name: Deploy via docker compose (MariaDB + Moodle)
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
+          host: ${{ needs.start-sandbox.outputs.vm_ip }}
+          username: leonardodg
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 15m
           script: |
-            sudo docker stop moodle || true
-            sudo docker rm moodle || true
-            sudo docker pull leodg/moodle-academy:latest
-            sudo docker run --name moodle -p 80:80 p 443:443 -v ${{ vars.REMOTE_TARGET }}:/var/www/html -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -d leodg/moodle-academy:latest
+            set -e
 
-            sudo docker stop moodle || true
-            sudo docker rm moodle || true
-            sudo docker pull leodg/moodle-academy:develop
-            sudo docker run --restart=always --name moodle -p 80:80 -p 443:443 -v ${{ vars.REMOTE_TARGET }}:/var/www/html -v /home/admin/moodledata:${{ vars.MOODLE_DATA }} -v /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/ -e MOODLE_URL=${{ vars.MOODLE_URL }} -e MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }} -e MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }} -e MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }} -e MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }} -e MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }} -e MOODLE_DATA=${{ vars.MOODLE_DATA }} -e ENVIRONMENT=develop -d leodg/moodle-academy:develop
+            mkdir -p /home/leonardodg/moodledata
+            sudo chown -R 33:33 /home/leonardodg/moodledata
+
+            export IMAGE_TAG="develop"
+            export MOODLE_DBNAME="${{ secrets.MOODLE_DBNAME }}"
+
+            cd /home/leonardodg/devcontainer
+            cp env/db.env.example env/db.env && cp env/dev.env.example env/dev.env
+            mkdir -p secrets && mkdir -p certs
+
+            echo "${{ secrets.MOODLE_DBUSER }}" > secrets/db_user
+            echo "${{ secrets.MOODLE_DBPASS }}" > secrets/db_password
+            echo "${{ secrets.MOODLE_DBROOT }}" > secrets/db_root_password
+
+            sudo cat /etc/letsencrypt/live/dev.ivana.academy/cert.pem > certs/develop-local.crt
+            sudo cat /etc/letsencrypt/live/dev.ivana.academy/privkey.pem > certs/develop-local.key
+
+            echo "🧹 Stopping and cleaning up old containers if they exist..."
+            docker compose --env-file env/dev.env --env-file env/db.env -f compose/base.yml -f compose/db.yml -f compose/dev.yml down --remove-orphans || true
+
+            # Garante a remoção forçada caso algum container tenha ficado preso ou órfão de outra execução
+            docker rm -f ivana-academy-moodle-1 moodle ivana-academy-db-1 2>/dev/null || true
+
+            docker compose \
+              --env-file env/db.env \
+              --env-file env/dev.env \
+              -f compose/base.yml \
+              -f compose/db.yml \
+              -f compose/dev.yml \
+              pull
+
+            docker compose \
+              --env-file env/db.env \
+              --env-file env/dev.env \
+              -f compose/base.yml \
+              -f compose/db.yml \
+              -f compose/dev.yml \
+              up -d
+
+            docker compose \
+              --env-file env/db.env \
+              --env-file env/dev.env \
+              -f compose/base.yml \
+              -f compose/db.yml \
+              -f compose/dev.yml \
+              ps
+
+            echo "⏰ schedule auto-shutdown in VM to after 2 hours..."
+            sudo shutdown -c || true
+            sudo shutdown +120 "auto-shutdown after-deploy of Ivana Academy"
+
+  auto-shutdown:
+    name: Auto-shutdown GCP VM em caso de falha
+    runs-on: ubuntu-latest
+    needs: [start-sandbox, deploy-sandbox]
+    if: failure() && needs.start-sandbox.result == 'success'
+    steps:
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Stop GCP VM de Emergência
+        run: |
+          gcloud compute instances stop ${{ secrets.GCP_VM_NAME }} \
+            --zone=${{ secrets.GCP_ZONE }}
+          echo "🛑 VM STOPPED DEVIDO A FALHA NO DEPLOY."

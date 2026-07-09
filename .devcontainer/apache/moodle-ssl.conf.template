@@ -1,0 +1,28 @@
+<VirtualHost *:443>
+    ServerAdmin callme@leodg.dev
+
+    ServerName localhost
+    ServerAlias ${MOODLE_URL_CLEAN}
+
+    DocumentRoot ${APACHE_DOCUMENT_ROOT}
+
+    SSLEngine on
+    SSLCertificateFile    ${CERT_PATH}
+    SSLCertificateKeyFile ${KEY_PATH}
+
+	<FilesMatch "\.(?:cgi|shtml|phtml|php)$">
+		SSLOptions +StdEnvVars
+	</FilesMatch>
+	<Directory /usr/lib/cgi-bin>
+		SSLOptions +StdEnvVars
+	</Directory>
+
+	<Directory "/var/www/html">
+		Options Indexes FollowSymLinks
+		AllowOverride All
+		Require all granted
+	</Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/moodle_error.log
+    CustomLog ${APACHE_LOG_DIR}/moodle_access.log combined
+</VirtualHost>
