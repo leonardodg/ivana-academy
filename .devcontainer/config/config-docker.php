@@ -47,4 +47,8 @@ $CFG->langstringcache = true;
 $CFG->preventexecpath = true;
 $CFG->localcachedir = '/var/www/moodledata/localcache';
 
+$CFG->phpunit_dataroot  = '/var/www/phpunitdata';
+$CFG->phpunit_prefix = 't_';
+define('PHPUNIT_LONGTEST', true);
+
 require_once(__DIR__ . '/lib/setup.php');
