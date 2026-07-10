@@ -163,40 +163,59 @@ RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-int
 RUN rm /usr/bin/composer
 
 # =============================================================================
-#          STAGE DEVELOPMENT - Tools (hot-reload, xdebug, etc)
-# =============================================================================
-# =============================================================================
-#          STAGE DEVELOPMENT - Tools (hot-reload, xdebug, etc)
+#          STAGE DEVELOPMENT - Tools (hot-reload, xdebug, phpcs, node, grunt)
 # =============================================================================
 FROM base AS development
 
 # Desabilita opcache validate timestamps para dev (melhor hot-reload)
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=1 \
-    ENVIRONMENT=development
+    ENVIRONMENT=development \
+    # CRON_ENABLED: false por padrao. No sandbox GCP, o entrypoint ou compose
+    # pode sobrescrever para true via environment no dev.yml/sandbox.yml.
+    CRON_ENABLED=false
 
-# Instala apenas as ferramentas utilitárias e ativa o Xdebug já embutido
+# -----------------------------------------------------------------------
+# Ferramentas de sistema: git, curl, mysql-client, xdebug
+# + Node.js LTS via NodeSource (necessario para Grunt/JS build do Moodle)
+# -----------------------------------------------------------------------
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        openssl \
        nano \
        curl \
+       ca-certificates \
        default-mysql-client \
        git \
        git-man \
        gnupg \
        gnupg2 \
        gpg \
+    # Node.js LTS oficial (requerido pelo Grunt, que e o bundler JS do Moodle):
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    # Xdebug ja embutido na imagem moodlehq/moodle-php-apache:8.2:
     && docker-php-ext-enable xdebug \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Grunt CLI global (build JS/LESS/SCSS do Moodle e seus temas)
+RUN npm install -g grunt-cli \
+    && grunt --version
+
 COPY .devcontainer/php/opcache-dev.ini /usr/local/etc/php/conf.d/moodle-opcache.ini
 
-# Vendor to development
+# -----------------------------------------------------------------------
+# Vendor com pacotes de DEV (inclui phpunit, moodle-cs, phpcs do composer-dev)
+# NOTA: para phpcs + moodle-cs aparecerem aqui, adicionar ao composer.json:
+#   "require-dev": {
+#     "squizlabs/php_codesniffer": "^3.0",
+#     "moodlehq/moodle-cs": "^3.0"
+#   }
+# -----------------------------------------------------------------------
 COPY --from=composer-dev --chown=www-data:www-data /app/vendor/ /var/www/html/vendor/
 
-# Copia todo o código (em dev geralmente será sobrescrito por volume)
+# Copia todo o codigo (em dev geralmente sera sobrescrito por bind-mount do dev.yml)
 COPY --chown=www-data:www-data . .
 
-# Em desenvolvimento: autoloader normal (permite hot-reload)
+# Em desenvolvimento: autoloader normal (permite hot-reload sem rebuild)
 RUN composer dump-autoload --no-interaction
