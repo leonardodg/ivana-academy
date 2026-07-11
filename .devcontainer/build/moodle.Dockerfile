@@ -45,6 +45,8 @@ FROM composer-base AS composer-prod
 # =============================================================================
 FROM composer-base AS composer-dev
 
+    ENV COMPOSER_ALLOW_PLUGINS=dealerdirect/phpcodesniffer-composer-installer:true
+
     RUN --mount=type=cache,target=/tmp/composer-cache \
         composer install \
             --no-interaction \
