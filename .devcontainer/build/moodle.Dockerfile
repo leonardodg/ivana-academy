@@ -45,6 +45,8 @@ FROM composer-base AS composer-prod
 # =============================================================================
 FROM composer-base AS composer-dev
 
+    ENV COMPOSER_ALLOW_PLUGINS=dealerdirect/phpcodesniffer-composer-installer:true
+
     RUN --mount=type=cache,target=/tmp/composer-cache \
         composer install \
             --no-interaction \
@@ -170,9 +172,7 @@ FROM base AS development
 # Desabilita opcache validate timestamps para dev (melhor hot-reload)
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=1 \
     ENVIRONMENT=development \
-    # CRON_ENABLED: false por padrao. No sandbox GCP, o entrypoint ou compose
-    # pode sobrescrever para true via environment no dev.yml/sandbox.yml.
-    CRON_ENABLED=false
+    CRON_ENABLED=TRUE
 
 # -----------------------------------------------------------------------
 # Ferramentas de sistema: git, curl, mysql-client, xdebug
@@ -191,7 +191,7 @@ RUN apt-get update \
        gnupg2 \
        gpg \
     # Node.js LTS oficial (requerido pelo Grunt, que e o bundler JS do Moodle):
-    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     # Xdebug ja embutido na imagem moodlehq/moodle-php-apache:8.2:
     && docker-php-ext-enable xdebug \
