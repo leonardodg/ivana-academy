@@ -92,7 +92,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: leonardodg/ivana-academy
-          ref: develop
           fetch-depth: 1
 
       - name: Setup and Run Sandbox Checks
