@@ -20,19 +20,18 @@
  * @copyright  2022 Willian Mano - https://conecti.me
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-import Ajax from 'core/ajax';
-import Modal from 'core/modal';
-import * as CustomEvents from 'core/custom_interaction_events';
-import Notification from 'core/notification';
 
-export default class AccessibilityModal extends Modal {
-    static TYPE = "theme_moove/themesettings_modal";
-    static TEMPLATE = "theme_moove/accessibilitysettings_modal";
+define([
+    'core/ajax',
+    'core/modal',
+    'core/custom_interaction_events',
+    'core/notification'
+], function(Ajax, Modal, CustomEvents, Notification) {
 
-    constructor(root) {
-        super(root);
+    var AccessibilityModal = function(root) {
+        Modal.call(this, root);
 
-        let request = Ajax.call([{
+        var request = Ajax.call([{
             methodname: 'theme_moove_getthemesettings',
             args: {}
         }]);
@@ -44,17 +43,24 @@ export default class AccessibilityModal extends Modal {
                 document.getElementById('enableaccessibilitytoolbar').checked = true;
             }
         });
-    }
+    };
+
+    // Herdar os métodos da classe Modal do Core
+    AccessibilityModal.prototype = Object.create(Modal.prototype);
+    AccessibilityModal.prototype.constructor = AccessibilityModal;
+
+    AccessibilityModal.TYPE = "theme_moove/themesettings_modal";
+    AccessibilityModal.TEMPLATE = "theme_moove/accessibilitysettings_modal";
 
     /**
      * Set up all of the event handling for the modal.
      */
-    registerEventListeners() {
+    AccessibilityModal.prototype.registerEventListeners = function() {
         // Apply parent event listeners.
-        super.registerEventListeners(this);
+        Modal.prototype.registerEventListeners.call(this);
 
         this.getModal().on(CustomEvents.events.activate, '[data-action="save"]', function() {
-            let request = Ajax.call([{
+            var request = Ajax.call([{
                 methodname: 'theme_moove_savethemesettings',
                 args: {
                     formdata: this.getBody().find('form').serialize()
@@ -64,7 +70,7 @@ export default class AccessibilityModal extends Modal {
             request[0].done(function() {
                 document.location.reload(true);
             }).fail(function(error) {
-                let message = error.message;
+                var message = error.message;
 
                 if (!message) {
                     message = error.error;
@@ -76,7 +82,6 @@ export default class AccessibilityModal extends Modal {
                 });
 
                 this.hide();
-
                 this.destroy();
             }.bind(this));
         }.bind(this));
@@ -85,5 +90,7 @@ export default class AccessibilityModal extends Modal {
             this.hide();
             this.destroy();
         }.bind(this));
-    }
-}
+    };
+
+    return AccessibilityModal;
+});

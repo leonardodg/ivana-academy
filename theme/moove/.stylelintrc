@@ -6,6 +6,7 @@
       ], "ignore": [
         "after-comment"
       ]}
-    ]
+    ],
+    "declaration-no-important": [true, { "severity": "warning" }]
   }
 }

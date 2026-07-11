@@ -1,0 +1,48 @@
+# =============================================================================
+# .devcontainer/compose/prod-v2.yml
+# =============================================================================
+
+services:
+  moodle:
+    image: leodg/moodle-academy:${IMAGE_TAG:-4.5.1-v2}
+    container_name: moodle-v2
+    restart: unless-stopped
+
+    environment:
+      - ENVIRONMENT=production
+      - MOODLE_URL=${MOODLE_URL}
+      - MOODLE_DBTYPE=${MOODLE_DBTYPE:-mariadb}
+      - MOODLE_DBHOST=${MOODLE_DBHOST}
+      - MOODLE_DBNAME=${MOODLE_DBNAME}
+      - MOODLE_DBUSER=${MOODLE_DBUSER}
+      - MOODLE_DBPASS=${MOODLE_DBPASS}
+      - MOODLE_DBPFX=mdl_
+      - MOODLE_DBCOLL=utf8mb4_bin
+      - MOODLE_DATA=${MOODLE_DATA:-/var/www/moodledata}
+
+      - CRON_ENABLED=${CRON_ENABLED:-false}
+      - PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
+      - MOODLE_DEBUG=MINIMAL
+      - MOODLE_DEBUG_DISPLAY=0
+
+    ports:
+      - "${PROD_HTTP_PORT:-8080}:80"
+      - "${PROD_HTTPS_PORT:-8443}:443"
+
+    volumes:
+      - /home/admin/moodledata:/var/www/moodledata
+      - /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/:ro
+
+    networks:
+      - moodle_v2_network
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsk https://localhost/login/index.php || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+networks:
+  moodle_v2_network:
+    driver: bridge
