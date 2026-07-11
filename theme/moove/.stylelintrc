@@ -1,12 +1,27 @@
 {
-  "rules": {
-    "at-rule-empty-line-before": ["always",
-      {"except": [
-        "blockless-after-same-name-blockless", "first-nested"
-      ], "ignore": [
-        "after-comment"
-      ]}
-    ],
-    "declaration-no-important": [true, { "severity": "warning" }]
-  }
+  "extends": "stylelint-config-standard",
+  "overrides": [
+    {
+      "files": [
+        "scss/moove/_accessibilitystyles.scss",
+        "scss/moove/_blocks.scss",
+        "scss/moove/_course.scss",
+        "scss/moove/_enrol.scss",
+        "scss/moove/_frontpage.scss",
+        "scss/moove/_general.scss",
+        "scss/moove/_labels.scss",
+        "scss/moove/_mydashboard.scss",
+        "scss/moove/_navbar.scss",
+        "scss/moove/_profile.scss",
+        "scss/moove/_security.scss"
+      ],
+      "rules": {
+        "declaration-no-important": null
+      }
+    }
+  ],
+  "ignoreFiles": [
+    "style/**/*.css",
+    "amd/build/**"
+  ]
 }

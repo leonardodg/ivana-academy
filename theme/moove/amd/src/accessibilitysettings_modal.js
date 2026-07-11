@@ -20,18 +20,19 @@
  * @copyright  2022 Willian Mano - https://conecti.me
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+import Ajax from 'core/ajax';
+import Modal from 'core/modal';
+import * as CustomEvents from 'core/custom_interaction_events';
+import Notification from 'core/notification';
 
-define([
-    'core/ajax',
-    'core/modal',
-    'core/custom_interaction_events',
-    'core/notification'
-], function(Ajax, Modal, CustomEvents, Notification) {
+export default class AccessibilityModal extends Modal {
+    static TYPE = "theme_moove/themesettings_modal";
+    static TEMPLATE = "theme_moove/accessibilitysettings_modal";
 
-    var AccessibilityModal = function(root) {
-        Modal.call(this, root);
+    constructor(root) {
+        super(root);
 
-        var request = Ajax.call([{
+        let request = Ajax.call([{
             methodname: 'theme_moove_getthemesettings',
             args: {}
         }]);
@@ -43,24 +44,17 @@ define([
                 document.getElementById('enableaccessibilitytoolbar').checked = true;
             }
         });
-    };
-
-    // Herdar os métodos da classe Modal do Core
-    AccessibilityModal.prototype = Object.create(Modal.prototype);
-    AccessibilityModal.prototype.constructor = AccessibilityModal;
-
-    AccessibilityModal.TYPE = "theme_moove/themesettings_modal";
-    AccessibilityModal.TEMPLATE = "theme_moove/accessibilitysettings_modal";
+    }
 
     /**
      * Set up all of the event handling for the modal.
      */
-    AccessibilityModal.prototype.registerEventListeners = function() {
+    registerEventListeners() {
         // Apply parent event listeners.
-        Modal.prototype.registerEventListeners.call(this);
+        super.registerEventListeners(this);
 
         this.getModal().on(CustomEvents.events.activate, '[data-action="save"]', function() {
-            var request = Ajax.call([{
+            let request = Ajax.call([{
                 methodname: 'theme_moove_savethemesettings',
                 args: {
                     formdata: this.getBody().find('form').serialize()
@@ -70,7 +64,7 @@ define([
             request[0].done(function() {
                 document.location.reload(true);
             }).fail(function(error) {
-                var message = error.message;
+                let message = error.message;
 
                 if (!message) {
                     message = error.error;
@@ -82,6 +76,7 @@ define([
                 });
 
                 this.hide();
+
                 this.destroy();
             }.bind(this));
         }.bind(this));
@@ -90,7 +85,5 @@ define([
             this.hide();
             this.destroy();
         }.bind(this));
-    };
-
-    return AccessibilityModal;
-});
+    }
+}
