@@ -4,7 +4,7 @@ unset($CFG);
 global $CFG;
 $CFG = new stdClass();
 
-$CFG->dbtype    = 'mysqli';
+$CFG->dbtype    = 'mariadb';
 $CFG->dblibrary = 'native';
 $CFG->dbhost    = 'db';
 $CFG->dbname    = 'moodle';
@@ -15,7 +15,7 @@ $CFG->dboptions = array (
   'dbpersist' => 0,
   'dbport' => '',
   'dbsocket' => '',
-  'dbcollation' => 'utf8mb4_unicode_ci',
+  'dbcollation' => 'utf8mb4_bin'
 );
 
 $CFG->wwwroot   = 'http://localhost';
@@ -38,5 +38,6 @@ define('PHPUNIT_LONGTEST', true);
 
 $CFG->iplookup = 'local/file';
 $CFG->block_tags_init_timeout = 0;
+$CFG->phpunit_iplookup = 'none';
 
 require_once(__DIR__ . '/lib/setup.php');

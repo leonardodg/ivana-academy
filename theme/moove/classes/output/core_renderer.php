@@ -116,7 +116,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
             $additionalclasses = explode(' ', $additionalclasses);
         }
 
-        return ' id="'. $this->body_id().'" class="'.$this->body_css_classes($additionalclasses).'"';
+        return ' id="' . $this->body_id() . '" class="' . $this->body_css_classes($additionalclasses) . '"';
     }
 
     /**
@@ -188,8 +188,11 @@ class core_renderer extends \theme_boost\output\core_renderer {
 
         $context->errorformatted = $this->error_text($context->error);
         $context->logourl = $this->get_logo();
-        $context->sitename = format_string($SITE->fullname, true,
-            ['context' => context_course::instance(SITEID), "escape" => false]);
+        $context->sitename = format_string(
+            $SITE->fullname,
+            true,
+            ['context' => context_course::instance(SITEID), "escape" => false]
+        );
 
         if (!$CFG->auth_instructions) {
             $context->instructions = null;
@@ -228,9 +231,11 @@ class core_renderer extends \theme_boost\output\core_renderer {
 
         // Do not provide a link to contact site support if it is unavailable to this user. This would be where the site has
         // disabled support, or limited it to authenticated users and the current user is a guest or not logged in.
-        if (!isset($CFG->supportavailability) ||
+        if (
+            !isset($CFG->supportavailability) ||
             $CFG->supportavailability == CONTACT_SUPPORT_DISABLED ||
-            ($CFG->supportavailability == CONTACT_SUPPORT_AUTHENTICATED && (!isloggedin() || isguestuser()))) {
+            ($CFG->supportavailability == CONTACT_SUPPORT_AUTHENTICATED && (!isloggedin() || isguestuser()))
+        ) {
             return '';
         }
 
@@ -355,8 +360,10 @@ class core_renderer extends \theme_boost\output\core_renderer {
     public function activity_navigation() {
         // First we should check if we want to add navigation.
         $context = $this->page->context;
-        if (($this->page->pagelayout !== 'incourse' && $this->page->pagelayout !== 'frametop')
-            || $context->contextlevel != CONTEXT_MODULE) {
+        if (
+            ($this->page->pagelayout !== 'incourse' && $this->page->pagelayout !== 'frametop')
+            || $context->contextlevel != CONTEXT_MODULE
+        ) {
             return '';
         }
 
@@ -499,25 +506,30 @@ class core_renderer extends \theme_boost\output\core_renderer {
      * @return string The HTML to display to the user before dying, may contain
      *         meta refresh, javascript refresh, and may have set header redirects
      */
-    public function redirect_message($encodedurl, $message, $delay, $debugdisableredirect,
-                                     $messagetype = \core\output\notification::NOTIFY_INFO) {
+    public function redirect_message(
+        $encodedurl,
+        $message,
+        $delay,
+        $debugdisableredirect,
+        $messagetype = \core\output\notification::NOTIFY_INFO
+    ) {
         $url = str_replace('&amp;', '&', $encodedurl);
 
         switch ($this->page->state) {
-            case \moodle_page::STATE_BEFORE_HEADER :
+            case \moodle_page::STATE_BEFORE_HEADER:
                 // No output yet it is safe to delivery the full arsenal of redirect methods.
                 if (!$debugdisableredirect) {
                     // Don't use exactly the same time here, it can cause problems when both redirects fire at the same time.
-                    $this->metarefreshtag = '<meta http-equiv="refresh" content="'. $delay .'; url='. $encodedurl .'" />'."\n";
+                    $this->metarefreshtag = '<meta http-equiv="refresh" content="' . $delay . '; url=' . $encodedurl . '" />' . "\n";
                     $this->page->requires->js_function_call('document.location.replace', [$url], false, ($delay + 3));
                 }
                 $output = $this->header();
                 break;
-            case \moodle_page::STATE_PRINTING_HEADER :
+            case \moodle_page::STATE_PRINTING_HEADER:
                 // We should hopefully never get here.
                 throw new coding_exception('You cannot redirect while printing the page header');
                 break;
-            case \moodle_page::STATE_IN_BODY :
+            case \moodle_page::STATE_IN_BODY:
                 // We really shouldn't be here but we can deal with this.
                 debugging("You should really redirect before you start page output");
                 if (!$debugdisableredirect) {
@@ -525,7 +537,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
                 }
                 $output = $this->opencontainers->pop_all_but_last();
                 break;
-            case \moodle_page::STATE_DONE :
+            case \moodle_page::STATE_DONE:
                 // Too late to be calling redirect now.
                 throw new \coding_exception('You cannot redirect after the entire page has been generated');
                 break;
@@ -536,7 +548,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
         $output .= $this->render_from_template('theme_moove/loading-overlay', ['encodedurl' => $encodedurl]);
 
         if ($debugdisableredirect) {
-            $output .= '<p><strong>'.get_string('erroroutput', 'error').'</strong></p>';
+            $output .= '<p><strong>' . get_string('erroroutput', 'error') . '</strong></p>';
         }
 
         $output .= $this->footer();

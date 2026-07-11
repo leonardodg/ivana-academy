@@ -83,11 +83,17 @@ class course_renderer extends \core_course_renderer {
                 // The option paginationurl was specified, display pagingbar.
                 $perpage = $chelper->get_courses_display_option('limit', $CFG->coursesperpage);
                 $page = $chelper->get_courses_display_option('offset') / $perpage;
-                $pagingbar = $this->paging_bar($totalcount, $page, $perpage,
-                    $paginationurl->out(false, ['perpage' => $perpage]));
+                $pagingbar = $this->paging_bar(
+                    $totalcount,
+                    $page,
+                    $perpage,
+                    $paginationurl->out(false, ['perpage' => $perpage])
+                );
                 if ($paginationallowall) {
-                    $pagingbar .= html_writer::tag('div', html_writer::link($paginationurl->out(false, ['perpage' => 'all']),
-                        get_string('showall', '', $totalcount)), ['class' => 'paging paging-showall']);
+                    $pagingbar .= html_writer::tag('div', html_writer::link(
+                        $paginationurl->out(false, ['perpage' => 'all']),
+                        get_string('showall', '', $totalcount)
+                    ), ['class' => 'paging paging-showall']);
                 }
             } else if ($viewmoreurl = $chelper->get_courses_display_option('viewmoreurl')) {
                 // The option for 'View more' link was specified, display more link.
@@ -100,9 +106,14 @@ class course_renderer extends \core_course_renderer {
             }
         } else if (($totalcount > $CFG->coursesperpage) && $paginationurl && $paginationallowall) {
             // There are more than one page of results and we are in 'view all' mode, suggest to go back to paginated view mode.
-            $pagingbar = html_writer::tag('div',
-                html_writer::link($paginationurl->out(false, ['perpage' => $CFG->coursesperpage]),
-                get_string('showperpage', '', $CFG->coursesperpage)), ['class' => 'paging paging-showperpage']);
+            $pagingbar = html_writer::tag(
+                'div',
+                html_writer::link(
+                    $paginationurl->out(false, ['perpage' => $CFG->coursesperpage]),
+                    get_string('showperpage', '', $CFG->coursesperpage)
+                ),
+                ['class' => 'paging paging-showperpage']
+            );
         }
 
         // Display list of courses.
@@ -123,7 +134,7 @@ class course_renderer extends \core_course_renderer {
                 $content .= html_writer::start_tag('div', ['class' => 'card-deck dashboard-card-deck mt-2']);
             }
 
-            $coursecount ++;
+            $coursecount++;
         }
 
         $content .= html_writer::end_tag('div');

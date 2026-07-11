@@ -65,7 +65,7 @@ LABEL maintainer="LeoDG <callme@leodg.dev>" \
       org.opencontainers.image.source="https://github.com/leonardodg/ivana-academy" \
       org.opencontainers.image.version="4.5"
 
-ENV MOODLE_DBTYPE=mysqli \
+ENV MOODLE_DBTYPE=mariadb \
     MOODLE_DBLIB=native \
     MOODLE_DBPFX=mdl_ \
     MOODLE_DBCOLL=utf8mb4_bin \
