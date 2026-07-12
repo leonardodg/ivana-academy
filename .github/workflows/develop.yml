@@ -101,7 +101,12 @@ jobs:
         shell: bash
         run: |
           echo "=== Preparing configuration ==="
-          cp "${basedir}/.devcontainer/config/config.docker-develop.php" config.php || touch config.php
+          if [ -f "${basedir}/.devcontainer/config/config-sandbox.php" ]; then
+            echo "✅ Copying .devcontainer/config/config-sandbox.php -> config.php"
+            cp "${basedir}/.devcontainer/config/config-sandbox.php" config.php
+          else
+            echo "❌ not config.php found"
+          fi
           export ASSETDIR="${basedir}/assets"
 
           echo "=== Starting up containers ==="

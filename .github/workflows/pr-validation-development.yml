@@ -34,8 +34,8 @@ jobs:
         env:
           basedir: ${{ github.workspace }}
         run: |
-            if [ -f "${basedir}/.devcontainer/config/config.docker-sandbox.php" ]; then
-              echo "✅ Copying config.docker-sandbox.php -> config.php"
+            if [ -f "${basedir}/.devcontainer/config/config-sandbox.php" ]; then
+              echo "✅ Copying config-sandbox.php -> config.php"
               cp "${basedir}/.devcontainer/config/config-sandbox.php" config.php
             else
               echo "❌ not config.php found"
