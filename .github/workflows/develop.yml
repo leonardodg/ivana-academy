@@ -145,7 +145,7 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rlgoDzvc -i --exclude=secrets/ --exclude=certs/"
+          ARGS: "-rlgoDzvc -v --stats --exclude=secrets/ --exclude=certs/"
           SOURCE: ".devcontainer/"
           REMOTE_HOST: ${{ needs.start-sandbox.outputs.vm_ip }}
           REMOTE_USER: leonardodg
@@ -161,14 +161,14 @@ jobs:
           script: |
             set -e
 
-            mkdir -p /home/leonardodg/moodledata
-            sudo chown -R 33:33 /home/leonardodg/moodledata
+            sudo mkdir -p /moodledata
+            sudo chown -R 33:33 /moodledata
 
-            export IMAGE_TAG="develop"
+            export IMAGE_TAG="development"
             export MOODLE_DBNAME="${{ secrets.MOODLE_DBNAME }}"
 
             cd /home/leonardodg/devcontainer
-            cp env/db.env.example env/db.env && cp env/dev.env.example env/dev.env
+            sudo cp env/db.env.example env/db.env && cp env/dev.env.example env/dev.env
             mkdir -p secrets && mkdir -p certs
 
             echo "${{ secrets.MOODLE_DBUSER }}" > secrets/db_user
