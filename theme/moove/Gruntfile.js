@@ -39,6 +39,29 @@ module.exports = function(grunt) {
             amd: {src: amdSrc},
             yui: {src: ["**/yui/src/**/*.js", "!*/**/yui/src/*/meta/*.js"]}
         },
+
+        terser: {
+            amd: {
+                options: {
+                    // Terser suporta ES2015+ (ES6 classes, const, let, arrow functions)
+                    ecma: 2015,
+                    compress: {
+                        drop_console: false,  // manter para debug em dev
+                    },
+                    format: {
+                        comments: false,
+                    },
+                },
+                files: [{
+                    expand: true,
+                    cwd: 'amd/src',
+                    src: ['**/*.js', '!**/*.min.js'],
+                    dest: 'amd/build',
+                    ext: '.min.js',
+                }],
+            },
+        },
+
         uglify: {
             amd: {
                 files: [{
@@ -99,17 +122,19 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-exec");
 
     // Load core tasks.
-    grunt.loadNpmTasks("grunt-contrib-uglify");
+    // grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-eslint");
     grunt.loadNpmTasks("grunt-stylelint");
+
+    grunt.loadNpmTasks('grunt-terser');
 
     // Register CSS taks.
     grunt.registerTask("css", ["stylelint:scss", "stylelint:css"]);
 
     // Register tasks.
-    grunt.registerTask("amd", ["uglify"]);
+    grunt.registerTask("amd", ["terser"]);
     grunt.registerTask("default", ["watch"]);
     grunt.registerTask("decache", ["exec:decache"]);
 
-    grunt.registerTask("compile", ["uglify", "decache"]);
+    grunt.registerTask("compile", ["terser", "decache"]);
 };

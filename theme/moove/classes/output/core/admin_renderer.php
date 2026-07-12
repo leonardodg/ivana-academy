@@ -65,14 +65,30 @@ class admin_renderer extends \core_admin_renderer {
      *
      * @return string HTML to output.
      */
-    public function admin_notifications_page($maturity, $insecuredataroot, $errorsdisplayed,
-                                             $cronoverdue, $dbproblems, $maintenancemode, $availableupdates, $availableupdatesfetch,
-                                             $buggyiconvnomb, $registered, array $cachewarnings = array(), $eventshandlers = 0,
-                                             $themedesignermode = false, $devlibdir = false, $mobileconfigured = false,
-                                             $overridetossl = false, $invalidforgottenpasswordurl = false, $croninfrequent = false,
-                                             $showcampaigncontent = false, bool $showfeedbackencouragement = false, bool $showservicesandsupport = false,
-                                             $xmlrpcwarning = '')
-    {
+    public function admin_notifications_page(
+        $maturity,
+        $insecuredataroot,
+        $errorsdisplayed,
+        $cronoverdue,
+        $dbproblems,
+        $maintenancemode,
+        $availableupdates,
+        $availableupdatesfetch,
+        $buggyiconvnomb,
+        $registered,
+        array $cachewarnings = [],
+        $eventshandlers = 0,
+        $themedesignermode = false,
+        $devlibdir = false,
+        $mobileconfigured = false,
+        $overridetossl = false,
+        $invalidforgottenpasswordurl = false,
+        $croninfrequent = false,
+        $showcampaigncontent = false,
+        bool $showfeedbackencouragement = false,
+        bool $showservicesandsupport = false,
+        $xmlrpcwarning = ''
+    ) {
         global $CFG;
         $output = '';
 
@@ -99,13 +115,11 @@ class admin_renderer extends \core_admin_renderer {
         $output .= $this->forgotten_password_url_warning($invalidforgottenpasswordurl);
         $output .= $this->mnet_deprecation_warning($xmlrpcwarning);
         $output .= $this->userfeedback_encouragement($showfeedbackencouragement);
-//        $output .= $this->services_and_support_content($showservicesandsupport);
+        // $output .= $this->services_and_support_content($showservicesandsupport);
         $output .= $this->campaign_content($showcampaigncontent);
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////
-        ////  IT IS ILLEGAL AND A VIOLATION OF THE GPL TO HIDE, REMOVE OR MODIFY THIS COPYRIGHT NOTICE ///
+        // IT IS ILLEGAL AND A VIOLATION OF THE GPL TO HIDE, REMOVE OR MODIFY THIS COPYRIGHT NOTICE ///
         $output .= $this->moodle_copyright();
-        //////////////////////////////////////////////////////////////////////////////////////////////////
 
         $output .= $this->footer();
 

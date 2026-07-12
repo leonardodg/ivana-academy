@@ -114,8 +114,8 @@ jobs:
           docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" ps
 
           echo "=== Checking that PHP CLI is available ==="
-          # Using specific file context ensures compose finds the active webserver container
-          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T webserver php -r 'echo "🚀 PHP CLI is Up!\n";'
+          # Using specific file context ensures compose finds the active moodle container
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle php -r 'echo "🚀 PHP CLI is Up!\n";'
 
           echo "=== Cleaning up testing sandbox ==="
           docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" down

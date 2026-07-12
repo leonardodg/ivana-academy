@@ -26,12 +26,11 @@ use theme_moove\util\settings;
 /**
  * Creates a navbar for boost that allows easy control of the navbar items.
  *
- * @package    theme_boost
+ * @package    theme_moove
  * @copyright  2021 Adrian Greeve <adrian@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class boostnavbar implements \renderable {
-
     /** @var array The individual items of the navbar. */
     protected $items = [];
     /** @var moodle_page The current moodle page. */
@@ -60,34 +59,24 @@ class boostnavbar implements \renderable {
     protected function prepare_nodes_for_boost(): void {
         global $PAGE;
 
-        // Remove the navbar nodes that already exist in the primary navigation menu.
         $this->remove_items_that_exist_in_navigation($PAGE->primarynav);
-
-        // Defines whether section items with an action should be removed by default.
         $removesections = true;
 
         if ($this->page->context->contextlevel == CONTEXT_COURSECAT) {
-            // Remove the 'Permissions' navbar node in the Check permissions page.
             if ($this->page->pagetype === 'admin-roles-check') {
                 $this->remove('permissions');
             }
         }
         if ($this->page->context->contextlevel == CONTEXT_COURSE) {
-            // Remove any duplicate navbar nodes.
             $this->remove_duplicate_items();
-            // Remove 'My courses' and 'Courses' if we are in the course context.
             $this->remove('mycourses');
             $this->remove('courses');
-            // Remove the course category breadcrumb nodes.
             foreach ($this->items as $key => $item) {
-                // Remove if it is a course category breadcrumb node.
                 $this->remove($item->key, \breadcrumb_navigation_node::TYPE_CATEGORY);
             }
-            // Remove the course breadcrumb node.
             if (!str_starts_with($this->page->pagetype, 'course-view-section-')) {
                 $this->remove($this->page->course->id, \breadcrumb_navigation_node::TYPE_COURSE);
             }
-            // Remove the navbar nodes that already exist in the secondary navigation menu.
             $this->remove_items_that_exist_in_navigation($PAGE->secondarynav);
 
             switch ($this->page->pagetype) {
@@ -95,33 +84,27 @@ class boostnavbar implements \renderable {
                 case 'group-grouping':
                 case 'group-overview':
                 case 'group-assign':
-                    // Remove the 'Groups' navbar node in the Groupings, Grouping, group Overview and Assign pages.
                     $this->remove('groups');
+                    break;
                 case 'backup-backup':
                 case 'backup-restorefile':
                 case 'backup-copy':
                 case 'course-reset':
-                    // Remove the 'Import' navbar node in the Backup, Restore, Copy course and Reset pages.
                     $this->remove('import');
+                    break;
                 case 'course-user':
                     $this->remove('mygrades');
                     $this->remove('grades');
+                    break;
             }
         }
 
-        // Remove 'My courses' if we are in the module context.
         if ($this->page->context->contextlevel == CONTEXT_MODULE) {
             $this->remove('mycourses');
             $this->remove('courses');
-            // Remove the course category breadcrumb nodes.
-            foreach ($this->items as $key => $item) {
-                // Remove if it is a course category breadcrumb node.
-//                $this->remove($item->key, \breadcrumb_navigation_node::TYPE_CATEGORY);
-            }
             $courseformat = course_get_format($this->page->course);
             $removesections = $courseformat->can_sections_be_removed_from_navigation();
             if ($removesections) {
-                // If the course sections are removed, we need to add the anchor of current section to the Course.
                 $coursenode = $this->get_item($this->page->course->id);
                 if (!is_null($coursenode) && $this->page->cm->sectionnum !== null) {
                     $coursenode->action = course_get_format($this->page->course)->get_view_url($this->page->cm->sectionnum);
@@ -130,11 +113,9 @@ class boostnavbar implements \renderable {
         }
 
         if ($this->page->context->contextlevel == CONTEXT_SYSTEM) {
-            // Remove the navbar nodes that already exist in the secondary navigation menu.
             $this->remove_items_that_exist_in_navigation($PAGE->secondarynav);
         }
 
-        // Set the designated one path for courses.
         $mycoursesnode = $this->get_item('mycourses');
         if (!is_null($mycoursesnode)) {
             $url = new \moodle_url('/my/courses.php');
@@ -144,13 +125,11 @@ class boostnavbar implements \renderable {
 
         $this->remove_no_link_items($removesections);
 
-        // Don't display the navbar if there is only one item. Apparently this is bad UX design.
         if ($this->item_count() <= 1) {
             $this->clear_items();
             return;
         }
 
-        // Make sure that the last item is not a link. Not sure if this is always a good idea.
         $this->remove_last_item_action();
     }
 
@@ -261,8 +240,10 @@ class boostnavbar implements \renderable {
      */
     protected function remove_no_link_items(bool $removesections = true): void {
         foreach ($this->items as $key => $value) {
-            if (!$value->is_last() &&
-                    (!$value->has_action() || ($value->type == \navigation_node::TYPE_SECTION && $removesections))) {
+            if (
+                !$value->is_last() &&
+                    (!$value->has_action() || ($value->type == \navigation_node::TYPE_SECTION && $removesections))
+            ) {
                 unset($this->items[$key]);
             }
         }
@@ -282,7 +263,7 @@ class boostnavbar implements \renderable {
         // to compare whether any of the breadcrumb items matches these pairs.
         $navigationviewitems = [];
         foreach ($navigationview->children as $child) {
-            list($childtext, $childaction) = $this->get_node_text_and_action($child);
+            [$childtext, $childaction] = $this->get_node_text_and_action($child);
             if ($childaction) {
                 $navigationviewitems[$childtext] = $childaction;
             }
@@ -290,10 +271,12 @@ class boostnavbar implements \renderable {
         // Loop through the breadcrumb items and if the item's 'text' and 'action' values matches with any of the
         // existing navigation view items, remove it from the breadcrumbs.
         foreach ($this->items as $item) {
-            list($itemtext, $itemaction) = $this->get_node_text_and_action($item);
+            [$itemtext, $itemaction] = $this->get_node_text_and_action($item);
             if ($itemaction) {
-                if (array_key_exists($itemtext, $navigationviewitems) &&
-                        $navigationviewitems[$itemtext] === $itemaction) {
+                if (
+                    array_key_exists($itemtext, $navigationviewitems) &&
+                        $navigationviewitems[$itemtext] === $itemaction
+                ) {
                     $this->remove($item->key);
                 }
             }
@@ -308,8 +291,8 @@ class boostnavbar implements \renderable {
     protected function remove_duplicate_items(): void {
         $taken = [];
         // Reverse the order of the items before filtering so that the first occurrence is removed instead of the last.
-        $filtereditems = array_values(array_filter(array_reverse($this->items), function($item) use (&$taken) {
-            list($itemtext, $itemaction) = $this->get_node_text_and_action($item);
+        $filtereditems = array_values(array_filter(array_reverse($this->items), function ($item) use (&$taken) {
+            [$itemtext, $itemaction] = $this->get_node_text_and_action($item);
             if ($itemaction) {
                 if (array_key_exists($itemtext, $taken) && $taken[$itemtext] === $itemaction) {
                     return false;
