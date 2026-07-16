@@ -1,0 +1,241 @@
+name: PR Validation Production
+
+# =============================================================================
+# .github/workflows/validation-production.yml
+# =============================================================================
+# Validates the PRODUCTION environment/target, as opposed to
+# validation-develop.yml which validates the DEVELOPMENT environment/target.
+# These are deliberately separate workflows: development validation checks
+# code quality and dev tooling (PHPUnit, PHPCS, Grunt, moodle-plugin-ci).
+# Production validation checks the deployable artifact itself - the
+# `production` Docker build target - against MoodleHQ's official security
+# and performance recommendations:
+#   https://moodledev.io/general/development/policies/security
+#   https://docs.moodle.org/502/en/Security_checks
+#   https://docs.moodle.org/502/en/Security_recommendations
+#   https://docs.moodle.org/dev/Performance_and_scalability
+#   https://docs.moodle.org/502/en/Performance_recommendations
+#
+# This workflow only REPORTS problems - it never fixes/edits the site. It
+# is used two ways:
+#   1) As a PR check (pull_request trigger below) when a PR targets the
+#      production release branch, so problems are visible before merge.
+#   2) As a required gate called from production-v2.yml (workflow_call)
+#      right after the image is built and before the deploy job runs. If
+#      security or performance checks come back CRITICAL/ERROR, this
+#      workflow fails and the deploy job (needs: validate-production) never
+#      runs - no faulty image reaches production.
+#
+# admin/cli/checks.php exits with an NRPE-style code per severity:
+#   0 = OK, 1 = WARNING, 2 = CRITICAL/ERROR, 3 = UNKNOWN
+# We block (fail the job) only on >=2. WARNING is surfaced in the job
+# summary for follow-up but does not stop the deploy - matching Moodle's
+# own guidance that Warning-level issues are for review, not blockers.
+# =============================================================================
+
+on:
+  pull_request:
+    branches: [release/production-v2]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_call:
+    inputs:
+      image_ref:
+        description: >
+          Fully qualified image ref already built/pushed (e.g.
+          leodg/moodle-academy:4.5.1-v2) to validate. When empty (PR-check
+          mode) the workflow builds the `production` target locally from
+          the checked-out source instead.
+        required: false
+        type: string
+        default: ""
+    outputs:
+      security_exit_code:
+        description: "Exit code of admin/cli/checks.php -t security (0/1/2/3)"
+        value: ${{ jobs.validate.outputs.security_exit_code }}
+      performance_exit_code:
+        description: "Exit code of admin/cli/checks.php -t performance (0/1/2/3)"
+        value: ${{ jobs.validate.outputs.performance_exit_code }}
+
+concurrency:
+  group: validation-production-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Security & Performance Gate (production target)
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    outputs:
+      security_exit_code: ${{ steps.security.outputs.exit_code }}
+      performance_exit_code: ${{ steps.performance.outputs.exit_code }}
+    env:
+      basedir: ${{ github.workspace }}
+      CI_ADMIN_PASSWORD: ${{ secrets.CI_MOODLE_ADMIN_PASS || 'Moodle@2026!' }}
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Resolve image to validate
+        id: image
+        run: |
+          if [ -n "${{ inputs.image_ref }}" ]; then
+            echo "ref=${{ inputs.image_ref }}" >> "$GITHUB_OUTPUT"
+            echo "🔎 Modo GATE: validando imagem já construída -> ${{ inputs.image_ref }}"
+          else
+            echo "ref=leodg/moodle-academy:production-ci" >> "$GITHUB_OUTPUT"
+            echo "🔎 Modo PR-CHECK: build local do target production"
+          fi
+
+      - name: Build production image (PR-check mode only)
+        if: inputs.image_ref == ''
+        run: |
+          docker build \
+            --file .devcontainer/build/moodle.Dockerfile \
+            --target production \
+            --tag ${{ steps.image.outputs.ref }} \
+            .
+          docker images ${{ steps.image.outputs.ref }}
+
+      - name: Login to Docker Hub (gate mode only, private pulls)
+        if: inputs.image_ref != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Pull image to validate (gate mode only)
+        if: inputs.image_ref != ''
+        run: docker pull ${{ steps.image.outputs.ref }}
+
+      - name: Start ephemeral production-target stack
+        env:
+          VALIDATE_IMAGE: ${{ steps.image.outputs.ref }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" up -d
+          sleep 10
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" ps
+
+      - name: Prepare hardened config.php for validation
+        env:
+          VALIDATE_IMAGE: ${{ steps.image.outputs.ref }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
+            rm -f config.php
+
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" cp \
+            "${basedir}/.devcontainer/config/config-sandbox-production.php" moodle:/var/www/html/config.php
+
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
+            chown www-data:www-data config.php
+
+      - name: Install Moodle (production-like, non-interactive)
+        env:
+          VALIDATE_IMAGE: ${{ steps.image.outputs.ref }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
+            php admin/cli/install.php \
+                --lang=en \
+                --wwwroot="https://localhost" \
+                --dataroot="/var/www/moodledata" \
+                --dbtype="mariadb" \
+                --dbhost="db" \
+                --dbname="moodle" \
+                --dbuser="moodle" \
+                --dbpass="m@0dl3ing" \
+                --dbport=3306 \
+                --prefix="mdl_" \
+                --fullname="Ivana Academy" \
+                --shortname="Ivana_Academy" \
+                --adminuser="admin" \
+                --adminpass="${CI_ADMIN_PASSWORD}" \
+                --adminemail="callme@leodg.dev" \
+                --agree-license \
+                --non-interactive
+
+      # ===================================================================
+      # Status checks - informational only, never blocks the deploy.
+      # (Several status checks, e.g. cron cadence, are meaningless on a
+      # container that has existed for under a minute.)
+      # ===================================================================
+      - name: "Status checks (informational)"
+        run: |
+          echo "## 🩺 Status checks (report/status)" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
+            php admin/cli/checks.php -t status -v 2>&1 | tee -a "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      # ===================================================================
+      # Security checks - BLOCKS deploy on CRITICAL/ERROR (exit code >= 2)
+      # https://docs.moodle.org/502/en/Security_checks
+      # ===================================================================
+      - name: "Security checks (report/security) - gate"
+        id: security
+        run: |
+          set +e
+          OUTPUT=$(docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
+            php admin/cli/checks.php -t security -v 2>&1)
+          CODE=$?
+          set -e
+
+          echo "$OUTPUT"
+          echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## 🔐 Security checks (report/security) - exit code: $CODE"
+            echo '```'
+            echo "$OUTPUT"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$CODE" -ge 2 ]; then
+            echo "::error::Security checks reproved (CRITICAL/ERROR, exit $CODE). Deploy BLOQUEADO - corrija os itens acima antes de mergear/reexecutar."
+            exit 1
+          elif [ "$CODE" -eq 1 ]; then
+            echo "::warning::Security checks com WARNING (exit $CODE). Nao bloqueia o deploy, mas precisa de correcao."
+          else
+            echo "✅ Security checks OK (exit $CODE)"
+          fi
+
+      # ===================================================================
+      # Performance checks - BLOCKS deploy on CRITICAL/ERROR (exit code >= 2)
+      # https://docs.moodle.org/502/en/Performance_recommendations
+      # ===================================================================
+      - name: "Performance checks (report/performance) - gate"
+        id: performance
+        if: ${{ !cancelled() }}
+        run: |
+          set +e
+          OUTPUT=$(docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
+            php admin/cli/checks.php -t performance -v 2>&1)
+          CODE=$?
+          set -e
+
+          echo "$OUTPUT"
+          echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## ⚡ Performance checks (report/performance) - exit code: $CODE"
+            echo '```'
+            echo "$OUTPUT"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$CODE" -ge 2 ]; then
+            echo "::error::Performance checks reproved (CRITICAL/ERROR, exit $CODE). Deploy BLOQUEADO - corrija os itens acima antes de mergear/reexecutar."
+            exit 1
+          elif [ "$CODE" -eq 1 ]; then
+            echo "::warning::Performance checks com WARNING (exit $CODE). Nao bloqueia o deploy, mas precisa de correcao."
+          else
+            echo "✅ Performance checks OK (exit $CODE)"
+          fi
+
+      # -------------------------------------------------------------------
+      # Cleanup - RUN ALWAYS
+      # -------------------------------------------------------------------
+      - name: Cleanup ephemeral stack
+        if: always()
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" down --remove-orphans || true
