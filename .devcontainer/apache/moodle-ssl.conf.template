@@ -18,10 +18,18 @@
 	</Directory>
 
 	<Directory "/var/www/html">
-		Options Indexes FollowSymLinks
+		Options FollowSymLinks
 		AllowOverride All
 		Require all granted
 	</Directory>
+
+	<DirectoryMatch "/(vendor|node_modules|tests/behat|\.git|\.devcontainer|\.github)(/|$)">
+		Require all denied
+	</DirectoryMatch>
+
+	<FilesMatch "^(composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml(\.dist)?|environment\.xml|install\.xml|README(\.txt|\.md)?|UPGRADING\.md|CHANGES\.md|\.env.*)$">
+		Require all denied
+	</FilesMatch>
 
     ErrorLog ${APACHE_LOG_DIR}/moodle_error.log
     CustomLog ${APACHE_LOG_DIR}/moodle_access.log combined

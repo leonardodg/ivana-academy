@@ -86,7 +86,7 @@ jobs:
           if [ "$INSTALLED" = "yes" ]; then
             echo "✅ Site ja instalado (mdl_config existe), pulando instalador."
           else
-            echo "⚙️  Site nao instalado, rodando admin/cli/install_database.php..."
+            echo "⚙  Site nao instalado, rodando admin/cli/install_database.php..."
             docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
               php admin/cli/install.php \
                   --lang=en \
