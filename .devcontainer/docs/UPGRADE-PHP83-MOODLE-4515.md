@@ -32,53 +32,14 @@ A VPS nao tem `docker compose`; os scripts usam `docker run` com as mesmas opcoe
 
 ## Passo a passo
 
-### 0. Antes (sem parar o site)
+**Guia manual, comando por comando: [`UPGRADE-PHP83-MOODLE-4515-MANUAL.md`](UPGRADE-PHP83-MOODLE-4515-MANUAL.md).**
+Todos os passos na VPS sao rodados a mao. O workflow `production-v2.yml` so builda, valida e
+publica a imagem (nao acessa a VPS). Os scripts `bin/prod-v2/*.sh` fazem o mesmo que o guia
+e ficam como referencia.
 
-1. PR desta branch -> `develop` -> `release/production-v2`.
-   O push em `release/production-v2` roda `production-v2.yml`: build + validacao + **prepare.sh**
-   na VPS. A troca **nao** e automatica.
-   Sem o workflow, na VPS: `/home/admin/devcontainer/bin/prod-v2/prepare.sh <git-ref> 4.5.15-php8.3`
-2. Conferir a saida do prepare: PHP 8.3.36, `upload_progress=0`, Moodle 4.5.15, cert de origem.
-3. Disco: o prepare exige 3G livres. Se faltar: `docker image prune` (so remove imagens `<none>`;
-   a `4.5.1` do v1 continua).
-4. Avisar os alunos da janela (~15 min).
-
-### 1. Janela de manutencao
-
-```bash
-ssh ivana-moodle-aws
-/home/admin/devcontainer/bin/prod-v2/switch-to-v2.sh
-```
-
-Faz: manutencao ON -> dump `/backups/pre-v2-<data>.sql.gz` -> para o v1 (`restart=no`) ->
-sobe o v2 em 80/443 -> `upgrade.php` -> purge caches -> manutencao OFF -> testes.
-
-### 2. Testes depois da troca
-
-- [ ] `https://ivana.academy` abre, login de aluno e de admin
-- [ ] Curso com formato Tiles e com Onetopic abrem
-- [ ] Certificado (customcert) gera PDF
-- [ ] Attendance abre; Configurable Reports executa um relatorio
-- [ ] Upload de arquivo em uma atividade (repository_s3bucket se usado)
-- [ ] `Administracao > Notificacoes`: sem upgrade pendente; `Servidor > Ambiente`: PHP 8.3 OK
-- [ ] `docker exec -u www-data moodle-v2 php admin/cli/checks.php` sem CRITICAL
-- [ ] Cron: `docker exec moodle-v2 tail /var/log/moodle-cron.log` rodando a cada minuto
-- [ ] E-mail de teste (esqueci a senha)
-
-### 3. Voltar para o v1 (se precisar)
-
-```bash
-/home/admin/devcontainer/bin/prod-v2/rollback-to-v1.sh --restore-db
-```
-
-`--restore-db` e obrigatorio se o `upgrade.php` rodou: o codigo 4.5.1+ recusa um banco 4.5.15.
-**Perde o que foi gravado no banco depois do dump** - por isso decidir rapido (testes do passo 2
-logo apos a troca). Sem `--restore-db` so troca os containers (ex.: v2 nem subiu).
-
-### 4. Depois de alguns dias estavel
-
-- Remover o container v1: `docker rm moodle` (a imagem `4.5.1` pode ficar como historico).
-- `public_html` pode virar backup compactado.
+Resumo: A. preparar (site no ar) -> B. validar o `moodle-v2-check` sem portas, com o codigo
+do v1 somente leitura -> C. janela: manutencao, dump, para v1, sobe v2, `upgrade.php` ->
+D. testes -> R. volta para o v1 com restauracao do dump, se precisar.
 
 ## Pendencias encontradas na analise (fora deste upgrade)
 

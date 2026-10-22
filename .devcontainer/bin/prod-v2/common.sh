@@ -58,8 +58,8 @@ v2_up() {
         -e CRON_ENABLED="${CRON_ENABLED:-true}" \
         -e PHP_OPCACHE_VALIDATE_TIMESTAMPS=0 \
         --env-file "${COMPOSE_DIR}/secrets/db.env" \
-        -v "${COMPOSE_DIR}/certs/develop-local.crt:/run/secrets/ssl_cert:ro" \
-        -v "${COMPOSE_DIR}/certs/develop-local.key:/run/secrets/ssl_key:ro" \
+        -v "${COMPOSE_DIR}/certs/server.crt:/run/secrets/ssl_cert:ro" \
+        -v "${COMPOSE_DIR}/certs/server.key:/run/secrets/ssl_key:ro" \
         -v "${MOODLE_CODE_DIR}:/var/www/html" \
         -v /home/admin/moodledata:/var/www/moodledata \
         "leodg/moodle-academy:${IMAGE_TAG}" >/dev/null

@@ -160,8 +160,10 @@ if [ "$CURRENT_PERM" != "755" ]; then
     echo "✅ Adjusted permissions CHMOD!"
 fi
 
+# So o moodledata: /var/www/html pode ser bind-mount do codigo (producao v2),
+# e um chown ali quebraria o git do usuario dono do checkout na VPS.
 if [ "$(stat -c '%U' /var/www/moodledata)" != "www-data" ]; then
-    chown -R www-data:www-data /var/www/html /var/www/moodledata 2>/dev/null || true
+    chown -R www-data:www-data /var/www/moodledata 2>/dev/null || true
     echo "✅ Adjusted permissions CHOWN!"
 fi
 

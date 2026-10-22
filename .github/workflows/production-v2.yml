@@ -1,10 +1,8 @@
-name: Deploy PRODUCTION v2 (prepare) to EC2
+name: Build PRODUCTION v2 image
 
-# Builda/valida a imagem e PREPARA o v2 na VPS (prepare.sh): codigo em
-# /home/admin/moodle-v2/code, env, certs e docker pull - sem tirar o site do ar.
-# A TROCA v1 -> v2 e sempre manual, na VPS, em janela de manutencao:
-#   /home/admin/devcontainer/bin/prod-v2/switch-to-v2.sh
-# Runbook: .devcontainer/docs/UPGRADE-PHP83-MOODLE-4515.md
+# Builda, valida (security & performance gate) e publica a imagem v2.
+# NAO acessa a VPS: todos os passos na producao sao manuais, seguindo
+# .devcontainer/docs/UPGRADE-PHP83-MOODLE-4515-MANUAL.md
 
 env:
   IMAGE_TAG: 4.5.15-php8.3
@@ -57,38 +55,3 @@ jobs:
     with:
       image_ref: leodg/moodle-academy:4.5.15-php8.3
     secrets: inherit
-
-  deploy:
-    name: Deploy to AWS EC2 (PRODUCTION-v2)
-    needs: [docker, validate-production]
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-
-      - name: Sync compose files only
-        uses: easingthemes/ssh-deploy@main
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rlgoDzvc -i --exclude=secrets/ --exclude=certs/ --exclude=env/prod.env"
-          SOURCE: ".devcontainer/"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: /home/admin/devcontainer/
-          # TARGET: ${{ vars.REMOTE_TARGET_V2 }}
-
-      - name: Prepare v2 on EC2 (no downtime)
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          timeout: 60s
-          command_timeout: 15m
-          script: |
-            set -e
-            chmod +x /home/admin/devcontainer/bin/prod-v2/*.sh
-            /home/admin/devcontainer/bin/prod-v2/prepare.sh "${{ github.ref_name }}" "${{ env.IMAGE_TAG }}"
-            echo "Troca v1 -> v2 NAO executada. Na VPS: /home/admin/devcontainer/bin/prod-v2/switch-to-v2.sh"

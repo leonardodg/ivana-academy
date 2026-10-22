@@ -65,13 +65,13 @@ EOF
 printf 'MOODLE_DBUSER=%s\nMOODLE_DBPASS=%s\n' "$(v1_env MOODLE_DBUSER)" "$(v1_env MOODLE_DBPASS)" \
     > "$COMPOSE_DIR/secrets/db.env"
 # fullchain (cert + cadeia), nao cert.pem
-cp -L "$LE_LIVE/fullchain.pem" "$COMPOSE_DIR/certs/develop-local.crt"
-cp -L "$LE_LIVE/privkey.pem"   "$COMPOSE_DIR/certs/develop-local.key"
-chmod 600 "$COMPOSE_DIR/secrets/db.env" "$COMPOSE_DIR/certs/develop-local.key"
-chmod 644 "$COMPOSE_DIR/certs/develop-local.crt"
+cp -L "$LE_LIVE/fullchain.pem" "$COMPOSE_DIR/certs/server.crt"
+cp -L "$LE_LIVE/privkey.pem"   "$COMPOSE_DIR/certs/server.key"
+chmod 600 "$COMPOSE_DIR/secrets/db.env" "$COMPOSE_DIR/certs/server.key"
+chmod 644 "$COMPOSE_DIR/certs/server.crt"
 umask 022
 log "✅ env/prod.env, secrets e certs gerados em $COMPOSE_DIR"
-openssl x509 -noout -enddate -in "$COMPOSE_DIR/certs/develop-local.crt" | sed 's/^/   cert origem: /'
+openssl x509 -noout -enddate -in "$COMPOSE_DIR/certs/server.crt" | sed 's/^/   cert origem: /'
 
 # 5. Imagem + smoke test -----------------------------------------------------
 log "🐳 docker pull $IMAGE"
