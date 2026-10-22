@@ -12,13 +12,17 @@
 		Require all granted
 	</Directory>
 
-	<DirectoryMatch "/(vendor|node_modules|tests/behat|\.git|\.devcontainer|\.github)(/|$)">
-		Require all denied
-	</DirectoryMatch>
-
-	<FilesMatch "^(composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml(\.dist)?|environment\.xml|install\.xml|README(\.txt|\.md)?|UPGRADING\.md|CHANGES\.md|\.env.*)$">
-		Require all denied
-	</FilesMatch>
+	# Caminhos internos -> 404 (admin/cli/checks.php -t security: core_publicpaths)
+	# https://docs.moodle.org/405/en/Installing_Moodle#Set_up_your_server
+	RedirectMatch 404 "/\.(?!well-known/)"
+	RedirectMatch 404 "/(vendor|node_modules)/"
+	RedirectMatch 404 "/(tests/behat|behat|fixtures)/"
+	RedirectMatch 404 "/composer\.(json|lock)$"
+	RedirectMatch 404 "/package(-lock)?\.json$"
+	RedirectMatch 404 "/(environment|install)\.xml$"
+	RedirectMatch 404 "/phpunit\.xml(\.dist)?$"
+	RedirectMatch 404 "(?i)/[^/]*readme[^/]*$"
+	RedirectMatch 404 "/(upgrade\.txt|UPGRADING\.md|UPGRADING-CURRENT\.md|CHANGES\.md)$"
 
     ErrorLog ${APACHE_LOG_DIR}/moodle_error.log
     CustomLog ${APACHE_LOG_DIR}/moodle_access.log combined
