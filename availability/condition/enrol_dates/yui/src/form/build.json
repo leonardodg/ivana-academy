@@ -1,0 +1,10 @@
+{
+  "name": "moodle-availability_enrol_dates-form",
+  "builds": {
+    "moodle-availability_enrol_dates-form": {
+      "jsfiles": [
+        "js/form.js"
+      ]
+    }
+  }
+}
