@@ -303,19 +303,21 @@ curl -s -o /dev/null -w '%{http_code}\n' https://ivana.academy/login/index.php  
 
 ## E. Atualizar o codigo com o moodle-v2 no ar
 
-### E1. Automatico (PR -> `release/production-v2`)
+### E1. Automatico (PR -> `main` -> `release/production-v2`)
 
 O job `prepare-vps` roda `prepare.sh` (pull da imagem) e depois `deploy-code.sh`, que:
 
-- **aborta** se algum `version.php` mudou (precisa `upgrade.php` -> E2) ou se o checkout
-  tem alteracao manual (lista os arquivos);
+- **aborta** se o checkout tem alteracao manual (lista os arquivos);
 - faz checkout do commit novo em `/home/admin/moodle-v2/code`;
 - **reinicia o `moodle-v2` so se algum `.php` mudou** (opcache sem revalidacao, ~10s fora);
-- `purge_caches` (nova revisao de JS/CSS) e confere o login publico.
+- `purge_caches` (nova revisao de JS/CSS) e confere o login publico;
+- se algum `version.php` mudou (plugin novo ou atualizacao): **nao roda `upgrade.php`** -
+  o admin conclui em **Administracao do site > Notificacoes** (o job avisa com um warning).
+  Para atualizacao grande (core), preferir E2 com dump antes.
 
 Nao editar arquivos a mao em `/home/admin/moodle-v2/code`: corrigir sempre por PR.
 
-### E2. Manual, com `version.php` alterado (janela)
+### E2. Manual, com dump (atualizacao de core / grande)
 
 ```bash
 V2=/home/admin/moodle-v2

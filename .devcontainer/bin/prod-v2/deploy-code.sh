@@ -5,7 +5,8 @@
 # So faz o que e seguro sem modo manutencao:
 #   - moodle-v2 parado     -> nada (o prepare.sh ja fez o checkout)
 #   - mesmo commit         -> nada
-#   - version.php mudou    -> ABORTA: precisa upgrade.php (janela manual)
+#   - version.php mudou    -> atualiza o codigo, mas NAO roda upgrade.php:
+#                             o admin conclui em Administracao > Notificacoes
 #   - checkout com mudanca local em arquivo versionado -> ABORTA (lista)
 #   - senao: checkout do commit novo
 #            .php alterado -> docker restart moodle-v2 (opcache sem revalidacao)
@@ -34,10 +35,10 @@ fi
 CHANGED=$(git -C "$V2_CODE_DIR" diff --name-only "$OLD" "$NEW")
 log "📦 ${OLD:0:11} -> ${NEW:0:11}: $(echo "$CHANGED" | grep -c .) arquivo(s)"
 
-if echo "$CHANGED" | grep -qE '(^|/)version\.php$'; then
-    echo "$CHANGED" | grep -E '(^|/)version\.php$' | sed 's/^/   /'
-    die "version.php alterado: exige upgrade.php -> deploy manual em janela (guia, etapa E2)"
-fi
+# version.php alterado (plugin novo / atualizacao): o codigo vai para o
+# servidor, mas o upgrade.php NAO roda aqui - o admin conclui pelo painel
+# (Administracao do site > Notificacoes).
+VERSION_CHANGED=$(echo "$CHANGED" | grep -E '(^|/)version\.php$' || true)
 
 DIRTY=$(git -C "$V2_CODE_DIR" status --porcelain --untracked-files=no)
 if [ -n "$DIRTY" ]; then
@@ -57,3 +58,9 @@ fi
 docker exec -u www-data "$V2_CONTAINER" php admin/cli/purge_caches.php
 log "🧹 Caches limpos (nova revisao de JS/CSS)"
 curl -s -o /dev/null -w "   publico: HTTP %{http_code}\n" "$PUBLIC_URL"
+
+if [ -n "$VERSION_CHANGED" ]; then
+    echo "$VERSION_CHANGED" | sed 's/^/   /'
+    log "⚠  Instalacao/atualizacao pendente: concluir em Administracao do site > Notificacoes"
+    echo "::warning::version.php alterado - concluir a instalacao em Administracao do site > Notificacoes"
+fi
