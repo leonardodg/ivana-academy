@@ -33,7 +33,7 @@ A VPS nao tem `docker compose`; os scripts usam `docker run` com as mesmas opcoe
 ## Passo a passo
 
 **Guia manual, comando por comando: [`UPGRADE-PHP83-MOODLE-4515-MANUAL.md`](UPGRADE-PHP83-MOODLE-4515-MANUAL.md).**
-O CI (`production-v2.yml`, push em `release/production-v2`) builda, valida, publica a imagem e
+O CI (`production-v2.yml`, push em `main`) builda, valida, publica a imagem e
 roda o `prepare.sh` na VPS (etapa A, sem tirar o site do ar). A troca v1 -> v2 e o `upgrade.php`
 sao sempre manuais. Os scripts `bin/prod-v2/*.sh` fazem o mesmo que o guia.
 

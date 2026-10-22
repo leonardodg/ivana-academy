@@ -16,7 +16,7 @@ e ficam como referencia. Contexto e decisoes: `UPGRADE-PHP83-MOODLE-4515.md`.
 
 ## A. Preparar (sem parar o site)
 
-> **Automatico pelo CI:** push em `release/production-v2` -> `production-v2.yml` builda, valida e
+> **Automatico pelo CI:** push em `main` -> `production-v2.yml` builda, valida e
 > roda o `prepare.sh` na VPS (job `prepare-vps`), que faz exatamente A2-A5. Conferir a saida
 > do job no GitHub Actions e seguir para a etapa B. Os comandos abaixo ficam para rodar a mao
 > se o CI falhar ou para conferir.
@@ -29,7 +29,7 @@ Variaveis usadas em todas as etapas (colar no inicio de cada sessao SSH):
 
 ```bash
 IMAGE=leodg/moodle-academy:4.5.15-php8.3
-GIT_REF=release/production-v2
+GIT_REF=main
 V2=/home/admin/moodle-v2
 CFG=/home/admin/devcontainer
 ```
@@ -303,7 +303,7 @@ curl -s -o /dev/null -w '%{http_code}\n' https://ivana.academy/login/index.php  
 
 ## E. Atualizar o codigo com o moodle-v2 no ar
 
-### E1. Automatico (PR -> `main` -> `release/production-v2`)
+### E1. Automatico (merge de PR na `main`)
 
 O job `prepare-vps` roda `prepare.sh` (pull da imagem) e depois `deploy-code.sh`, que:
 
@@ -324,7 +324,7 @@ V2=/home/admin/moodle-v2
 docker exec -u www-data moodle-v2 php admin/cli/maintenance.php --enable
 # dump do banco: igual ao C2
 git -C $V2/code fetch origin
-git -C $V2/code checkout --detach origin/release/production-v2
+git -C $V2/code checkout --detach origin/main
 docker restart moodle-v2
 docker exec -u www-data moodle-v2 php admin/cli/upgrade.php --non-interactive
 docker exec -u www-data moodle-v2 php admin/cli/purge_caches.php
