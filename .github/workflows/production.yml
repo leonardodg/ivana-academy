@@ -1,9 +1,11 @@
 name: Deploy PRODCTION to EC2
 
+# LEGADO (v1: container `moodle`, PHP 8.1, codigo via rsync em public_html).
+# Push em main NAO dispara mais: com o v2 no ar, este job recriaria o v1 nas
+# portas 80/443 (conflito) e perderia o 99-security.ini aplicado a mao.
+# Producao agora: production-v2.yml + .devcontainer/bin/prod-v2/*.sh
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   docker:

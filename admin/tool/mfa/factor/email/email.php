@@ -42,9 +42,13 @@ $PAGE->set_cacheable(false);
 $instance = $DB->get_record('tool_mfa', ['id' => $instanceid]);
 $factor = \tool_mfa\plugininfo\factor::get_factor('email');
 
-// If pass is set, require login to force $SESSION and user, and pass for that session.
+// If pass is set, do checks and pass for this session.
+// Require login to force $SESSION and user, and pass for that session.
 if (!empty($instance) && $pass != 0 && $secret != 0) {
     require_login();
+    if ((int)$instance->userid !== (int)$USER->id) {
+        throw new moodle_exception('error:parameters', 'factor_email');
+    }
     if ($factor->get_state() === \tool_mfa\plugininfo\factor::STATE_LOCKED) {
         // Redirect through to auth, this will bounce them to the next factor.
         redirect(new moodle_url('/admin/tool/mfa/auth.php'));
@@ -69,8 +73,12 @@ $form = new \factor_email\form\email($url);
 
 if ($form->is_cancelled()) {
     redirect(new moodle_url('/'));
-} else if ($fromform = $form->get_data()) {
-    if (empty($instance)) {
+}
+
+// If submitted without the pass param, is a cancel request - do checks and revoke email factor.
+if ($fromform = $form->get_data()) {
+    // Only allow revoke attempts from requests with a valid instance and secret.
+    if (empty($instance) || empty($secret) || $instance->secret != $secret) {
         $message = get_string('error:badcode', 'factor_email');
     } else {
         $user = $DB->get_record('user', ['id' => $instance->userid]);

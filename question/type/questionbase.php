@@ -459,14 +459,30 @@ abstract class question_definition {
 
     /** @return the result of applying {@link format_text()} to the question text. */
     public function format_questiontext($qa) {
-        return $this->format_text($this->questiontext, $this->questiontextformat,
-                $qa, 'question', 'questiontext', $this->id);
+        $formattext = $this->format_text(
+            $this->questiontext,
+            $this->questiontextformat,
+            $qa,
+            'question',
+            'questiontext',
+            $this->id
+        );
+
+        return html_writer::nonempty_tag('div', $formattext, ['class' => 'clearfix']);
     }
 
     /** @return the result of applying {@link format_text()} to the general feedback. */
     public function format_generalfeedback($qa) {
-        return $this->format_text($this->generalfeedback, $this->generalfeedbackformat,
-                $qa, 'question', 'generalfeedback', $this->id);
+        $formattext  = $this->format_text(
+            $this->generalfeedback,
+            $this->generalfeedbackformat,
+            $qa,
+            'question',
+            'generalfeedback',
+            $this->id
+        );
+
+        return html_writer::nonempty_tag('div', $formattext, ['class' => 'clearfix']);
     }
 
     /**
@@ -838,6 +854,10 @@ abstract class question_graded_automatically extends question_with_responses
             return false;
         }
         $hint = $qa->get_applicable_hint();
+        // If there is no applicable hint, that means access should not be granted.
+        if (is_null($hint)) {
+            return false;
+        }
         $hintid = reset($args); // Itemid is hint id.
         return $hintid == $hint->id;
     }

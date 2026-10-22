@@ -1,5 +1,31 @@
 # core_courseformat (subsystem / plugintype) Upgrade notes
 
+## 4.5.14
+
+### Changed
+
+- The course index tree semantics for subsections have moved from the delegated section wrapper to the activity that delegates it.
+
+  * The `li[role="treeitem"]` in `core_courseformat/local/courseindex/cm` should add the following attributes when the activity has a delegated section:
+    * `aria-owns`, set to the id of that section's collapsible content, `courseindexcollapse{{number}}`
+    * `aria-labelledby`, set to the id of that section's title element, `courseindexsection{{number}}-title`
+    * `aria-expanded`, set to `false` when the section's `indexcollapsed` is set and `true` otherwise
+  * In `core_courseformat/local/courseindex/section`, `role="treeitem"` and those same three attributes should no longer be set when the section is delegated, and the section title element needs `id="courseindexsection{{number}}-title"` so the tree item can reference it.
+
+  Note that the `core_courseformat/local/courseindex/section` JS keeps `aria-expanded` up to date by writing to the closest `[role="treeitem"]` ancestor, so the element carrying the role is the one that receives the state. Plugins overriding either template should update both, as the two are no longer independent.
+
+  For more information see [MDL-88949](https://tracker.moodle.org/browse/MDL-88949)
+
+## 4.5.2
+
+### Fixed
+
+- HTML IDs relating to section collapse/expand have been changed in the course format templates.
+  - core_courseformat/local/content/section/header #collapssesection{{num}} has been changed to #collapsesectionid{{id}}
+  - core_courseformat/local/content/section/content #coursecontentcollapse{{num}} had been changed to #coursecontentcollapseid{{id}}
+
+  For more information see [MDL-82679](https://tracker.moodle.org/browse/MDL-82679)
+
 ## 4.5.1
 
 ### Added

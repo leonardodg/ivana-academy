@@ -17,6 +17,14 @@ Feature: Use the TinyMCE editor to upload an image
     And I click on "Browse repositories" "button" in the "Insert image" "dialogue"
     Then "File picker" "dialogue" should exist
 
+  Scenario: Focus returns to the correct location after closing a nested FilePicker
+    Given I log in as "admin"
+    And I open my profile in edit mode
+    When I click on the "Image" button for the "Description" TinyMCE editor
+    And I press "Browse repositories"
+    When I press the escape key
+    Then the focused element is "Browse repositories" "button"
+
   @_file_upload @test_tiny
   Scenario: Browsing repositories in the TinyMCE editor shows the FilePicker and upload url image
     Given I log in as "admin"
@@ -27,7 +35,7 @@ Feature: Use the TinyMCE editor to upload an image
     # Note: This needs to be replaced with a label.
     Then ".tiny_image_preview" "css_element" should be visible
 
-  @_file_upload
+  @_file_upload @accessibility
   Scenario: Insert image to the TinyMCE editor
     Given I log in as "admin"
     And I open my profile in edit mode
@@ -39,6 +47,7 @@ Feature: Use the TinyMCE editor to upload an image
     When I select the "img" element in position "0" of the "Description" TinyMCE editor
     And I click on the "Image" button for the "Description" TinyMCE editor
     Then the field "How would you describe this image to someone who can't see it?" matches value "It's the Moodle"
+    And the "Image details" "dialogue" should meet accessibility standards
     # Note: This needs to be replaced with a label.
     And ".tiny_image_preview" "css_element" should be visible
 

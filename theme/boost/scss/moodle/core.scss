@@ -1986,6 +1986,7 @@ nav.navbar .logo img {
 
 ul.dragdrop-keyboard-drag li {
     list-style-type: none;
+    margin-bottom: 0.1em;
 }
 
 a.disabled:hover,
@@ -2259,10 +2260,19 @@ $footer-link-color: $bg-inverse-link-color !default;
     bottom: calc(4rem + #{$stickyfooter-height});
 }
 
+.hasstickyfooter .maintenancewarning {
+    bottom: #{$stickyfooter-height};
+}
+
 .popover.footer {
     .popover-body {
         padding: 0;
         .footer-section {
+            // Add a bottom padding to the direct child divs of the footer-section container so the links within will meet SC 2.5.8.
+            > div {
+                padding-bottom: 0.2rem;
+            }
+
             a {
                 color: $body-color;
                 text-decoration: underline;
@@ -2281,6 +2291,13 @@ $footer-link-color: $bg-inverse-link-color !default;
     padding-bottom: 5px;
 }
 
+.footer-content-popover {
+    // Ensure that the footer links when rendered out of the popover will also have sufficient spacing and meet SC 2.5.8.
+    .footer-section > div {
+        padding-bottom: 0.1rem;
+    }
+}
+
 @include media-breakpoint-up(sm) {
     .jsenabled #page-footer .footer-content-popover {
         display: none;
@@ -2289,6 +2306,10 @@ $footer-link-color: $bg-inverse-link-color !default;
     .jsenabled .btn-footer-communication {
         display: block;
         z-index: $zindex-dropdown;
+    }
+    .jsenabled .maintenancewarning,
+    .jsenabled.hasstickyfooter:has(.drawer-right-toggle) .maintenancewarning {
+        right: 5rem;
     }
 }
 
@@ -2949,13 +2970,22 @@ body.dragging {
     }
 }
 
-.drawers {
+.page-mycourses {
     .block_myoverview {
-        border: 0;
-        & > .card-body {
-            padding-top: 0 !important; /* stylelint-disable-line declaration-no-important */
-            padding-left: 0 !important; /* stylelint-disable-line declaration-no-important */
-            padding-right: 0 !important; /* stylelint-disable-line declaration-no-important */
+        .block-cards {
+            border-top: 1px solid $border-color;
+            padding-top: map-get($spacers, 2);
+        }
+    }
+    // Boost theme styling only (drawers not used in classic).
+    .drawers {
+        .block_myoverview {
+            border: 0;
+            & > .card-body {
+                padding-top: 0 !important; /* stylelint-disable-line declaration-no-important */
+                padding-left: 0 !important; /* stylelint-disable-line declaration-no-important */
+                padding-right: 0 !important; /* stylelint-disable-line declaration-no-important */
+            }
         }
     }
 }
@@ -3121,11 +3151,9 @@ blockquote {
             display: none;
         }
     }
-    button {
+    .showmore-button {
         float: right;
-        &.btn-link {
-            text-decoration: none;
-        }
+        text-decoration: none;
         .icon {
             font-size: $btn-font-size-sm;
             margin: 0;
