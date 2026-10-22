@@ -100,6 +100,6 @@ docker pull --quiet "$IMAGE"
 docker run --rm --entrypoint sh -v "$V2_CODE_DIR:/var/www/html:ro" "$IMAGE" -c '
     php -r "echo \"   PHP \", PHP_VERSION, \" | upload_progress=\", var_export(ini_get(\"session.upload_progress.enabled\"), true), PHP_EOL;"
     php -l /var/www/html/config.php
-    php -r "define(\"MOODLE_INTERNAL\",1); require \"/var/www/html/version.php\"; echo \"   Moodle \", \$release, PHP_EOL;"'
+    grep -E "^.release" /var/www/html/version.php'
 
 log "🎯 Pronto. Troca de container e upgrade.php: manual (guia, etapa C)"
