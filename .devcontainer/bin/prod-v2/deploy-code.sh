@@ -17,7 +17,7 @@
 set -euo pipefail
 source "$(dirname "$0")/common.sh"
 
-GIT_REF="${1:-release/production-v2}"
+GIT_REF="${1:-main}"
 
 if [ "$(docker inspect -f '{{.State.Running}}' "$V2_CONTAINER" 2>/dev/null)" != true ]; then
     log "ℹ $V2_CONTAINER nao esta no ar: nada a fazer (codigo ja preparado pelo prepare.sh)"

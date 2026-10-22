@@ -14,12 +14,12 @@
 # Roda no CI (production-v2.yml, job prepare-vps) ou a mao.
 #
 # Uso: prepare.sh [GIT_REF] [IMAGE_TAG]
-#      prepare.sh release/production-v2 4.5.15-php8.3
+#      prepare.sh main 4.5.15-php8.3
 # =============================================================================
 set -euo pipefail
 source "$(dirname "$0")/common.sh"
 
-GIT_REF="${1:-release/production-v2}"
+GIT_REF="${1:-main}"
 IMAGE_TAG="${2:-4.5.15-php8.3}"
 IMAGE="leodg/moodle-academy:${IMAGE_TAG}"
 

@@ -1,5 +1,6 @@
 name: Deploy PRODUCTION v2 (build + prepare)
 
+# Dispara em todo merge (push) na main = deploy automatico na VPS.
 # 1. docker:          builda e publica a imagem v2 (target production)
 # 2. validate:        security & performance gate na mesma imagem
 # 3. prepare-vps:     na EC2 (prepare.sh + deploy-code.sh):
@@ -17,7 +18,7 @@ env:
 on:
   push:
     branches:
-      - release/production-v2
+      - main
   workflow_dispatch:
 
 concurrency:
