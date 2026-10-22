@@ -87,9 +87,17 @@ else
     sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG}/" "$ENV_FILE"
     log "ℹ v1 removido: mantidos env/prod.env e secrets/db.env (IMAGE_TAG=${IMAGE_TAG})"
 fi
-# fullchain (cert + cadeia), nao cert.pem
-cp -L "$LE_LIVE/fullchain.pem" "$COMPOSE_DIR/certs/server.crt"
-cp -L "$LE_LIVE/privkey.pem"   "$COMPOSE_DIR/certs/server.key"
+# Certificado da origem: Cloudflare Origin CA se instalado (nao vence por 15
+# anos, exigido pelo SSL "Full (strict)"); senao Let's Encrypt (fullchain).
+if [ -f "$ORIGIN_CERT_DIR/ivana.academy.crt" ] && [ -f "$ORIGIN_CERT_DIR/ivana.academy.key" ]; then
+    cp "$ORIGIN_CERT_DIR/ivana.academy.crt" "$COMPOSE_DIR/certs/server.crt"
+    cp "$ORIGIN_CERT_DIR/ivana.academy.key" "$COMPOSE_DIR/certs/server.key"
+    log "🔐 Certificado: Cloudflare Origin CA ($ORIGIN_CERT_DIR)"
+else
+    cp -L "$LE_LIVE/fullchain.pem" "$COMPOSE_DIR/certs/server.crt"
+    cp -L "$LE_LIVE/privkey.pem"   "$COMPOSE_DIR/certs/server.key"
+    log "🔐 Certificado: Let's Encrypt ($LE_LIVE)"
+fi
 chmod 600 "$COMPOSE_DIR/secrets/db.env" "$COMPOSE_DIR/certs/server.key"
 chmod 644 "$COMPOSE_DIR/certs/server.crt"
 openssl x509 -noout -enddate -in "$COMPOSE_DIR/certs/server.crt" | sed 's/^/   cert origem: /'

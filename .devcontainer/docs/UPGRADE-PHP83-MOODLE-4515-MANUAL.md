@@ -330,3 +330,42 @@ docker exec -u www-data moodle-v2 php admin/cli/upgrade.php --non-interactive
 docker exec -u www-data moodle-v2 php admin/cli/purge_caches.php
 docker exec -u www-data moodle-v2 php admin/cli/maintenance.php --disable
 ```
+
+---
+
+## F. Certificado da origem: Cloudflare Origin CA + SSL "Full (strict)"
+
+Cloudflare conecta na VPS por HTTPS (porta 443, IPv6). O Let's Encrypt da origem venceu em
+02/05/2026 (o certbot usava DNS Route53, mas o DNS esta na Cloudflare) e so funcionava porque
+o modo SSL era "Full" (nao valida o certificado). Origin CA: 15 anos, sem renovacao.
+
+1. **Cloudflare** > SSL/TLS > Origin Server > *Create Certificate*: RSA (2048), hostnames
+   `ivana.academy` e `*.ivana.academy`, validade 15 anos. Copiar o certificado e a chave
+   (a chave so aparece uma vez; nunca colar em chat/PR).
+2. **VPS** - salvar e conferir que chave e certificado batem:
+   ```bash
+   mkdir -p /home/admin/certs/cloudflare-origin && chmod 700 /home/admin/certs/cloudflare-origin
+   nano /home/admin/certs/cloudflare-origin/ivana.academy.crt     # colar o certificado
+   nano /home/admin/certs/cloudflare-origin/ivana.academy.key     # colar a chave privada
+   chmod 600 /home/admin/certs/cloudflare-origin/ivana.academy.key
+   cd /home/admin/certs/cloudflare-origin
+   openssl x509 -noout -subject -issuer -enddate -in ivana.academy.crt
+   [ "$(openssl x509 -noout -pubkey -in ivana.academy.crt | sha256sum)" = \
+     "$(openssl pkey -pubout -in ivana.academy.key | sha256sum)" ] && echo "chave OK"
+   ```
+3. **Aplicar no moodle-v2** (~8s de restart):
+   ```bash
+   CFG=/home/admin/devcontainer
+   cp -a $CFG/certs/server.crt $CFG/certs/server.crt.le-bak; cp -a $CFG/certs/server.key $CFG/certs/server.key.le-bak
+   cp /home/admin/certs/cloudflare-origin/ivana.academy.crt $CFG/certs/server.crt
+   cp /home/admin/certs/cloudflare-origin/ivana.academy.key $CFG/certs/server.key
+   chmod 600 $CFG/certs/server.key
+   docker restart moodle-v2
+   echo | openssl s_client -connect localhost:443 -servername ivana.academy 2>/dev/null | openssl x509 -noout -issuer -enddate
+   ```
+   Esperado: `issuer=... CloudFlare Origin ...`. Os proximos deploys mantem esse certificado
+   (`prepare.sh` prefere `/home/admin/certs/cloudflare-origin` ao Let's Encrypt).
+4. **Cloudflare** > SSL/TLS > Overview > modo **Full (strict)**. Conferir o site. Se der
+   **526**, voltar para **Full** e revisar o passo 3.
+5. **Cron** (`crontab -e`): remover a linha do `certbot ... --dns-route53` (nao renova) e a
+   `docker restart moodle` (reinicia/liga o v1 antigo no dia 1).

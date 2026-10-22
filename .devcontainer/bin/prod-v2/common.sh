@@ -11,6 +11,8 @@ COMPOSE_DIR="/home/admin/devcontainer"
 STATE_FILE="${V2_BASE_DIR}/last-switch.env"
 BACKUP_DIR="/backups"
 LE_LIVE="/home/admin/local/letsencrypt/live/ivana.academy"
+# Cloudflare Origin CA (15 anos, SSL "Full (strict)"): preferido quando existe
+ORIGIN_CERT_DIR="/home/admin/certs/cloudflare-origin"
 REPO_URL="https://github.com/leonardodg/ivana-academy.git"
 PUBLIC_URL="https://ivana.academy/login/index.php"
 
