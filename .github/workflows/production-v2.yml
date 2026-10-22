@@ -1,7 +1,13 @@
-name: Build PRODUCTION v2 image
+name: Deploy PRODUCTION v2 (build + prepare)
 
-# Builda, valida (security & performance gate) e publica a imagem v2.
-# NAO acessa a VPS: todos os passos na producao sao manuais, seguindo
+# 1. docker:          builda e publica a imagem v2 (target production)
+# 2. validate:        security & performance gate na mesma imagem
+# 3. prepare-vps:     na EC2, SEM tirar o site do ar (prepare.sh):
+#                     checkout do codigo em /home/admin/moodle-v2/code, env,
+#                     secrets, certs e docker pull. Se o moodle-v2 ja estiver
+#                     no ar, so faz o pull (nao mexe no codigo em uso).
+#
+# A TROCA v1 -> v2 e o upgrade.php NUNCA rodam aqui: sao manuais, etapa C de
 # .devcontainer/docs/UPGRADE-PHP83-MOODLE-4515-MANUAL.md
 
 env:
@@ -12,6 +18,10 @@ on:
     branches:
       - release/production-v2
   workflow_dispatch:
+
+concurrency:
+  group: production-v2
+  cancel-in-progress: false
 
 jobs:
   docker:
@@ -55,3 +65,39 @@ jobs:
     with:
       image_ref: leodg/moodle-academy:4.5.15-php8.3
     secrets: inherit
+
+  prepare-vps:
+    name: Prepare v2 on AWS EC2 (no downtime, no switch)
+    needs: [docker, validate-production]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      # Scripts ficam fora do diretorio de codigo: o prepare.sh faz checkout
+      # em /home/admin/moodle-v2/code e nao pode estar rodando de dentro dele.
+      - name: Sync prod-v2 scripts
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rlzvc --delete"
+          SOURCE: ".devcontainer/bin/prod-v2/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: /home/admin/devcontainer/bin/prod-v2/
+
+      - name: Run prepare.sh
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 20m
+          script: |
+            set -e
+            chmod +x /home/admin/devcontainer/bin/prod-v2/*.sh
+            /home/admin/devcontainer/bin/prod-v2/prepare.sh "${{ github.ref_name }}" "${{ env.IMAGE_TAG }}"
+            echo "::notice::v2 preparado. Troca v1 -> v2 + upgrade.php: manual (guia, etapa C)."
