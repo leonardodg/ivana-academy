@@ -134,12 +134,16 @@ if [[ "${ENVIRONMENT:-production}" =~ ^(production|prod)$ || "${CRON_ENABLED}" =
 
     declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID' > /container.env 2>/dev/null || true
 
-    if [ -f "/var/www/html/moodle-cron" ] && command -v crontab >/dev/null 2>&1; then
-        crontab /var/www/html/moodle-cron
+    # Imagem: /usr/local/etc/moodle-cron. Fallback legado: raiz do codigo.
+    CRON_FILE="/usr/local/etc/moodle-cron"
+    [ -f "$CRON_FILE" ] || CRON_FILE="/var/www/html/moodle-cron"
+
+    if [ -f "$CRON_FILE" ] && command -v crontab >/dev/null 2>&1; then
+        crontab "$CRON_FILE"
         service cron restart 2>/dev/null || true
-        echo "✅ Service Cron Configured"
+        echo "✅ Service Cron Configured ($CRON_FILE)"
     else
-        [ ! -f "/var/www/html/moodle-cron" ] && echo "⚠ File moodle-cron NOT FOUND!"
+        [ ! -f "$CRON_FILE" ] && echo "⚠ File moodle-cron NOT FOUND!"
         command -v crontab >/dev/null 2>&1 || echo "⚠ Command CRONTAB binary NOT FOUND!"
     fi
 else
@@ -156,8 +160,10 @@ if [ "$CURRENT_PERM" != "755" ]; then
     echo "✅ Adjusted permissions CHMOD!"
 fi
 
+# So o moodledata: /var/www/html pode ser bind-mount do codigo (producao v2),
+# e um chown ali quebraria o git do usuario dono do checkout na VPS.
 if [ "$(stat -c '%U' /var/www/moodledata)" != "www-data" ]; then
-    chown -R www-data:www-data /var/www/html /var/www/moodledata 2>/dev/null || true
+    chown -R www-data:www-data /var/www/moodledata 2>/dev/null || true
     echo "✅ Adjusted permissions CHOWN!"
 fi
 

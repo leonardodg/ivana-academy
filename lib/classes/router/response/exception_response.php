@@ -121,9 +121,19 @@ abstract class exception_response extends \core\router\schema\response\response 
         \Exception $exception,
         ...$extra,
     ): array {
+        // Do not use $CFG->dirroot because it might not be available in destructors.
+        $dirroot = realpath(dirname(__DIR__, 4));
+
         $data = [
             'message' => $exception->getMessage(),
-            'stacktrace' => $exception->getTrace(),
+            'stacktrace' => array_map(
+                fn ($frame): array => array_filter($frame, fn ($key) => $key !== 'args', ARRAY_FILTER_USE_KEY),
+                array_map(
+                    fn ($trace): array => array_key_exists('file', $trace)
+                        ? array_merge($trace, ['file' => str_replace($dirroot, '', realpath($trace['file']))])
+                        : $trace,
+                    $exception->getTrace()),
+            ),
         ];
 
         if (is_a($exception, \moodle_exception::class)) {
