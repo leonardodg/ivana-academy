@@ -5,9 +5,10 @@ name: Deploy PRODUCTION v2 (build + prepare)
 # 3. prepare-vps:     na EC2, SEM tirar o site do ar (prepare.sh):
 #                     checkout do codigo em /home/admin/moodle-v2/code, env,
 #                     secrets, certs e docker pull. Se o moodle-v2 ja estiver
-#                     no ar, so faz o pull (nao mexe no codigo em uso).
+#                     no ar, so faz o pull: NAO mexe no codigo em uso
+#                     (atualizar codigo com o v2 no ar e manual, etapa E).
 #
-# A TROCA v1 -> v2 e o upgrade.php NUNCA rodam aqui: sao manuais, etapa C de
+# A TROCA v1 -> v2 e o upgrade.php NUNCA rodam aqui: sao manuais, etapas C/E de
 # .devcontainer/docs/UPGRADE-PHP83-MOODLE-4515-MANUAL.md
 
 env:
@@ -30,6 +31,9 @@ jobs:
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
+
+      - name: Lint AMD builds (named define, no ES modules)
+        run: python3 .github/scripts/amd_lint.py
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -102,4 +106,3 @@ jobs:
             set -e
             chmod +x /home/admin/devcontainer/bin/prod-v2/*.sh
             /home/admin/devcontainer/bin/prod-v2/prepare.sh "${{ github.ref_name }}" "${{ env.IMAGE_TAG }}"
-            echo "::notice::v2 preparado. Troca v1 -> v2 + upgrade.php: manual (guia, etapa C)."
