@@ -66,7 +66,7 @@ class cachestore_redis extends store implements
     const TTL_EXPIRE_BATCH = 10000;
 
     /** @var int The number of seconds to wait for a connection or response from the Redis server. */
-    const CONNECTION_TIMEOUT = 10;
+    const CONNECTION_TIMEOUT = 3;
 
     /**
      * Name of this store.
@@ -116,6 +116,14 @@ class cachestore_redis extends store implements
      * @var int
      */
     protected $compressor = self::COMPRESSOR_NONE;
+
+
+    /**
+     * The number of seconds to wait for a connection or response from the Redis server.
+     *
+     * @var int
+     */
+    protected $connectiontimeout = self::CONNECTION_TIMEOUT;
 
     /**
      * Bytes read or written by last call to set()/get() or set_many()/get_many().
@@ -197,6 +205,9 @@ class cachestore_redis extends store implements
         if (array_key_exists('compressor', $configuration)) {
             $this->compressor = (int)$configuration['compressor'];
         }
+        if (array_key_exists('connectiontimeout', $configuration)) {
+            $this->connectiontimeout = (int)$configuration['connectiontimeout'];
+        }
         if (array_key_exists('lockwait', $configuration)) {
             $this->lockwait = (int)$configuration['lockwait'];
         }
@@ -277,8 +288,8 @@ class cachestore_redis extends store implements
                     $redis = new RedisCluster(
                         name: null,
                         seeds: $trimmedservers,
-                        timeout: self::CONNECTION_TIMEOUT, // Timeout.
-                        read_timeout: self::CONNECTION_TIMEOUT, // Read timeout.
+                        timeout: $this->connectiontimeout, // Timeout.
+                        read_timeout: $this->connectiontimeout, // Read timeout.
                         persistent: true,
                         auth: $password,
                         context: !empty($opts) ? $opts : null,
@@ -287,8 +298,8 @@ class cachestore_redis extends store implements
                     $redis = new RedisCluster(
                         null,
                         $trimmedservers,
-                        self::CONNECTION_TIMEOUT,
-                        self::CONNECTION_TIMEOUT,
+                        $this->connectiontimeout,
+                        $this->connectiontimeout,
                         true, $password,
                         !empty($opts) ? $opts : null,
                     );
@@ -300,18 +311,18 @@ class cachestore_redis extends store implements
                     $redis->connect(
                         host: $server,
                         port: $port,
-                        timeout: self::CONNECTION_TIMEOUT, // Timeout.
+                        timeout: $this->connectiontimeout, // Timeout.
                         retry_interval: 100, // Retry interval.
-                        read_timeout: self::CONNECTION_TIMEOUT, // Read timeout.
+                        read_timeout: $this->connectiontimeout, // Read timeout.
                         context: $opts,
                     );
                 } else {
                     $redis->connect(
                         $server, $port,
-                        self::CONNECTION_TIMEOUT,
+                        $this->connectiontimeout,
                         null,
                         100,
-                        self::CONNECTION_TIMEOUT,
+                        $this->connectiontimeout,
                         $opts,
                     );
                 }
@@ -704,12 +715,33 @@ class cachestore_redis extends store implements
     }
 
     /**
+     * Finds all of the keys being used by this cache store instance using a scan.
+     * This is preferred over keys to avoid blocking the server for a long time.
+     *
+     * @param string $prefix
+     * @return array of all matching keys in the hash as a numbered array.
+     */
+    protected function scan_keys($prefix = '') {
+        $return = [];
+        $iterator = null;
+        do {
+            $results = $this->redis->hScan($this->hash, $iterator, "$prefix*", 1000);
+            if ($results !== false) {
+                foreach ($results as $key => $value) {
+                    $return[] = $key;
+                }
+            }
+        } while ($iterator != 0);
+        return $return;
+    }
+
+    /**
      * Finds all of the keys being used by this cache store instance.
      *
      * @return array of all keys in the hash as a numbered array.
      */
     public function find_all() {
-        return $this->redis->hKeys($this->hash);
+        return $this->scan_keys();
     }
 
     /**
@@ -720,13 +752,7 @@ class cachestore_redis extends store implements
      * @return array List of keys that match this prefix.
      */
     public function find_by_prefix($prefix) {
-        $return = [];
-        foreach ($this->find_all() as $key) {
-            if (strpos($key, $prefix) === 0) {
-                $return[] = $key;
-            }
-        }
-        return $return;
+        return $this->scan_keys($prefix);
     }
 
     /**
@@ -863,6 +889,7 @@ class cachestore_redis extends store implements
             'password' => $data->password,
             'serializer' => $data->serializer,
             'compressor' => $data->compressor,
+            'connectiontimeout' => $data->connectiontimeout,
             'encryption' => $data->encryption,
             'cafile' => $data->cafile,
             'clustermode' => $data->clustermode,
@@ -886,6 +913,9 @@ class cachestore_redis extends store implements
         }
         if (!empty($config['compressor'])) {
             $data['compressor'] = $config['compressor'];
+        }
+        if (!empty($config['connectiontimeout'])) {
+            $data['connectiontimeout'] = $config['connectiontimeout'];
         }
         if (!empty($config['encryption'])) {
             $data['encryption'] = $config['encryption'];

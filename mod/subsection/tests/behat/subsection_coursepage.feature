@@ -18,12 +18,13 @@ Feature: Users view subsections on course page
       | teacher1    | C1        | editingteacher    |
       | student1    | C1        | student           |
     And the following "activities" exist:
-      | activity   | name             		| course    | idnumber | section |
-      | subsection | Subsection1      		| C1        | sub1     | 1       |
-      | page       | Page1 in Subsection1 | C1        | page11   | 4       |
-      | subsection | Subsection2      		| C1        | sub2     | 1       |
-      | data       | New database         | C1        | data1    | 3       |
-      | page       | New page             | C1        | page1    | 3       |
+      | activity   | name                 | course | idnumber | section |
+      | subsection | Subsection1          | C1     | sub1     | 1       |
+      | page       | Page1 in Subsection1 | C1     | page11   | 4       |
+      | subsection | Subsection2          | C1     | sub2     | 1       |
+      | data       | New database         | C1     | data1    | 3       |
+      | page       | New page             | C1     | page1    | 3       |
+
   @javascript
   Scenario: Student can view, expand and collapse subsections on course page
     When I log in as "student1"
@@ -110,3 +111,15 @@ Feature: Users view subsections on course page
     Then I should see "New forum" in the "Section 3" "section"
     And "New database" "text" should appear before "New forum" "text"
     And "New forum" "text" should appear before "New page" "text"
+
+  @javascript
+  Scenario: Teacher can subsections after moving the parent section
+    Given I log in as "teacher1"
+    And I am on "Course 1" course homepage with editing mode on
+    And I open section "1" edit menu
+    And I click on "Move" "link" in the "Section 1" "section"
+    And I click on "Section 3" "link" in the "Move section" "dialogue"
+    And "Section 1" "section" should appear after "Section 3" "section"
+    When I click on "Add content" "button" in the "Section 1" "section"
+    And I click on "Subsection" "link" in the ".dropdown-menu.show" "css_element"
+    Then I should see "New subsection" in the "Section 1" "section"

@@ -24,23 +24,23 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Moove';
-$string['configtitle'] = 'Moove';
+$string['access'] = 'Access';
 $string['choosereadme'] = 'Moove is a modern highly-customisable theme. This theme is intended to be used directly, or as a parent theme when creating new themes utilising Bootstrap 4.';
-
+$string['configtitle'] = 'Moove';
 $string['currentinparentheses'] = '(current)';
-$string['region-side-pre'] = 'Right';
-$string['prev_section'] = 'Previous section';
+$string['donthaveanaccount'] = 'Don\'t have an account?';
+$string['needsupport'] = 'Need support for your Moodle site? ';
+$string['next_activity'] = 'Next activity';
 $string['next_section'] = 'Next section';
+$string['pleasuretohelp'] = 'It will be a pleasure to help you!';
+$string['pluginname'] = 'Moove';
+
+$string['prev_activity'] = 'Previous activity';
+$string['prev_section'] = 'Previous section';
+$string['region-side-pre'] = 'Right';
+$string['signinwith'] = 'Sign in with';
 $string['themedevelopedby'] = 'This theme was customize by';
 $string['themedevelopedbyconectimepartner'] = 'a Brazilian Moodle Partner Company.';
-$string['needsupport'] = 'Need support for your Moodle site? ';
-$string['pleasuretohelp'] = 'It will be a pleasure to help you!';
-$string['access'] = 'Access';
-$string['prev_activity'] = 'Previous activity';
-$string['next_activity'] = 'Next activity';
-$string['donthaveanaccount'] = 'Don\'t have an account?';
-$string['signinwith'] = 'Sign in with';
 
 // General settings tab.
 $string['generalsettings'] = 'General';

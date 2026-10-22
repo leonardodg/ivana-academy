@@ -24,6 +24,7 @@
 
 namespace gradereport_singleview\local\screen;
 
+use context_course;
 use grade_report;
 use gradereport_singleview\local\ui\range;
 use gradereport_singleview\local\ui\bulk_insert;
@@ -217,8 +218,13 @@ class grade extends tablelike implements selectable_items, filterable_items {
         $grade = $this->fetch_grade_or_default($this->item, $item->id);
 
         $gradestatus = '';
+
+        // Show hidden icon if the grade is hidden and the user has permission to view hidden grades.
+        $showhiddenicon = $grade->is_hidden() &&
+            has_capability('moodle/grade:viewhidden', context_course::instance($this->courseid));
+
         $context = [
-            'hidden' => $grade->is_hidden(),
+            'hidden' => $showhiddenicon,
             'locked' => $grade->is_locked(),
         ];
 
@@ -417,9 +423,11 @@ class grade extends tablelike implements selectable_items, filterable_items {
         $title = get_string('showallgrades', 'core_grades');
         $menuitems[] = new \action_menu_link_secondary($url, null, $title);
         $menu = new \action_menu($menuitems);
-        $icon = $OUTPUT->pix_icon('i/moremenu', get_string('actions'));
+        $label = get_string('actions');
+        $icon = $OUTPUT->pix_icon('i/moremenu', '') . \core\output\html_writer::span($label, 'sr-only d-inline-block');
         $extraclasses = 'btn btn-link btn-icon icon-size-3 d-flex align-items-center justify-content-center';
         $menu->set_menu_trigger($icon, $extraclasses);
+        $menu->triggerattributes['title'] = $label;
         $menu->set_menu_left();
         $menu->set_boundary('window');
 

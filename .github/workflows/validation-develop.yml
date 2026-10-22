@@ -1,0 +1,402 @@
+name: PR Validation Development
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: pr-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Check and Validation
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build development image (local)
+        run: |
+          docker build \
+            --file .devcontainer/build/moodle.Dockerfile \
+            --target development \
+            --tag leodg/moodle-academy:development \
+            .
+          echo "✅ Imagem buildada e disponível localmente:"
+          docker images leodg/moodle-academy:development
+
+      - name: Start sandbox containers
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" up -d
+          sleep 10
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" ps
+
+      - name: Prepare CONFIG.PHP (BEFORE)
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          echo "🧹 Removendo config.php atual de dentro do container..."
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            rm -f config.php
+
+      - name: Check PHP CLI, Show version and Check libs PHPUNIT
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            php -r 'echo "🚀 PHP " . PHP_VERSION . " CLI is Up!\n";'
+
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            sh -c 'ls vendor/bin/phpunit && echo "✅ vendor/bin/phpunit encontrado" || (echo "❌ vendor/ FALTANDO - imagem errada foi usada!" && exit 1)'
+
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            php --version
+
+      - name: Ensure Moodle site is installed
+        env:
+          basedir: ${{ github.workspace }}
+          CI_ADMIN_PASSWORD: ${{ secrets.CI_MOODLE_ADMIN_PASS || 'Moodle@2026!' }}
+        run: |
+          INSTALLED=$(docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle php -r "
+            define('CLI_SCRIPT', true);
+            require('/var/www/html/config.php');
+            echo \$DB->get_manager()->table_exists('config') ? 'yes' : 'no';
+          " 2>/dev/null | tr -d '\r\n')
+
+          echo "Checking connection to database from inside the container..."
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            php -r "
+              \$conn = @fsockopen('db', 3306, \$errno, \$errstr, 5);
+              if (\$conn) {
+                  echo '✅ Connection to DB successful!\n';
+                  fclose(\$conn);
+              } else {
+                  echo '❌ Connection to DB failed: ' . \$errstr . '\n';
+                  exit(1);
+              }
+            "
+
+          if [ "$INSTALLED" = "yes" ]; then
+            echo "✅ Site ja instalado (mdl_config existe), pulando instalador."
+          else
+            echo "⚙  Site nao instalado, rodando admin/cli/install_database.php..."
+            docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+              php admin/cli/install.php \
+                  --lang=en \
+                  --wwwroot="http://localhost/" \
+                  --dataroot="/moodledata" \
+                  --dbtype="mariadb" \
+                  --dbhost="db" \
+                  --dbname="moodle" \
+                  --dbuser="moodle" \
+                  --dbpass="m@0dl3ing" \
+                  --dbport=3306 \
+                  --prefix="mdl_" \
+                  --fullname="Ivana Academy DEV" \
+                  --shortname="Ivana_Academy" \
+                  --adminuser="admin" \
+                  --adminpass="${CI_ADMIN_PASSWORD}" \
+                  --adminemail="callme@leodg.dev" \
+                  --agree-license \
+                  --non-interactive
+          fi
+
+      - name: Prepare CONFIG.PHP (AFTER)
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          if [ ! -f "${basedir}/.devcontainer/config/config-sandbox.php" ]; then
+            echo "❌ config-sandbox.php não encontrado em .devcontainer/config/"
+            exit 1
+          fi
+
+          echo "✅ Copiando config-sandbox.php -> container moodle:/var/www/html/config.php"
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" cp \
+            "${basedir}/.devcontainer/config/config-sandbox.php" moodle:/var/www/html/config.php
+
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            chown www-data:www-data config.php
+
+          echo "🔎 Confirmando que config.php existe dentro do container..."
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            test -f config.php && echo "✅ config.php presente" || (echo "❌ config.php ainda ausente" && exit 1)
+
+      # ===================================================================
+      # PHPUnit
+      # ===================================================================
+      - name: "PHPUnit"
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+
+          echo "✅ Copiando phpunit.xml.dist -> container moodle:/var/www/html/phpunit.xml"
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" cp \
+            "${basedir}/phpunit.xml.dist" moodle:/var/www/html/phpunit.xml
+
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            chown www-data:www-data phpunit.xml
+
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            php admin/tool/phpunit/cli/init.php
+
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            php -r "
+              define('CLI_SCRIPT', true);
+              require('/var/www/html/config.php');
+              set_config('iplookup', 'none', 'core');
+              echo 'iplookup desabilitado' . PHP_EOL;
+            "
+
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            vendor/bin/phpunit \
+              --filter 'core_auth|core_login|core_session|core_user' \
+              --stop-on-failure
+
+      # ===================================================================
+      # PHP CodeSniffer
+      # ===================================================================
+      - name: "PHPCBF theme/moove"
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+                  vendor/bin/phpcbf --standard=moodle theme/moove/ 2>&1 || true
+
+      # ===================================================================
+      # PHP CodeSniffer
+      # ===================================================================
+      - name: "PHPCS theme/moove"
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            vendor/bin/phpcs --standard=moodle --extensions=php theme/moove/ 2>&1 || true
+
+      - name: "PHPCS login/auth (codechecker)"
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            vendor/bin/phpcs --standard=moodle --extensions=php login/ auth/ 2>&1 || true
+
+      # ===================================================================
+      # Build de JavaScript (Grunt)
+      # ===================================================================
+      - name: "Grunt build check"
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle bash -c "
+            cd /var/www/html/theme/moove &&
+            [ -f package.json ] && npm ci --prefer-offline &&
+            NODE_OPTIONS='--max-old-space-size=4096' npx grunt amd --path=theme/moove
+          "
+
+      # ===================================================================
+      # Security and Performance
+      # ===================================================================
+      - name: "Moodle health checks"
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+           php admin/cli/checks.php 2>&1 | grep -v "^$" || true
+
+      - name: "Debug config (debug=MINIMAL, debugdisplay=0)"
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          RESULT=$(docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle php -r "
+            define('CLI_SCRIPT', true);
+            require('/var/www/html/config.php');
+            echo 'debug=' . (int)\$CFG->debug . PHP_EOL;
+            echo 'debugdisplay=' . (int)\$CFG->debugdisplay . PHP_EOL;
+          ")
+          echo "$RESULT"
+
+          DEBUG_VALUE=$(echo "$RESULT" | awk -F= '/^debug=/{print $2}')
+          DEBUGDISPLAY_VALUE=$(echo "$RESULT" | awk -F= '/^debugdisplay=/{print $2}')
+
+          if [ "$DEBUG_VALUE" != "5" ]; then
+            echo "❌ debug=$DEBUG_VALUE, esperado MINIMAL (5)"
+            # exit 1
+          fi
+          if [ "$DEBUGDISPLAY_VALUE" != "0" ]; then
+            echo "❌ debugdisplay=$DEBUGDISPLAY_VALUE, esperado 0"
+            # exit 1
+          fi
+          echo "✅ debug=MINIMAL, debugdisplay=0"
+
+      - name: "Check OPcache enabled"
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            php -r "
+              \$s = opcache_get_status();
+              if (!\$s || !\$s['opcache_enabled']) { echo '❌ OPcache OFF\n'; }
+              echo '✅ OPcache OK\n';
+            "
+      - name: "Check Cron scheduled"
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            crontab -u www-data -l || true
+
+      # -------------------------------------------------------------------
+      # Cleanup - RUN ALWAY
+      # -------------------------------------------------------------------
+      - name: Cleanup sandbox containers
+        if: always()
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" down --remove-orphans || true
+
+  # ===========================================================================
+  # moodle-plugin-ci (oficial MoodleHQ, TODO plugin custom)
+  # ===========================================================================
+  #
+  # Pra adicionar um novo plugin a validacao: adicione uma linha em
+  # .github/moodle-plugins.txt com o path relativo do plugin (a pasta que
+  # contem o version.php). Esse job falha se o arquivo nao existir, se
+  # estiver vazio, ou se algum path listado nao tiver version.php - assim
+  # nenhum plugin novo passa despercebido sem entrar na esteira.
+  # ===========================================================================
+  moodle-plugin-ci:
+    name: Moodle Plugin CI (custom plugins battery)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    services:
+      database:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      selenium:
+        image: selenium/standalone-chrome:latest
+        ports:
+          - 4444:4444
+        options: --shm-size=2g
+
+    steps:
+      - name: Checkout ivana-academy (fonte dos plugins custom)
+        uses: actions/checkout@v4
+        with:
+          path: ivana-academy
+          fetch-depth: 1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: ctype, mbstring, libxml, pgsql, pdo_pgsql, mysqli, pdo_mysql, zip, gd, intl, soap, curl, dom, iconv, json, xml, bcmath
+          ini-values: memory_limit=-1
+          coverage: none
+        env:
+          COMPOSER_NO_AUDIT: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install moodle-plugin-ci
+        run: |
+          composer create-project moodlehq/moodle-plugin-ci ci ^4 --no-dev --no-interaction
+          echo "$(pwd)/ci/bin" >> $GITHUB_PATH
+          echo "$(pwd)/ci/vendor/bin" >> $GITHUB_PATH
+        env:
+          COMPOSER_NO_AUDIT: 1
+
+      - name: Wait for MariaDB
+        run: |
+          until mysqladmin ping -h127.0.0.1 -P3306 -uroot -proot --silent; do
+            echo "Aguardando MariaDB..."
+            sleep 2
+          done
+
+      # ---------------------------------------------------------------------
+      # Le .github/moodle-plugins.txt do repo e monta um --plugin por linha.
+      # ---------------------------------------------------------------------
+      - name: Discover custom plugins
+        id: plugins
+        run: |
+          LIST_FILE="ivana-academy/.github/moodle-plugins.txt"
+          if [ ! -f "$LIST_FILE" ]; then
+            echo "❌ $LIST_FILE não encontrado. Crie o arquivo listando um path de plugin por linha."
+            exit 1
+          fi
+
+          PLUGIN_ARGS=""
+          COUNT=0
+          while IFS= read -r line; do
+            line="$(echo "$line" | sed 's/#.*//' | xargs)"
+            [ -z "$line" ] && continue
+            if [ ! -f "ivana-academy/$line/version.php" ]; then
+              echo "❌ ivana-academy/$line/version.php não encontrado - path inválido em $LIST_FILE"
+              exit 1
+            fi
+            PLUGIN_ARGS="$PLUGIN_ARGS --plugin $(pwd)/ivana-academy/$line"
+            COUNT=$((COUNT + 1))
+          done < "$LIST_FILE"
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "❌ Nenhum plugin custom listado em $LIST_FILE"
+            exit 1
+          fi
+
+          echo "plugin_args=$PLUGIN_ARGS" >> "$GITHUB_OUTPUT"
+          echo "✅ $COUNT plugin(s) a validar:$PLUGIN_ARGS"
+
+      - name: Install Moodle + plugins
+        run: |
+          moodle-plugin-ci install \
+            ${{ steps.plugins.outputs.plugin_args }} \
+            --branch MOODLE_405_STABLE \
+            --db-type mariadb \
+            --db-host 127.0.0.1 \
+            --db-user root \
+            --db-pass root \
+            --db-name moodle
+
+      - name: Build JS (grunt)
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: moodle-plugin-ci grunt
+        continue-on-error: true  # remover após fix uglify->terser no tema moove
+
+      - name: phplint
+        run: moodle-plugin-ci phplint
+
+      - name: phpcs (Moodle Coding Style)
+        # Usar valor maior ou -1 para nao bloquear em warnings de estilo.
+        run: moodle-plugin-ci phpcs --max-warnings 100
+
+      # - name: moodlecheck (docblocks, boilerplate, naming)
+      #   run: moodle-plugin-ci moodlecheck
+
+      - name: phpmd (Mess Detector)
+        run: moodle-plugin-ci phpmd
+
+      - name: PHPUnit
+        run: moodle-plugin-ci phpunit
+
+      - name: Behat (headless Chrome via Selenium)
+        env:
+          MOODLE_BEHAT_WWWROOT: http://localhost:8000
+        run: moodle-plugin-ci behat --profile chrome

@@ -331,7 +331,7 @@ class core_renderer extends renderer_base {
             $timeleft = $CFG->maintenance_later - time();
             // If timeleft less than 30 sec, set the class on block to error to highlight.
             $errorclass = ($timeleft < 30) ? 'alert-error alert-danger' : 'alert-warning';
-            $output .= $this->box_start($errorclass . ' moodle-has-zindex maintenancewarning m-3 alert');
+            $output .= $this->box_start($errorclass . ' moodle-has-zindex maintenancewarning alert');
             $a = new stdClass();
             $a->hour = (int)($timeleft / 3600);
             $a->min = (int)(floor($timeleft / 60) % 60);
@@ -663,8 +663,8 @@ class core_renderer extends renderer_base {
             $fullname = fullname($USER);
             // Since Moodle 2.0 this link always goes to the public profile page (not the course profile page)
             if ($withlinks) {
-                $linktitle = get_string('viewprofile');
-                $username = "<a href=\"$CFG->wwwroot/user/profile.php?id=$USER->id\" title=\"$linktitle\">$fullname</a>";
+                $userurl = new moodle_url('/user/profile.php', ['id' => $USER->id]);
+                $username = html_writer::link($userurl, $fullname);
             } else {
                 $username = $fullname;
             }
@@ -1261,6 +1261,10 @@ class core_renderer extends renderer_base {
         if ($blockid !== null) {
             $menu->set_owner_selector('#' . $blockid);
         }
+        $label = get_string('actionsmenu');
+        $icon = $this->pix_icon('i/menu', '') . html_writer::span($label, 'sr-only');
+        $menu->triggerattributes += ['title' => $label];
+        $menu->set_menu_trigger($icon, 'btn btn-sm icon-no-margin ms-1 p-1');
         $menu->attributes['class'] .= ' block-control-actions commands';
         return $this->render($menu);
     }
@@ -1351,7 +1355,9 @@ class core_renderer extends renderer_base {
         }
 
         // Add the action link.
-        $renderedresult .= $this->render_action_link($check->get_action_link());
+        if ($actionlink = $check->get_action_link()) {
+            $renderedresult .= $this->render_action_link($actionlink);
+        }
 
         return $renderedresult;
     }
@@ -1397,7 +1403,7 @@ class core_renderer extends renderer_base {
         mdl: 'MDL-83164',
     )]
     protected function render_action_menu_link(\action_menu_link $action) {
-        \core\deprecation::emit_deprecation_if_present([$this, __FUNCTION__]);
+        \core\deprecation::emit_deprecation([$this, __FUNCTION__]);
         return $this->render_action_menu__link($action);
     }
 
@@ -1410,7 +1416,7 @@ class core_renderer extends renderer_base {
         mdl: 'MDL-83164',
     )]
     protected function render_action_menu_filler(\action_menu_filler $action) {
-        \core\deprecation::emit_deprecation_if_present([$this, __FUNCTION__]);
+        \core\deprecation::emit_deprecation([$this, __FUNCTION__]);
         return $this->render_action_menu__filler($action);
     }
 
@@ -1423,7 +1429,7 @@ class core_renderer extends renderer_base {
         mdl: 'MDL-83164',
     )]
     protected function render_action_menu_primary(\action_menu_link $action) {
-        \core\deprecation::emit_deprecation_if_present([$this, __FUNCTION__]);
+        \core\deprecation::emit_deprecation([$this, __FUNCTION__]);
         return $this->render_action_menu__link_primary($action);
     }
 
@@ -1436,7 +1442,7 @@ class core_renderer extends renderer_base {
         mdl: 'MDL-83164',
     )]
     protected function render_action_menu_secondary(\action_menu_link $action) {
-        \core\deprecation::emit_deprecation_if_present([$this, __FUNCTION__]);
+        \core\deprecation::emit_deprecation([$this, __FUNCTION__]);
         return $this->render_action_menu__link_secondary($action);
     }
 
@@ -1503,10 +1509,11 @@ class core_renderer extends renderer_base {
         $context->skiptitle = strip_tags($bc->title);
         $context->showskiplink = !empty($context->skiptitle);
         $context->arialabel = $bc->arialabel;
-        $context->ariarole = !empty($bc->attributes['role']) ? $bc->attributes['role'] : 'complementary';
+        $context->ariarole = !empty($bc->attributes['role']) ? $bc->attributes['role'] : '';
         $context->class = $bc->attributes['class'];
         $context->type = $bc->attributes['data-block'];
-        $context->title = $bc->title;
+        $context->title = (string) $bc->title;
+        $context->showtitle = $context->title !== '';
         $context->content = $bc->content;
         $context->annotation = $bc->annotation;
         $context->footer = $bc->footer;
@@ -1672,14 +1679,20 @@ class core_renderer extends renderer_base {
             $attributes['class'] = 'action-icon';
         }
 
-        if ($linktext) {
-            $text = $pixicon->attributes['alt'];
-            // Set the icon as a decorative image if we're displaying the action text.
-            // Otherwise, the action name will be read twice by assistive technologies.
-            $pixicon->attributes['alt'] = '';
-            $pixicon->attributes['title'] = '';
-            $pixicon->attributes['aria-hidden'] = 'true';
-        } else {
+        $text = $pixicon->attributes['alt'];
+        // Set the icon as a decorative image. The accessible label should be within the link itself and not the icon.
+        $pixicon->attributes['alt'] = '';
+        $pixicon->attributes['title'] = '';
+        $pixicon->attributes['aria-hidden'] = 'true';
+
+        $attributes['class'] .= ' mx-1 p-1';
+        if (!$linktext) {
+            // Set a title attribute on the link for sighted users if no text is shown.
+            $attributes['title'] = $text;
+            // Style the icon button for increased target area.
+            $attributes['class'] .= ' btn btn-link icon-no-margin';
+            // Make the action text only available to screen readers.
+            $attributes['aria-label'] = $text;
             $text = '';
         }
 
@@ -1688,23 +1701,35 @@ class core_renderer extends renderer_base {
         return $this->action_link($url, $text . $icon, $action, $attributes);
     }
 
-   /**
-    * Print a message along with button choices for Continue/Cancel
-    *
-    * If a string or moodle_url is given instead of a single_button, method defaults to post.
-    *
-    * @param string $message The question to ask the user
-    * @param single_button|moodle_url|string $continue The single_button component representing the Continue answer. Can also be a moodle_url or string URL
-    * @param single_button|moodle_url|string $cancel The single_button component representing the Cancel answer. Can also be a moodle_url or string URL
-    * @param array $displayoptions optional extra display options
-    * @return string HTML fragment
-    */
+    /**
+     * Print a message along with button choices for Continue/Cancel
+     *
+     * If a string or moodle_url is given instead of a single_button, method defaults to post.
+     *
+     * @param string $message The question to ask the user
+     * @param single_button|moodle_url|string $continue The single_button component representing the Continue answer.
+     *      Can also be a moodle_url or string URL
+     * @param single_button|moodle_url|string $cancel The single_button component representing the Cancel answer.
+     *      Can also be a moodle_url or string URL
+     * @param array $displayoptions Display options (Optional).
+     *      Possible options:
+     *      - confirmtitle: The title to display above the message
+     *      - continuestr: The label to use for the continue button (if $continue is not a single_button)
+     *      - cancelstr: The label to use for the cancel button (if $cancel is not a single_button)
+     *      - headinglevel: The heading level to use for the title (1-6). Default is 4.
+     *      - type: The button type to use for the continue button (if $continue is not a single_button). Default is BUTTON_PRIMARY.
+     * @return string HTML fragment
+     */
     public function confirm($message, $continue, $cancel, array $displayoptions = []) {
 
         // Check existing displayoptions.
         $displayoptions['confirmtitle'] = $displayoptions['confirmtitle'] ?? get_string('confirm');
         $displayoptions['continuestr'] = $displayoptions['continuestr'] ?? get_string('continue');
         $displayoptions['cancelstr'] = $displayoptions['cancelstr'] ?? get_string('cancel');
+        $headinglevel = $displayoptions['headinglevel'] ?? 4;
+        if ($headinglevel < 1 || $headinglevel > 6) {
+            throw new coding_exception('The headinglevel option to $OUTPUT->confirm() must be between 1 and 6.');
+        }
 
         if ($continue instanceof single_button) {
             // Continue button should be primary if set to secondary type as it is the fefault.
@@ -1749,7 +1774,7 @@ class core_renderer extends renderer_base {
         $output = $this->box_start('generalbox modal modal-dialog modal-in-page show', 'notice', $attributes);
         $output .= $this->box_start('modal-content', 'modal-content');
         $output .= $this->box_start('modal-header px-3', 'modal-header');
-        $output .= html_writer::tag('h4', $displayoptions['confirmtitle']);
+        $output .= html_writer::tag('h' . $headinglevel, $displayoptions['confirmtitle'], ['class' => 'h4']);
         $output .= $this->box_end();
         $attributes = [
             'role' => 'alert',
@@ -2874,7 +2899,9 @@ EOD;
      * @return string the HTML to output.
      */
     public function skip_link_target($id = null) {
-        return html_writer::span('', '', ['id' => $id]);
+        // The tabindex="-1" makes the target focusable so that activating the skip link moves
+        // keyboard focus to it, rather than leaving focus on the link (which would trap the user).
+        return html_writer::span('', '', ['id' => $id, 'tabindex' => -1]);
     }
 
     /**
@@ -3079,7 +3106,8 @@ EOD;
             'hiddenfields' => (object) ['name' => 'context', 'value' => $this->page->context->id],
             'inputname' => 'q',
             'searchstring' => get_string('search'),
-            ];
+            'grouplabel' => get_string('sitewidesearch', 'search'),
+        ];
         return $this->render_from_template('core/search_input_navbar', $data);
     }
 
@@ -3786,6 +3814,7 @@ EOD;
      */
     public function blocks($region, $classes = [], $tag = 'aside', $fakeblocksonly = false) {
         $displayregion = $this->page->apply_theme_region_manipulations($region);
+        $headingid = $displayregion . '-block-region-heading';
         $classes = (array)$classes;
         $classes[] = 'block-region';
         $attributes = [
@@ -3793,12 +3822,23 @@ EOD;
             'class' => join(' ', $classes),
             'data-blockregion' => $displayregion,
             'data-droptarget' => '1',
+            'aria-labelledby' => $headingid,
         ];
+        // Generate an appropriate heading to uniquely identify the block region.
+        $blocksheading = match ($displayregion) {
+            'side-post' => get_string('blocks_supplementary'),
+            'content' => get_string('blocks_main'),
+            default => get_string('blocks'),
+        };
+        $content = html_writer::tag('h2', $blocksheading, ['class' => 'sr-only', 'id' => $headingid]);
         if ($this->page->blocks->region_has_content($displayregion, $this)) {
-            $content = html_writer::tag('h2', get_string('blocks'), ['class' => 'sr-only']) .
-                $this->blocks_for_region($displayregion, $fakeblocksonly);
-        } else {
-            $content = html_writer::tag('h2', get_string('blocks'), ['class' => 'sr-only']);
+            $content .= $this->blocks_for_region($displayregion, $fakeblocksonly);
+        }
+        // Given that <aside> has a default role of a complementary landmark and is supposed to be a top-level landmark,
+        // blocks rendered as part of the main content should not have a complementary role and should be rendered in a more generic
+        // container.
+        if ($displayregion === 'content' && $tag === 'aside') {
+            $tag = 'section';
         }
         return html_writer::tag($tag, $content, $attributes);
     }
@@ -4148,6 +4188,7 @@ EOD;
                     ];
 
                     if ($USER->id != $user->id) {
+                        $cancreatecontact = \core_message\api::can_create_contact($USER->id, $user->id);
                         $iscontact = \core_message\api::is_contact($USER->id, $user->id);
                         $isrequested = \core_message\api::get_contact_requests_between_users($USER->id, $user->id);
                         $contacturlaction = '';
@@ -4160,6 +4201,9 @@ EOD;
                         // If the user is not a contact.
                         if (!$iscontact) {
                             if ($isrequested) {
+                                // Set it to true if a request has been sent.
+                                $cancreatecontact = true;
+
                                 // We just need the first request.
                                 $requests = array_shift($isrequested);
                                 if ($requests->userid == $USER->id) {
@@ -4185,7 +4229,8 @@ EOD;
                             $contacturlaction = 'removecontact';
                             $contactimage = 't/removecontact';
                         }
-                        $userbuttons['togglecontact'] = [
+                        if ($cancreatecontact) {
+                            $userbuttons['togglecontact'] = [
                                 'buttontype' => 'togglecontact',
                                 'title' => get_string($contacttitle, 'message'),
                                 'url' => new moodle_url('/message/index.php', [
@@ -4198,6 +4243,7 @@ EOD;
                                 'linkattributes' => $linkattributes,
                                 'page' => $this->page,
                             ];
+                        }
                     }
                 }
             } else {

@@ -39,6 +39,9 @@ class core_shutdown_manager {
     /** @var bool is this manager already registered? */
     protected static $registered = false;
 
+    /** @var array A list of pcntl handlers */
+    protected static array $pcntlhandlers = [];
+
     /**
      * Register self as main shutdown handler.
      *
@@ -47,19 +50,35 @@ class core_shutdown_manager {
     public static function initialize() {
         if (self::$registered) {
             debugging('Shutdown manager is already initialised!');
+            return;
         }
         self::$registered = true;
         register_shutdown_function(array('core_shutdown_manager', 'shutdown_handler'));
 
-        // Signal handlers should only be used when dealing with a CLI script.
-        // In the case of PHP called in a web server the server is the owning process and should handle the signal chain
-        // properly itself.
+        // Signal handlers are recommended for the best possible shutdown handling.
+        // They require the 'pcntl' extension to be loaded and the following functions to be available:
+        // 'pcntl_async_signals'
+        // 'pcntl_signal'
         // The 'pcntl' extension is optional and not available on Windows.
-        if (CLI_SCRIPT && extension_loaded('pcntl') && function_exists('pcntl_async_signals')) {
-            // We capture and handle SIGINT (Ctrl+C) and SIGTERM (termination requested).
-            pcntl_async_signals(true);
-            pcntl_signal(SIGINT, ['core_shutdown_manager', 'signal_handler']);
-            pcntl_signal(SIGTERM, ['core_shutdown_manager', 'signal_handler']);
+        if (extension_loaded('pcntl')) {
+            if (function_exists('pcntl_async_signals')) {
+                // We capture and handle SIGINT (Ctrl+C) and SIGTERM (termination requested).
+                pcntl_async_signals(true);
+            }
+            if (function_exists('pcntl_signal')) {
+                $signals = [SIGINT, SIGTERM];
+
+                foreach ($signals as $signal) {
+                    if (function_exists('pcntl_signal_get_handler')) {
+                        $handler = pcntl_signal_get_handler($signal);
+                        if (is_callable($handler)) {
+                            // We can restore the original handler later if needed.
+                            self::$pcntlhandlers[$signal] = $handler;
+                        }
+                    }
+                    pcntl_signal($signal, ['core_shutdown_manager', 'signal_handler']);
+                }
+            }
         }
     }
 
@@ -105,6 +124,10 @@ class core_shutdown_manager {
                 // phpcs:ignore
                 error_log('Exception ignored in signal function ' . get_callable_name($callback) . ': ' . $e->getMessage());
             }
+        }
+        if (array_key_exists($signo, self::$pcntlhandlers)) {
+            $handler = self::$pcntlhandlers[$signo];
+            $handler($signo);
         }
 
         if ($shouldexit) {

@@ -1,0 +1,88 @@
+# =============================================================================
+# .devcontainer/compose/sandbox-production.yml
+# =============================================================================
+# Ephemeral stack used ONLY by .github/workflows/validation-production.yml.
+#
+# Unlike compose/sandbox.yml (development target, used by validation-develop),
+# this file always runs the `production` build target / the exact image that
+# is about to be deployed, so the security & performance gate reflects the
+# real deployable artifact - not a dev container with xdebug/grunt/tools.
+#
+# Usage (CI only, never for real prod - that's prod-v2.yml + a real DB/host):
+#   VALIDATE_IMAGE=leodg/moodle-academy:production-ci \
+#     docker compose -f .devcontainer/compose/sandbox-production.yml up -d
+# =============================================================================
+services:
+  moodle:
+    container_name: webserver-production-validation
+    image: ${VALIDATE_IMAGE:-leodg/moodle-academy:production-ci}
+    pull_policy: missing
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - MOODLE_URL=https://localhost
+      - ENVIRONMENT=production
+      - PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
+      - MOODLE_DEBUG=MINIMAL
+      - MOODLE_DEBUG_DISPLAY=0
+      - CRON_ENABLED=true
+      - APACHE_LOG_DIR=/var/log/apache2
+      - MOODLE_DBHOST=db
+      - MOODLE_DBNAME=moodle
+      - MOODLE_DBUSER=moodle
+      - MOODLE_DBPASS=m@0dl3ing
+
+    # moodle-entrypoint only auto-generates a self-signed cert when
+    # ENVIRONMENT=development. For this production-target validation we
+    # reuse the repo's existing self-signed dev cert so cookiesecure/https
+    # checks can actually be exercised, without touching real prod certs.
+    volumes:
+      - ../certs/develop-local.crt:/etc/ssl/certs/develop-local.crt:ro
+      - ../certs/develop-local.key:/etc/ssl/certs/develop-local.key:ro
+
+    networks:
+      - moodle_network_production_validation
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsk https://localhost/login/index.php || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  db:
+    image: mariadb:11.4
+    container_name: db-production-validation
+    command: >
+          --character-set-server=utf8mb4
+          --collation-server=utf8mb4_bin
+          --innodb_file_per_table=On
+          --wait-timeout=28800
+          --skip-log-bin
+    environment:
+      MYSQL_ROOT_PASSWORD: "m@0dl3ing"
+      MYSQL_USER: moodle
+      MYSQL_PASSWORD: "m@0dl3ing"
+      MYSQL_DATABASE: moodle
+    networks:
+      - moodle_network_production_validation
+
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  moodle_network_production_validation:
+    driver: bridge

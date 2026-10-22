@@ -1,0 +1,9 @@
+# Lista de plugins customizados/proprietários a validar via moodle-plugin-ci
+# Formato: um path por linha (relativo à raiz do repo), sem barra inicial
+# O job moodle-plugin-ci falha se algum path listado não tiver version.php
+
+# Plugins customizados do tema
+theme/moove
+
+# Plugin de disponibilidade por matrículas (Trilha 4 - descomentar quando instalado)
+# availability/condition/enrol_dates
