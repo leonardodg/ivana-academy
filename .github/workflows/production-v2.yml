@@ -1,9 +1,19 @@
-name: Deploy PRODUCTION v2 (compose) to EC2
+name: Deploy PRODUCTION v2 (prepare) to EC2
+
+# Builda/valida a imagem e PREPARA o v2 na VPS (prepare.sh): codigo em
+# /home/admin/moodle-v2/code, env, certs e docker pull - sem tirar o site do ar.
+# A TROCA v1 -> v2 e sempre manual, na VPS, em janela de manutencao:
+#   /home/admin/devcontainer/bin/prod-v2/switch-to-v2.sh
+# Runbook: .devcontainer/docs/UPGRADE-PHP83-MOODLE-4515.md
+
+env:
+  IMAGE_TAG: 4.5.15-php8.3
 
 on:
   push:
     branches:
       - release/production-v2
+  workflow_dispatch:
 
 jobs:
   docker:
@@ -32,7 +42,10 @@ jobs:
           file: .devcontainer/build/moodle.Dockerfile
           target: production
           push: true
-          tags: leodg/moodle-academy:4.5.1-v2
+          pull: true
+          tags: |
+            leodg/moodle-academy:${{ env.IMAGE_TAG }}
+            leodg/moodle-academy:${{ env.IMAGE_TAG }}-${{ github.sha }}
           build-args: |
             MOODLE_URL=${{ vars.MOODLE_URL }}
             ENVIRONMENT=production
@@ -42,7 +55,7 @@ jobs:
     needs: docker
     uses: ./.github/workflows/validation-production.yml
     with:
-      image_ref: leodg/moodle-academy:4.5.1-v2
+      image_ref: leodg/moodle-academy:4.5.15-php8.3
     secrets: inherit
 
   deploy:
@@ -58,14 +71,14 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rlgoDzvc -i --exclude=secrets/ --exclude=certs/"
+          ARGS: "-rlgoDzvc -i --exclude=secrets/ --exclude=certs/ --exclude=env/prod.env"
           SOURCE: ".devcontainer/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: /home/admin/devcontainer/
           # TARGET: ${{ vars.REMOTE_TARGET_V2 }}
 
-      - name: Deploy via docker compose
+      - name: Prepare v2 on EC2 (no downtime)
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.REMOTE_HOST }}
@@ -73,52 +86,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           timeout: 60s
-          command_timeout: 10m
+          command_timeout: 15m
           script: |
             set -e
-            cd /home/admin/devcontainer/
-
-            cp env/prod.env.example env/prod.env
-
-            mkdir -p secrets && mkdir -p certs
-
-            echo "${{ secrets.MOODLE_DBUSER }}" > secrets/db_user
-            echo "${{ secrets.MOODLE_DBPASS }}" > secrets/db_password
-            echo "${{ secrets.MOODLE_DBROOT }}" > secrets/db_root_password
-
-            sudo cat /etc/letsencrypt/live/ivana.academy/cert.pem > certs/develop-local.crt
-            sudo cat /etc/letsencrypt/live/ivana.academy/privkey.pem > certs/develop-local.key
-
-            export IMAGE_TAG=4.5.1-v2
-            export MOODLE_URL=${{ vars.MOODLE_URL }}
-            export MOODLE_DBTYPE=${{ vars.MOODLE_DBTYPE }}
-            export MOODLE_DBHOST=${{ secrets.MOODLE_DBHOST }}
-            export MOODLE_DBNAME=${{ secrets.MOODLE_DBNAME }}
-            export MOODLE_DBUSER=${{ secrets.MOODLE_DBUSER }}
-            export MOODLE_DBPASS=${{ secrets.MOODLE_DBPASS }}
-            export MOODLE_DATA=${{ vars.MOODLE_DATA }}
-            export PROD_HTTP_PORT=8080
-            export PROD_HTTPS_PORT=8443
-            export CRON_ENABLED=false
-
-            # ---------------------------------------------------------------
-            # Limpeza de containers anteriores do v2 (idempotente)
-            # ---------------------------------------------------------------
-            echo "🧹 Removendo containers v2 anteriores se existirem..."
-            docker compose --env-file env/prod.env -f compose/base.yml -f compose/prod-v2.yml \
-              down --remove-orphans 2>/dev/null || true
-            docker rm -f moodle-v2 2>/dev/null || true
-
-            # ---------------------------------------------------------------
-            # Deploy: sem db.yml (producao usa banco externo, nao container)
-            # ---------------------------------------------------------------
-            docker compose --env-file env/prod.env -f compose/base.yml -f compose/prod-v2.yml pull
-            docker compose --env-file env/prod.env -f compose/base.yml -f compose/prod-v2.yml up -d
-
-            echo "=== Status dos containers ==="
-            docker compose --env-file env/prod.env -f compose/base.yml -f compose/prod-v2.yml ps
-
-            echo "=== Verificando saude do container ==="
-            sleep 15
-            docker inspect moodle-v2 \
-              --format='Health: {{.State.Health.Status}}' 2>/dev/null || true
+            chmod +x /home/admin/devcontainer/bin/prod-v2/*.sh
+            /home/admin/devcontainer/bin/prod-v2/prepare.sh "${{ github.ref_name }}" "${{ env.IMAGE_TAG }}"
+            echo "Troca v1 -> v2 NAO executada. Na VPS: /home/admin/devcontainer/bin/prod-v2/switch-to-v2.sh"

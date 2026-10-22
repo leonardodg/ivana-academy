@@ -1,10 +1,24 @@
 # =============================================================================
-# .devcontainer/compose/prod-v2.yml
+# .devcontainer/compose/prod-v2.yml - PRODUCAO v2 (EC2 ivana-moodle-aws)
+# =============================================================================
+# Runtime (PHP 8.3 + Apache) vem da imagem; o CODIGO vem de bind-mount de um
+# diretorio proprio na VPS, separado do v1 (/home/admin/public_html), para
+# que a volta para o v1 seja so parar este container e subir o antigo.
+#
+#   v1: container `moodle`    -> /home/admin/public_html   (intocado)
+#   v2: container `moodle-v2` -> ${MOODLE_CODE_DIR}         (git checkout)
+#
+# NUNCA rodar v1 e v2 ao mesmo tempo nas portas 80/443 (VPS com ~1GB RAM).
+# A troca e feita por .devcontainer/bin/prod-v2/switch-to-v2.sh e desfeita
+# por rollback-to-v1.sh - ver .devcontainer/docs/UPGRADE-PHP83-MOODLE-4515.md
+#
+# Uso (na VPS, em /home/admin/devcontainer):
+#   docker compose --env-file env/prod.env -f compose/base.yml -f compose/prod-v2.yml up -d
 # =============================================================================
 
 services:
   moodle:
-    image: leodg/moodle-academy:${IMAGE_TAG:-4.5.1-v2}
+    image: leodg/moodle-academy:${IMAGE_TAG:-4.5.15-php8.3}
     container_name: moodle-v2
     restart: unless-stopped
 
@@ -14,30 +28,38 @@ services:
       - MOODLE_DBTYPE=${MOODLE_DBTYPE:-mariadb}
       - MOODLE_DBHOST=${MOODLE_DBHOST}
       - MOODLE_DBNAME=${MOODLE_DBNAME}
-      - MOODLE_DBUSER=${MOODLE_DBUSER}
-      - MOODLE_DBPASS=${MOODLE_DBPASS}
       - MOODLE_DBPFX=mdl_
       - MOODLE_DBCOLL=utf8mb4_bin
       - MOODLE_DATA=${MOODLE_DATA:-/var/www/moodledata}
 
-      - CRON_ENABLED=${CRON_ENABLED:-false}
+      - CRON_ENABLED=${CRON_ENABLED:-true}
       - PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
       - MOODLE_DEBUG=MINIMAL
       - MOODLE_DEBUG_DISPLAY=0
 
+    # MOODLE_DBUSER/MOODLE_DBPASS como env do container (o config.php usa
+    # getenv() e `docker exec php admin/cli/...` so ve o env do container).
+    env_file:
+      - ../secrets/db.env
+
+    secrets:
+      - ssl_cert
+      - ssl_key
+
     ports:
-      - "${PROD_HTTP_PORT:-8080}:80"
-      - "${PROD_HTTPS_PORT:-8443}:443"
+      - "${PROD_HTTP_PORT:-80}:80"
+      - "${PROD_HTTPS_PORT:-443}:443"
 
     volumes:
+      # Codigo: git checkout na VPS; config.php copiado do v1 pelo prepare.sh
+      - ${MOODLE_CODE_DIR:-/home/admin/moodle-v2/code}:/var/www/html
       - /home/admin/moodledata:/var/www/moodledata
-      - /home/admin/local/letsencrypt/:/etc/ssl/certs/letsencrypt/:ro
 
     networks:
       - moodle_v2_network
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsk https://localhost/login/index.php || exit 1"]
+      test: ["CMD-SHELL", "curl -fsk -o /dev/null https://localhost/login/index.php || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
