@@ -63,7 +63,8 @@ class question_history_view extends view {
         array $params = [],
         array $extraparams = [],
     ) {
-        $this->entryid = $extraparams['entryid'];
+        // The extra params can come straight from a web service request, so the entry id must be cleaned here.
+        $this->entryid = clean_param($extraparams['entryid'] ?? 0, PARAM_INT);
         $this->basereturnurl = new \moodle_url($extraparams['returnurl']);
         parent::__construct($contexts, $pageurl, $course, $cm, $params, $extraparams);
     }
@@ -97,18 +98,9 @@ class question_history_view extends view {
         return false;
     }
 
-    /**
-     * Default sort for question data.
-     * @return array
-     */
+    #[\Override]
     protected function default_sort(): array {
-        $defaultsort = [];
-        if (class_exists('\\qbank_viewcreator\\creator_name_column')) {
-            $sort = 'qbank_viewcreator\creator_name_column-timecreated';
-        }
-        $defaultsort[$sort] = 1;
-
-        return $defaultsort;
+        return ['qbank_history__version_number_column' => 1];
     }
 
     protected function build_query(): void {
@@ -123,9 +115,8 @@ class question_history_view extends view {
         }
 
         // Build the where clause.
-        $entryid = "qbe.id = $this->entryid";
         // Changes done here to get the questions only for the passed entryid.
-        $tests = ['q.parent = 0', $entryid];
+        $tests = ['q.parent = 0', 'qbe.id = :entryid'];
         $this->sqlparams = [];
         foreach ($this->searchconditions as $searchcondition) {
             if ($searchcondition->where()) {
@@ -135,6 +126,8 @@ class question_history_view extends view {
                 $this->sqlparams = array_merge($this->sqlparams, $searchcondition->params());
             }
         }
+        // Merged last so that a search condition cannot replace the entry id value.
+        $this->sqlparams = array_merge($this->sqlparams, ['entryid' => $this->entryid]);
         // Build the SQL.
         $sql = ' FROM {question} q ' . implode(' ', $joins);
         $sql .= ' WHERE ' . implode(' AND ', $tests);

@@ -76,10 +76,13 @@ class notification_helper {
         $sql = "SELECT DISTINCT a.id
                   FROM {assign} a
                   JOIN {course_modules} cm ON a.id = cm.instance
+                  JOIN {course} c ON a.course = c.id
                   JOIN {modules} m ON cm.module = m.id AND m.name = :modulename
              LEFT JOIN {assign_overrides} ao ON a.id = ao.assignid
                  WHERE (a.duedate < :futuretime OR ao.duedate < :ao_futuretime)
-                   AND (a.duedate > :timenow OR ao.duedate > :ao_timenow)";
+                   AND (a.duedate > :timenow OR ao.duedate > :ao_timenow)
+                   AND cm.visible = 1
+                   AND c.visible = 1";
 
         $params = [
             'timenow' => $timenow,
@@ -113,12 +116,15 @@ class notification_helper {
         $sql = "SELECT DISTINCT a.id
                   FROM {assign} a
                   JOIN {course_modules} cm ON a.id = cm.instance
+                  JOIN {course} c ON a.course = c.id
                   JOIN {modules} m ON cm.module = m.id AND m.name = :modulename
              LEFT JOIN {assign_overrides} ao ON a.id = ao.assignid
                  WHERE (a.duedate < :dd_timenow OR ao.duedate < :dd_ao_timenow)
                    AND (a.duedate > :dd_timewindow OR ao.duedate > :dd_ao_timewindow)
                    AND ((a.cutoffdate > :co_timenow OR a.cutoffdate = 0) OR
-                       (ao.cutoffdate > :co_ao_timenow OR ao.cutoffdate = 0))";
+                       (ao.cutoffdate > :co_ao_timenow OR ao.cutoffdate = 0))
+                   AND cm.visible = 1
+                   AND c.visible = 1";
 
         $params = [
             'dd_timenow' => $timenow,
@@ -147,10 +153,13 @@ class notification_helper {
         $sql = "SELECT DISTINCT a.id
                   FROM {assign} a
                   JOIN {course_modules} cm ON a.id = cm.instance
+                  JOIN {course} c ON a.course = c.id
                   JOIN {modules} m ON cm.module = m.id AND m.name = :modulename
              LEFT JOIN {assign_overrides} ao ON a.id = ao.assignid
                  WHERE (a.duedate <= :endofday OR ao.duedate <= :ao_endofday)
-                   AND (a.duedate >= :startofday OR ao.duedate >= :ao_startofday)";
+                   AND (a.duedate >= :startofday OR ao.duedate >= :ao_startofday)
+                   AND cm.visible = 1
+                   AND c.visible = 1";
 
         $params = [
             'startofday' => $day['start'],
@@ -190,6 +199,8 @@ class notification_helper {
                  WHERE (a.duedate <= :endofday OR ao.duedate <= :ao_endofday)
                    AND (a.duedate >= :startofday OR ao.duedate >= :ao_startofday)
                    AND ue.userid = :userid
+                   AND cm.visible = 1
+                   AND c.visible = 1
               ORDER BY a.duedate ASC";
 
         $params = [
@@ -216,7 +227,7 @@ class notification_helper {
         $assignmentobj = self::get_assignment_data($assignmentid);
 
         // Get our assignment users.
-        $users = $assignmentobj->list_participants(0, true);
+        $users = $assignmentobj->list_participants(0, true, false, true);
 
         foreach ($users as $key => $user) {
             // Check if the user has submitted already.
@@ -306,8 +317,14 @@ class notification_helper {
      * @param int $userid The user id.
      */
     public static function send_due_soon_notification_to_user(int $assignmentid, int $userid): void {
-        // Get assignment data.
-        $assignmentobj = self::get_assignment_data($assignmentid);
+        try {
+            // Get assignment data.
+            $assignmentobj = self::get_assignment_data($assignmentid);
+        } catch (\dml_missing_record_exception) {
+            // The assignment has vanished, nothing to do.
+            mtrace("No notification send as the assignment $assignmentid can no longer be found in the database.");
+            return;
+        }
 
         // Check if the due date still within range.
         $assignmentobj->update_effective_access($userid);
@@ -336,8 +353,14 @@ class notification_helper {
 
         $stringparams = [
             'firstname' => $user->firstname,
-            'assignmentname' => $assignmentobj->get_instance()->name,
-            'coursename' => $assignmentobj->get_course()->fullname,
+            'assignmentname' => format_string(
+                $assignmentobj->get_instance()->name,
+                options: ['context' => $assignmentobj->get_context()],
+            ),
+            'coursename' => format_string(
+                $assignmentobj->get_course()->fullname,
+                options: ['context' => $assignmentobj->get_course_context()],
+            ),
             'duedate' => userdate($duedate),
             'url' => $url,
         ];
@@ -346,7 +369,7 @@ class notification_helper {
             'user' => \core_user::get_user($user->id),
             'url' => $url->out(false),
             'subject' => get_string('assignmentduesoonsubject', 'mod_assign', $stringparams),
-            'assignmentname' => $assignmentobj->get_instance()->name,
+            'assignmentname' => $stringparams['assignmentname'],
             'html' => get_string('assignmentduesoonhtml', 'mod_assign', $stringparams),
         ];
 
@@ -379,8 +402,14 @@ class notification_helper {
      * @param int $userid The user id.
      */
     public static function send_overdue_notification_to_user(int $assignmentid, int $userid): void {
-        // Get assignment data.
-        $assignmentobj = self::get_assignment_data($assignmentid);
+        try {
+            // Get assignment data.
+            $assignmentobj = self::get_assignment_data($assignmentid);
+        } catch (\dml_missing_record_exception) {
+            // The assignment has vanished, nothing to do.
+            mtrace("No notification send as the assignment $assignmentid can no longer be found in the database.");
+            return;
+        }
 
         // Get the user and check they are a still a valid participant.
         $user = $assignmentobj->get_participant($userid);
@@ -422,8 +451,14 @@ class notification_helper {
 
         $stringparams = [
             'firstname' => $user->firstname,
-            'assignmentname' => $assignmentobj->get_instance()->name,
-            'coursename' => $assignmentobj->get_course()->fullname,
+            'assignmentname' => format_string(
+                $assignmentobj->get_instance()->name,
+                options: ['context' => $assignmentobj->get_context()],
+            ),
+            'coursename' => format_string(
+                $assignmentobj->get_course()->fullname,
+                options: ['context' => $assignmentobj->get_course_context()],
+            ),
             'duedate' => userdate($duedate),
             'url' => $url,
             'cutoffsnippet' => $snippet,
@@ -433,7 +468,7 @@ class notification_helper {
             'user' => \core_user::get_user($user->id),
             'url' => $url->out(false),
             'subject' => get_string('assignmentoverduesubject', 'mod_assign', $stringparams),
-            'assignmentname' => $assignmentobj->get_instance()->name,
+            'assignmentname' => $stringparams['assignmentname'],
             'html' => get_string('assignmentoverduehtml', 'mod_assign', $stringparams),
         ];
 
@@ -479,6 +514,12 @@ class notification_helper {
                 continue;
             }
 
+            // Check if the module is visible to the user.
+            $cm = $assignmentobj->get_course_module();
+            if (!\core_availability\info_module::is_user_visible($cm, $userid)) {
+                continue;
+            }
+
             // Check if the due date is still within range.
             $assignmentobj->update_effective_access($userid);
             $duedate = $assignmentobj->get_instance($userid)->duedate;
@@ -498,8 +539,14 @@ class notification_helper {
                 'action' => 'view',
             ];
             $assignmentsfordigest[$assignment->id] = [
-                'assignmentname' => $assignmentobj->get_instance()->name,
-                'coursename' => $assignmentobj->get_course()->fullname,
+                'assignmentname' => format_string(
+                    $assignmentobj->get_instance()->name,
+                    options: ['context' => $assignmentobj->get_context()],
+                ),
+                'coursename' => format_string(
+                    $assignmentobj->get_course()->fullname,
+                    options: ['context' => $assignmentobj->get_course_context()],
+                ),
                 'duetime' => userdate($duedate, get_string('strftimetime12', 'langconfig')),
                 'url' => new \moodle_url('/mod/assign/view.php', $urlparams),
             ];
