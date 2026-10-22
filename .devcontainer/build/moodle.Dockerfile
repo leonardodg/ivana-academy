@@ -152,6 +152,9 @@ RUN apt-get remove --purge -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+COPY .devcontainer/php/php.ini-production /usr/local/etc/php/php.ini
+COPY .devcontainer/php/opcache-prod.ini /usr/local/etc/php/conf.d/moodle-opcache.ini
+
 # Copia vendor otimizado do stage composer
 COPY --from=composer-prod --chown=www-data:www-data /app/vendor/ /var/www/html/vendor/
 

@@ -35,6 +35,7 @@ services:
 
   db:
     image: mariadb:11.4
+    container_name: db
     command: >
           --character-set-server=utf8mb4
           --collation-server=utf8mb4_bin

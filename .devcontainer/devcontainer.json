@@ -18,8 +18,7 @@
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
         "ghcr.io/devcontainers/features/common-utils:2": {},
-        "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
-        "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {}
+        "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
     },
     // Mounts are used to share configuration files and SSH keys between the host and the container.
     "mounts": [
@@ -51,9 +50,7 @@
     ],
     // Use 'postCreateCommand' to run commands after the container is created.
     "postCreateCommand": {
-        "Fix Volume Permissions": "sudo chown -R $(whoami): /commandhistory",
-        "Fix Moodle Data Permissions": "sudo chown -R www-data:www-data /var/www/moodledata-academy",
-        "Fix Moodle Code Permissions": "sudo chown -R www-data:www-data /var/www/html"
+        "Fix Volume Permissions": "sudo chown -R $(whoami): /commandhistory"
     },
     // Configure tool-specific properties.
     "customizations": {
@@ -79,12 +76,15 @@
                 "cweijan.vscode-database-client2",
                 "ms-azuretools.vscode-containers",
                 "DEVSENSE.composer-php-vscode",
-                "neilbrayfield.php-docblocker"
+                "neilbrayfield.php-docblocker",
+                "ms-vscode-remote.vscode-remote-extensionpack"
             ],
             // Add custom VS Code settings.
             "settings": {
                 "terminal.integrated.shell.linux": "/bin/bash",
-                "terminal.integrated.defaultProfile.linux": "bash"
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "php.suggest.basic": false,
+                "php.validate.enable": false
             }
         }
     },

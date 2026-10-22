@@ -37,9 +37,17 @@ jobs:
             MOODLE_URL=${{ vars.MOODLE_URL }}
             ENVIRONMENT=production
 
+  validate-production:
+    name: Validate PRODUCTION (security & performance gate)
+    needs: docker
+    uses: ./.github/workflows/validation-production.yml
+    with:
+      image_ref: leodg/moodle-academy:4.5.1-v2
+    secrets: inherit
+
   deploy:
     name: Deploy to AWS EC2 (PRODUCTION-v2)
-    needs: docker
+    needs: [docker, validate-production]
     runs-on: ubuntu-latest
     environment: production
     steps:

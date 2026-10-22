@@ -1,4 +1,4 @@
-# Ivana Academy — Moodle Platform
+# Ivana Academy - Moodle Platform
 
 Docker multi-stage, multi-environment setup for Moodle 4.5.
 
