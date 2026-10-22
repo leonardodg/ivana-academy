@@ -2,11 +2,11 @@ name: Deploy PRODUCTION v2 (build + prepare)
 
 # 1. docker:          builda e publica a imagem v2 (target production)
 # 2. validate:        security & performance gate na mesma imagem
-# 3. prepare-vps:     na EC2, SEM tirar o site do ar (prepare.sh):
+# 3. prepare-vps:     na EC2 (prepare.sh + deploy-code.sh):
 #                     checkout do codigo em /home/admin/moodle-v2/code, env,
 #                     secrets, certs e docker pull. Se o moodle-v2 ja estiver
-#                     no ar, so faz o pull: NAO mexe no codigo em uso
-#                     (atualizar codigo com o v2 no ar e manual, etapa E).
+#                     no ar, o deploy-code.sh atualiza o codigo SE nenhum
+#                     version.php mudou (restart so se .php mudou + purge).
 #
 # A TROCA v1 -> v2 e o upgrade.php NUNCA rodam aqui: sao manuais, etapas C/E de
 # .devcontainer/docs/UPGRADE-PHP83-MOODLE-4515-MANUAL.md
@@ -106,3 +106,7 @@ jobs:
             set -e
             chmod +x /home/admin/devcontainer/bin/prod-v2/*.sh
             /home/admin/devcontainer/bin/prod-v2/prepare.sh "${{ github.ref_name }}" "${{ env.IMAGE_TAG }}"
+            # Com o moodle-v2 no ar: atualiza o codigo se for seguro (nenhum
+            # version.php alterado, checkout sem mudanca local); senao falha
+            # e pede a janela manual (guia, etapa E2).
+            /home/admin/devcontainer/bin/prod-v2/deploy-code.sh "${{ github.ref_name }}"
