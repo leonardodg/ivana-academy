@@ -1,0 +1,56 @@
+name: Moodle Plugin CI & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: enrol_dates
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, libxml, mysqli, zip, gd, intl
+
+      - name: Install Moodle CI Tools
+        env:
+          COMPOSER_NO_AUDIT: 1
+        run: |
+          composer global require moodlehq/moodle-plugin-ci
+          echo "$(composer global config bin-dir --absolute)" >> $GITHUB_PATH
+
+      - name: Initialize Moodle Environment
+        run: |
+          moodle-plugin-ci install --plugin ./enrol_dates --moodle-branch MOODLE_405_STABLE
+
+      - name: Build JS
+        run: |
+          moodle-plugin-ci grunt --extra="--path=availability/condition/enrol_dates"
+
+      - name: Validate Code Standards
+        run: |
+            moodle-plugin-ci codechecker availability/condition/enrol_dates
+
+
+      - name: Create Tagged ZIP Bundle
+        run: |
+          ZIP_NAME="availability_enrol_dates-${{ github.ref_name }}.zip"
+          cd $GITHUB_WORKSPACE
+          zip -r $ZIP_NAME enrol_dates/ -x "enrol_dates/.git/*" "enrol_dates/node_modules/*" "enrol_dates/.github/*"
+          echo "ZIP_FILENAME=$ZIP_NAME" >> $GITHUB_ENV
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.ZIP_FILENAME }}
+          generate_release_notes: true 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

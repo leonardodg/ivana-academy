@@ -104,6 +104,12 @@ class MoodleODSCell {
     public $type;
     public $format;
     public $formula;
+    /**
+     * @var array Contains the number of rows and columns spanned by the merged cell.
+     *            'rows' => integer, the number of rows the cell spans.
+     *            'columns' => integer, the number of columns the cell spans.
+     */
+    public $merge;
 }
 
 
@@ -158,6 +164,8 @@ class MoodleODSWorksheet {
         if (is_array($format)) {
             $format = new MoodleODSFormat($format);
         }
+        $str = \core\dataformat::escape_spreadsheet_formula($str);
+
         $this->data[$row][$col]->value = $str;
         $this->data[$row][$col]->type = 'string';
         $this->data[$row][$col]->format = $format;

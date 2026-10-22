@@ -1,5 +1,5 @@
 # =============================================================================
-# Ivana Academy - Moodle 4.5
+# Ivana Academy - Moodle 4.5 (PHP 8.3)
 # Multi-stage build: composer → base → production | development
 #
 # Build production:
@@ -57,7 +57,7 @@ FROM composer-base AS composer-dev
 # =============================================================================
 #         STAGE BASE - SETUP SHARED BETWEEN DEVELOPMENT AND PRODUCTION
 # =============================================================================
-FROM moodlehq/moodle-php-apache:8.2 AS base
+FROM moodlehq/moodle-php-apache:8.3 AS base
 
 # Metadata
 LABEL maintainer="LeoDG <callme@leodg.dev>" \
@@ -91,7 +91,6 @@ RUN apt-get update \
        apache2 \
        apache2-bin \
        apache2-data \
-       libapache2-mod-php8.2 \
        libpam-runtime \
        libpam0g \
        gnutls-bin \
@@ -112,13 +111,14 @@ RUN mkdir -p /etc/ssl/certs \
 COPY --from=composer-base /usr/bin/composer /usr/bin/composer
 COPY .devcontainer/php/opcache.ini \
      .devcontainer/php/uploads.ini \
+     .devcontainer/php/conf.d/99-security.ini \
      /usr/local/etc/php/conf.d/
 
 # Apache: módulos e configuração via template (URL vem em runtime)
 COPY .devcontainer/apache/*.template /etc/apache2/sites-available/
 
-# Add Script to CRONTAB
-COPY --chown=www-data:www-data .devcontainer/bin/moodle-cron /var/www/html/moodle-cron
+# Add Script to CRONTAB (fora do /var/www/html: em producao o codigo e bind-mount)
+COPY .devcontainer/bin/moodle-cron /usr/local/etc/moodle-cron
 
 # Add Script Entrypoint
 COPY --chown=www-data:www-data .devcontainer/bin/moodle-entrypoint /usr/local/bin/moodle-entrypoint
@@ -126,7 +126,7 @@ COPY --chown=www-data:www-data .devcontainer/bin/moodle-entrypoint /usr/local/bi
 # Configure Moodle after installation
 COPY --chown=www-data:www-data .devcontainer/config/config-docker.php /var/www/html/config.php
 
-RUN chmod +x /var/www/html/moodle-cron \
+RUN chmod 644 /usr/local/etc/moodle-cron \
     && chmod +x /usr/local/bin/moodle-entrypoint
 
 
@@ -196,7 +196,7 @@ RUN apt-get update \
     # Node.js LTS oficial (requerido pelo Grunt, que e o bundler JS do Moodle):
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
-    # Xdebug ja embutido na imagem moodlehq/moodle-php-apache:8.2:
+    # Xdebug ja embutido na imagem moodlehq/moodle-php-apache:8.3:
     && docker-php-ext-enable xdebug \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

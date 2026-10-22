@@ -44,11 +44,14 @@ class notification_helper {
 
         $sql = "SELECT DISTINCT q.id
                   FROM {quiz} q
+                  JOIN {course} c ON q.course = c.id
                   JOIN {course_modules} cm ON q.id = cm.instance
                   JOIN {modules} m ON cm.module = m.id AND m.name = :modulename
              LEFT JOIN {quiz_overrides} qo ON q.id = qo.quiz
                  WHERE (q.timeopen < :futuretime OR qo.timeopen < :qo_futuretime)
-                   AND (q.timeopen > :timenow OR qo.timeopen > :qo_timenow)";
+                   AND (q.timeopen > :timenow OR qo.timeopen > :qo_timenow)
+                   AND cm.visible = 1
+                   AND c.visible = 1";
 
         $params = [
             'timenow' => $timenow,
@@ -76,13 +79,22 @@ class notification_helper {
         $users = get_enrolled_users(
             context: \context_module::instance($quizobj->get_cm()->id),
             withcapability: 'mod/quiz:attempt',
-            userfields: 'u.id, u.firstname',
+            userfields: 'u.id, u.firstname, u.suspended, u.auth',
+            onlyactive: true,
         );
+
+        // Filter a list of users who meet the availability conditions.
+        $info = new \core_availability\info_module($quizobj->get_cm());
+        $users = $info->filter_user_list($users);
 
         // Check for any override dates.
         $overrides = $quizobj->get_override_manager()->get_all_overrides();
 
         foreach ($users as $key => $user) {
+            if ($user->suspended || ($user->auth == 'nologin')) {
+                unset($users[$key]);
+                continue;
+            }
             // Time open and time close dates can be user specific with an override.
             // We begin by assuming it is the same as recorded in the quiz.
             $user->timeopen = $quiz->timeopen;
@@ -93,7 +105,7 @@ class notification_helper {
 
             // Update this user with any applicable override dates.
             if (!empty($overrides)) {
-                self::update_user_with_date_overrides($overrides, $user);
+                self::update_user_with_date_overrides($overrides, $quiz->course, $user);
             }
 
             // If the 'timeopen' date has no value, even after overriding, unset this user.
@@ -142,8 +154,10 @@ class notification_helper {
 
         $stringparams = [
             'firstname' => $user->firstname,
-            'quizname' => $quiz->name,
-            'coursename' => $quizobj->get_course()->fullname,
+            'quizname' => format_string($quiz->name,
+                options: ['context' => $quizobj->get_context(), 'escape' => false]),
+            'coursename' => format_string($quizobj->get_course()->fullname,
+                options: ['context' => \context_course::instance($quizobj->get_course()->id), 'escape' => false]),
             'timeopen' => userdate($user->timeopen),
             'timeclose' => !empty($user->timeclose) ? userdate($user->timeclose) : get_string('statusna'),
             'url' => $url,
@@ -153,7 +167,7 @@ class notification_helper {
             'user' => \core_user::get_user($user->id),
             'url' => $url->out(false),
             'subject' => get_string('quizopendatesoonsubject', 'mod_quiz', $stringparams),
-            'quizname' => $quiz->name,
+            'quizname' => $stringparams['quizname'],
             'html' => get_string('quizopendatesoonhtml', 'mod_quiz', $stringparams),
         ];
 
@@ -215,10 +229,11 @@ class notification_helper {
      * Update user's recorded date based on the overrides.
      *
      * @param array $overrides The overrides to check.
+     * @param int $courseid The course id of the overrides.
      * @param stdClass $user The user records we will be updating.
      */
-    protected static function update_user_with_date_overrides(array $overrides, stdClass $user): void {
-
+    protected static function update_user_with_date_overrides(array $overrides, int $courseid, stdClass $user): void {
+        $usergroupids = null;
         foreach ($overrides as $override) {
             // User override.
             if ($override->userid === $user->id) {
@@ -229,7 +244,13 @@ class notification_helper {
                 return;
             }
             // Group override.
-            if (!empty($override->groupid) && groups_is_member($override->groupid, $user->id)) {
+            if (!isset($usergroupids)) {
+                // Only load user groups if there is at least one group override.
+                // We only need to check the group ids and not grouping ids or visibility.
+                $usergroups = groups_get_user_groups($courseid, $user->id);
+                $usergroupids = array_merge(...array_values($usergroups));
+            }
+            if (!empty($override->groupid) && in_array($override->groupid, $usergroupids)) {
                 // If user is a member of multiple groups, and we have set this already, use the earliest date.
                 if ($user->overridetype === 'group' && $user->timeopen < $override->timeopen) {
                     continue;

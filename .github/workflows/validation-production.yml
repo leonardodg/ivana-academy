@@ -35,7 +35,7 @@ name: PR Validation Production
 
 on:
   pull_request:
-    branches: [release/production-v2]
+    branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_call:
     inputs:
@@ -50,10 +50,10 @@ on:
         default: ""
     outputs:
       security_exit_code:
-        description: "Exit code of admin/cli/checks.php -t security (0/1/2/3)"
+        description: "Exit code of admin/cli/checks.php --type=security (0/1/2/3)"
         value: ${{ jobs.validate.outputs.security_exit_code }}
       performance_exit_code:
-        description: "Exit code of admin/cli/checks.php -t performance (0/1/2/3)"
+        description: "Exit code of admin/cli/checks.php --type=performance (0/1/2/3)"
         value: ${{ jobs.validate.outputs.performance_exit_code }}
 
 concurrency:
@@ -109,6 +109,17 @@ jobs:
         if: inputs.image_ref != ''
         run: docker pull ${{ steps.image.outputs.ref }}
 
+      # compose/sandbox-production.yml monta ../certs/develop-local.{crt,key},
+      # que sao gitignored: gera um self-signed so para o CI (https/cookiesecure).
+      - name: Generate self-signed cert for the ephemeral stack
+        run: |
+          mkdir -p "${basedir}/.devcontainer/certs"
+          openssl req -x509 -nodes -newkey rsa:2048 -days 2 -sha256 \
+            -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost" \
+            -keyout "${basedir}/.devcontainer/certs/develop-local.key" \
+            -out "${basedir}/.devcontainer/certs/develop-local.crt"
+          chmod 644 "${basedir}/.devcontainer/certs/develop-local."*
+
       - name: Start ephemeral production-target stack
         env:
           VALIDATE_IMAGE: ${{ steps.image.outputs.ref }}
@@ -130,29 +141,34 @@ jobs:
           docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
             chown www-data:www-data config.php
 
+          # opcache.validate_timestamps=0: o Apache ja cacheou o config.php da
+          # imagem; reinicia para servir o config trocado (senao: HTTP 500).
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" restart moodle
+          for i in $(seq 1 24); do
+            docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
+              curl -fsk -o /dev/null https://localhost/login/index.php 2>/dev/null && break
+            sleep 5
+          done
+
       - name: Install Moodle (production-like, non-interactive)
         env:
           VALIDATE_IMAGE: ${{ steps.image.outputs.ref }}
         run: |
-          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
-            php admin/cli/install.php \
+          # TRAVA: so instala no banco EFEMERO desta stack (service `db` do
+          # compose/sandbox-production.yml, criado vazio e destruido no fim).
+          grep -qE "dbhost *= *'db';" "${basedir}/.devcontainer/config/config-sandbox-production.php" \
+            || { echo "::error::config-sandbox-production.php nao aponta para o db efemero"; exit 1; }
+          # config.php ja foi copiado no passo anterior: install.php recusaria.
+          # install_database.php tambem se recusa se o banco ja tiver tabelas.
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T -u www-data moodle \
+            php admin/cli/install_database.php \
                 --lang=en \
-                --wwwroot="https://localhost" \
-                --dataroot="/var/www/moodledata" \
-                --dbtype="mariadb" \
-                --dbhost="db" \
-                --dbname="moodle" \
-                --dbuser="moodle" \
-                --dbpass="m@0dl3ing" \
-                --dbport=3306 \
-                --prefix="mdl_" \
-                --fullname="Ivana Academy" \
-                --shortname="Ivana_Academy" \
                 --adminuser="admin" \
                 --adminpass="${CI_ADMIN_PASSWORD}" \
                 --adminemail="callme@leodg.dev" \
-                --agree-license \
-                --non-interactive
+                --fullname="Ivana Academy" \
+                --shortname="Ivana_Academy" \
+                --agree-license
 
       # ===================================================================
       # Status checks - informational only, never blocks the deploy.
@@ -164,7 +180,7 @@ jobs:
           echo "## 🩺 Status checks (report/status)" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
-            php admin/cli/checks.php -t status -v 2>&1 | tee -a "$GITHUB_STEP_SUMMARY" || true
+            php admin/cli/checks.php --type=status -v 2>&1 | tee -a "$GITHUB_STEP_SUMMARY" || true
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       # ===================================================================
@@ -175,10 +191,16 @@ jobs:
         id: security
         run: |
           set +e
+          # core_publicpaths usa \curl sem carregar filelib.php e so funciona
+          # com cache frio (MDL core): purge antes deixa o resultado estavel.
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T -u www-data moodle \
+            php admin/cli/purge_caches.php
           OUTPUT=$(docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
-            php admin/cli/checks.php -t security -v 2>&1)
+            php admin/cli/checks.php --type=security -v 2>&1)
           CODE=$?
           set -e
+          # checks.php que quebra com excecao sai com 1 (= WARNING): tratar como falha
+          if echo "$OUTPUT" | grep -q '!!! Exception'; then CODE=3; fi
 
           echo "$OUTPUT"
           echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
@@ -209,9 +231,11 @@ jobs:
         run: |
           set +e
           OUTPUT=$(docker compose -f "${basedir}/.devcontainer/compose/sandbox-production.yml" exec -T moodle \
-            php admin/cli/checks.php -t performance -v 2>&1)
+            php admin/cli/checks.php --type=performance -v 2>&1)
           CODE=$?
           set -e
+          # checks.php que quebra com excecao sai com 1 (= WARNING): tratar como falha
+          if echo "$OUTPUT" | grep -q '!!! Exception'; then CODE=3; fi
 
           echo "$OUTPUT"
           echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"

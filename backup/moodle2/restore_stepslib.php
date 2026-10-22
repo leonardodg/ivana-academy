@@ -1044,6 +1044,17 @@ class restore_load_included_files extends restore_structure_step {
 
         $data = (object)$data; // handy
 
+        // Reject invalid contenthash values early to prevent path traversal.
+        if (!empty($data->contenthash) && !preg_match('/^[a-f0-9]{40}$/', $data->contenthash)) {
+            $filename = isset($data->filename) ? $data->filename : '';
+            $this->log(
+                'Skipping file with invalid contenthash during restore: ' . $filename,
+                backup::LOG_WARNING
+            );
+
+            return;
+        }
+
         // load it if needed:
         //   - it it is one of the annotated inforef files (course/section/activity/block)
         //   - it is one "user", "group", "grouping", "grade", "question" or "qtype_xxxx" component file (that aren't sent to inforef ever)
@@ -1859,9 +1870,13 @@ class restore_section_structure_step extends restore_structure_step {
             [$this->get_courseid()],
             'section DESC', 'id, section'
         );
+        // Here we add the new section to the end of the list so we make sure that all delegated sections are really
+        // all located after the normal sections. We can have case where delegated sections are located before the
+        // normal sections, so we need to move them to the end (mostly in the restore process more than in the duplicate
+        // process in which the order sections => delegated section is mostly there).
+        $sectionnum = $sectionnum + count($sectionstomove);
         foreach ($sectionstomove as $section) {
-            $sectionnum++;
-            $section->section = $sectionnum;
+            $section->section = $sectionnum--;
             $DB->update_record('course_sections', $section);
         }
     }
@@ -5281,6 +5296,15 @@ class restore_create_categories_and_questions extends restore_structure_step {
                 $this->set_mapping('question_bank_entry', $this->latestqbe->oldid, $this->latestqbe->newid);
             }
 
+            if (
+                ($data->qtype === 'random')
+                && ($this->latestversion->status == \core_question\local\bank\question_version_status::QUESTION_STATUS_HIDDEN)
+            ) {
+                // Ensure that this newly created question is considered by
+                // \qtype_random\task\remove_unused_questions.
+                $this->latestversion->status = \core_question\local\bank\question_version_status::QUESTION_STATUS_DRAFT;
+            }
+
             // Now store the question.
             $newitemid = $DB->insert_record('question', $data);
             $this->set_mapping('question', $oldid, $newitemid);
@@ -5352,8 +5376,7 @@ class restore_create_categories_and_questions extends restore_structure_step {
                 $potentialhints = $DB->get_records('question_hints',
                         array('questionid' => $newquestionid), '', 'id, hint');
                 foreach ($potentialhints as $potentialhint) {
-                    // Clean in the same way than {@link xml_writer::xml_safe_utf8()}.
-                    $cleanhint = preg_replace('/[\x-\x8\xb-\xc\xe-\x1f\x7f]/is','', $potentialhint->hint); // Clean CTRL chars.
+                    $cleanhint = core_text::trim_ctrl_chars($potentialhint->hint); // Clean CTRL chars.
                     $cleanhint = preg_replace("/\r\n|\r/", "\n", $cleanhint); // Normalize line ending.
                     if ($cleanhint === $data->hint) {
                         $newitemid = $data->id;
