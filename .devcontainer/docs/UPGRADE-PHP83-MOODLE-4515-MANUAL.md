@@ -301,23 +301,30 @@ curl -s -o /dev/null -w '%{http_code}\n' https://ivana.academy/login/index.php  
 
 ---
 
-## E. Atualizar o codigo com o moodle-v2 no ar (sempre manual)
+## E. Atualizar o codigo com o moodle-v2 no ar
 
-O CI nao mexe no codigo em uso: com o `moodle-v2` no ar, o `prepare.sh` so faz o pull da
-imagem. Depois do merge em `release/production-v2` (CI verde):
+### E1. Automatico (PR -> `release/production-v2`)
+
+O job `prepare-vps` roda `prepare.sh` (pull da imagem) e depois `deploy-code.sh`, que:
+
+- **aborta** se algum `version.php` mudou (precisa `upgrade.php` -> E2) ou se o checkout
+  tem alteracao manual (lista os arquivos);
+- faz checkout do commit novo em `/home/admin/moodle-v2/code`;
+- **reinicia o `moodle-v2` so se algum `.php` mudou** (opcache sem revalidacao, ~10s fora);
+- `purge_caches` (nova revisao de JS/CSS) e confere o login publico.
+
+Nao editar arquivos a mao em `/home/admin/moodle-v2/code`: corrigir sempre por PR.
+
+### E2. Manual, com `version.php` alterado (janela)
 
 ```bash
 V2=/home/admin/moodle-v2
-git -C $V2/code status -s                         # vazio (sem alteracao manual)
+docker exec -u www-data moodle-v2 php admin/cli/maintenance.php --enable
+# dump do banco: igual ao C2
 git -C $V2/code fetch origin
-git -C $V2/code diff --stat HEAD origin/release/production-v2
-git -C $V2/code diff --name-only HEAD origin/release/production-v2 | grep version.php   # vazio?
 git -C $V2/code checkout --detach origin/release/production-v2
-docker restart moodle-v2                          # so se algum .php mudou (opcache)
+docker restart moodle-v2
+docker exec -u www-data moodle-v2 php admin/cli/upgrade.php --non-interactive
 docker exec -u www-data moodle-v2 php admin/cli/purge_caches.php
+docker exec -u www-data moodle-v2 php admin/cli/maintenance.php --disable
 ```
-
-Se algum `version.php` mudou: fazer em janela, com manutencao + dump (C1/C2) e
-`docker exec -u www-data moodle-v2 php admin/cli/upgrade.php --non-interactive` depois do checkout.
-
-Nao editar arquivos a mao em `$V2/code`: corrigir sempre por PR.
