@@ -176,11 +176,44 @@ echo "DUMP=$DUMP" > $V2/last-switch.env
 Se o dump falhar: `docker exec -u www-data moodle php admin/cli/maintenance.php --disable`
 e parar aqui - nada foi trocado.
 
+**C2b. Backup do moodledata** (manutencao ativa = cron do v1 parado)
+
+```bash
+MDATA=/backups/pre-v2-moodledata-$TS.tar.gz
+sudo tar -czf $MDATA -C / --exclude=moodledata/cache --exclude=moodledata/localcache \
+  --exclude=moodledata/sessions --exclude=moodledata/temp moodledata
+sudo tar -tzf $MDATA | grep -c '^moodledata/filedir/'   # > 0
+ls -lh $MDATA
+echo "MDATA=$MDATA" >> $V2/last-switch.env
+```
+
 **C3. Parar o v1** (container e codigo ficam intactos)
 
 ```bash
 docker update --restart=no moodle
 docker stop moodle
+```
+
+**C3a. Atualizar o sistema da VPS** (nenhum container rodando; mantem configs locais,
+inclusive `/etc/docker/daemon.json`)
+
+```bash
+sudo apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confold upgrade
+uname -r; ls /boot/vmlinuz-* | tail -2      # kernel novo instalado?
+cat /etc/docker/daemon.json                 # dns 8.8.8.8 / 8.8.4.4
+```
+
+**C3b. Reboot** (so se veio kernel novo ou docker atualizado). IP publico se mantem.
+
+```bash
+sudo reboot
+# reconectar (~1-2 min):
+ssh ivana-moodle-aws
+docker ps -a --format '{{.Names}} {{.Status}}'   # moodle: Exited (restart=no) - nada rodando
+# recarregar as variaveis da sessao:
+V2=/home/admin/moodle-v2; CFG=/home/admin/devcontainer; IMAGE=leodg/moodle-academy:4.5.15-php8.3
+set -a; source $CFG/env/prod.env; set +a; source $V2/last-switch.env
 ```
 
 **C4. Subir o moodle-v2** (codigo 4.5.15, portas 80/443, cron ligado)
@@ -254,7 +287,8 @@ Com upgrade ja rodado (C5 em diante) e **obrigatorio** restaurar o banco: o codi
 source $V2/last-switch.env; echo $DUMP
 docker rm -f moodle-v2
 
-# so se o C5 rodou:
+# so se o C5 rodou (o moodledata normalmente NAO precisa ser restaurado:
+# o upgrade.php muda o banco; o tar $MDATA e garantia extra):
 eval "$(grep -E '^(DB_HOST|DB_USER|DB_PASS)=' /backups/backup.sh)"
 zcat $DUMP | mysql -h "$DB_HOST" -P 3306 -u "$DB_USER" -p"$DB_PASS" moodle
 
@@ -264,3 +298,26 @@ docker exec -u www-data moodle php admin/cli/maintenance.php --disable
 docker exec -u www-data moodle php admin/cli/purge_caches.php
 curl -s -o /dev/null -w '%{http_code}\n' https://ivana.academy/login/index.php   # 200
 ```
+
+---
+
+## E. Atualizar o codigo com o moodle-v2 no ar (sempre manual)
+
+O CI nao mexe no codigo em uso: com o `moodle-v2` no ar, o `prepare.sh` so faz o pull da
+imagem. Depois do merge em `release/production-v2` (CI verde):
+
+```bash
+V2=/home/admin/moodle-v2
+git -C $V2/code status -s                         # vazio (sem alteracao manual)
+git -C $V2/code fetch origin
+git -C $V2/code diff --stat HEAD origin/release/production-v2
+git -C $V2/code diff --name-only HEAD origin/release/production-v2 | grep version.php   # vazio?
+git -C $V2/code checkout --detach origin/release/production-v2
+docker restart moodle-v2                          # so se algum .php mudou (opcache)
+docker exec -u www-data moodle-v2 php admin/cli/purge_caches.php
+```
+
+Se algum `version.php` mudou: fazer em janela, com manutencao + dump (C1/C2) e
+`docker exec -u www-data moodle-v2 php admin/cli/upgrade.php --non-interactive` depois do checkout.
+
+Nao editar arquivos a mao em `$V2/code`: corrigir sempre por PR.
