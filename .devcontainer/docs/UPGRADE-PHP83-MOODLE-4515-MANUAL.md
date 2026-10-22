@@ -1,12 +1,12 @@
 # Guia manual - PHP 8.3 + Moodle 4.5.15 + moodle-v2 (VPS `ivana-moodle-aws`)
 
-Todos os comandos abaixo sao rodados **a mao**, um por vez, conferindo o resultado
+A etapa A e feita pelo CI; as demais sao rodadas **a mao**, um comando por vez, conferindo o resultado
 esperado antes de seguir. Os scripts em `.devcontainer/bin/prod-v2/` fazem o mesmo
 e ficam como referencia. Contexto e decisoes: `UPGRADE-PHP83-MOODLE-4515.md`.
 
 | Etapa | Site no ar? | Duracao |
 |---|---|---|
-| A. Preparar | sim | ~10 min |
+| A. Preparar (CI: `prepare-vps`) | sim | ~10 min |
 | B. Validar o moodle-v2 sem portas | sim | ~5 min |
 | C. Trocar v1 -> v2 (janela) | **nao** (manutencao) | ~15 min |
 | D. Testar | sim | ~10 min |
@@ -15,6 +15,11 @@ e ficam como referencia. Contexto e decisoes: `UPGRADE-PHP83-MOODLE-4515.md`.
 ---
 
 ## A. Preparar (sem parar o site)
+
+> **Automatico pelo CI:** push em `release/production-v2` -> `production-v2.yml` builda, valida e
+> roda o `prepare.sh` na VPS (job `prepare-vps`), que faz exatamente A2-A5. Conferir a saida
+> do job no GitHub Actions e seguir para a etapa B. Os comandos abaixo ficam para rodar a mao
+> se o CI falhar ou para conferir.
 
 ```bash
 ssh ivana-moodle-aws
