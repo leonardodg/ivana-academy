@@ -49,7 +49,8 @@ fi
 git -C "$V2_CODE_DIR" checkout --quiet --detach "$NEW"
 log "✅ Codigo v2: $(git -C "$V2_CODE_DIR" log -1 --format='%h %s')"
 
-if echo "$CHANGED" | grep -qE '\.php$'; then
+# Restart so por .php servido pelo site (.devcontainer/ e .github/ nao sao).
+if echo "$CHANGED" | grep -vE '^(\.devcontainer|\.github)/' | grep -qE '\.php$'; then
     log "🔄 PHP alterado: reiniciando $V2_CONTAINER (opcache sem revalidacao)"
     docker restart "$V2_CONTAINER" >/dev/null
     wait_http_ok "$V2_CONTAINER" || die "$V2_CONTAINER nao respondeu apos restart: docker logs $V2_CONTAINER"
