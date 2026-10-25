@@ -9,9 +9,12 @@ name: Deploy DEVELOP Sandbox to GCP
 #   - Deploys MariaDB + Moodle via docker compose (base + db + sandbox override)
 # =============================================================================
 
+# DESATIVADO por padrao (so manual): a VM do GCP foi removida em 25/10/2026,
+# depois que o sandbox (copia do banco de producao) enviou e-mails pelo
+# Gmail de producao em 22/10/2026. PR para develop NAO sobe mais a VM.
+# Para voltar a usar: recriar a VM + secrets GCP_* e rodar via Actions.
 on:
-  pull_request:
-    branches: [develop]
+  workflow_dispatch:
 
 jobs:
   start-sandbox:
