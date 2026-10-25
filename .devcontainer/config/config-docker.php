@@ -51,4 +51,10 @@ $CFG->phpunit_dataroot  = '/var/www/phpunitdata';
 $CFG->phpunit_prefix = 't_';
 define('PHPUNIT_LONGTEST', true);
 
+// Fora de producao nunca envia e-mail (dev/sandbox usam copia do banco de
+// producao, com a configuracao SMTP real).
+if (getenv('ENVIRONMENT') !== 'production') {
+    $CFG->noemailever = true;
+}
+
 require_once(__DIR__ . '/lib/setup.php');

@@ -9,9 +9,12 @@ name: Deploy DEVELOP Sandbox to GCP
 #   - Deploys MariaDB + Moodle via docker compose (base + db + sandbox override)
 # =============================================================================
 
+# DESATIVADO por padrao (so manual): a VM do GCP foi removida em 25/10/2026,
+# depois que o sandbox (copia do banco de producao) enviou e-mails pelo
+# Gmail de producao em 22/10/2026. PR para develop NAO sobe mais a VM.
+# Para voltar a usar: recriar a VM + secrets GCP_* e rodar via Actions.
 on:
-  pull_request:
-    branches: [develop]
+  workflow_dispatch:
 
 jobs:
   start-sandbox:
@@ -207,6 +210,22 @@ jobs:
               -f compose/db.yml \
               -f compose/dev.yml \
               ps
+
+            # Sandbox nunca envia e-mail: remove a config SMTP (copiada de
+            # producao junto com o banco) - tambem tira a senha do Gmail da VM.
+            for i in $(seq 1 30); do
+              docker compose --env-file env/db.env --env-file env/dev.env \
+                -f compose/base.yml -f compose/db.yml -f compose/dev.yml \
+                exec -T -u www-data moodle php admin/cli/cfg.php --name=version >/dev/null 2>&1 && break
+              sleep 5
+            done
+            for name in smtphosts smtpuser smtppass; do
+              docker compose --env-file env/db.env --env-file env/dev.env \
+                -f compose/base.yml -f compose/db.yml -f compose/dev.yml \
+                exec -T -u www-data moodle php admin/cli/cfg.php --name=$name --set="" \
+                || echo "⚠️  $name nao alterado (fixado no config.php da VM?) - cron desligado mesmo assim"
+            done
+            echo "✉️  SMTP removido do sandbox (sem envio de e-mail)"
 
             echo "⏰ schedule auto-shutdown in VM to after 2 hours..."
             sudo shutdown -c || true
