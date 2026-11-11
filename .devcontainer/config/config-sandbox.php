@@ -22,7 +22,7 @@ $CFG->wwwroot   = 'http://localhost';
 $CFG->dataroot  = '/var/www/moodledata';
 $CFG->admin     = 'admin';
 
-$CFG->directorypermissions = 0777;
+$CFG->directorypermissions = 02770; // so www-data (Apache + cron); nunca 0777
 
 // MOODLE DEV PERFORMANCE SETTINGS
 $CFG->debug = 0;

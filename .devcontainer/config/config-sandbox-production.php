@@ -40,7 +40,7 @@ $CFG->wwwroot   = 'https://localhost';
 $CFG->dataroot  = '/var/www/moodledata';
 $CFG->admin     = 'admin';
 
-$CFG->directorypermissions = 02777;
+$CFG->directorypermissions = 02770; // so www-data (Apache + cron); nunca 0777
 $CFG->sslproxy = false;
 
 // -----------------------------------------------------------------------

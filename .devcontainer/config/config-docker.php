@@ -36,8 +36,9 @@ $CFG->wwwroot   = getenv('MOODLE_URL') ?: 'https://develop.local';
 $CFG->dataroot  = getenv('MOODLE_DATA') ?: '/var/www/moodledata';
 $CFG->admin     = getenv('MOODLE_ADMIN') ?: 'admin';
 
-$CFG->directorypermissions = 0777;
-$CFG->sslproxy  = true;
+$CFG->directorypermissions = 02770; // so www-data (Apache + cron); nunca 0777
+// Apache termina o TLS (Cloudflare Full strict -> :443), entao NAO ha proxy SSL.
+$CFG->sslproxy  = false;
 
 // MOODLE DEV PERFORMANCE SETTINGS
 $CFG->debug = 0;

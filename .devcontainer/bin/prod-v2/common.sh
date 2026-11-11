@@ -49,6 +49,7 @@ v2_up() {
     # shellcheck disable=SC1090
     source "$ENV_FILE"
     docker run -d --name "$V2_CONTAINER" --restart unless-stopped \
+        --memory "${MOODLE_MEM_LIMIT:-700m}" --pids-limit "${MOODLE_PIDS_LIMIT:-256}" \
         -p "${PROD_HTTP_PORT:-80}:80" -p "${PROD_HTTPS_PORT:-443}:443" \
         -e ENVIRONMENT=production \
         -e MOODLE_URL="$MOODLE_URL" \

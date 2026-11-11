@@ -10,3 +10,13 @@ updates:
    directory: "/"
    schedule:
      interval: weekly
+ # Imagem base PHP fixada por digest: PR semanal quando a moodlehq publicar
+ # um novo build (patches de seguranca do PHP/Debian).
+ - package-ecosystem: "docker"
+   directory: "/.devcontainer/build"
+   schedule:
+     interval: weekly
+ - package-ecosystem: "github-actions"
+   directory: "/"
+   schedule:
+     interval: weekly

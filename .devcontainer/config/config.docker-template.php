@@ -50,7 +50,7 @@ if (strpos($_SERVER['HTTP_HOST'], '.gitpod.io') !== false) {
 
 $CFG->dataroot  = '/var/www/moodledata';
 $CFG->admin     = 'admin';
-$CFG->directorypermissions = 0777;
+$CFG->directorypermissions = 02770; // so www-data (Apache + cron); nunca 0777
 $CFG->smtphosts = 'mailpit:1025';
 $CFG->noreplyaddress = 'noreply@example.com';
 

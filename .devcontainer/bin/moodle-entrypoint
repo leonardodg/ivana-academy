@@ -133,13 +133,19 @@ if [[ "${ENVIRONMENT:-production}" =~ ^(production|prod)$ || "${CRON_ENABLED}" =
     echo "📄 Cron log file created"
 
     declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID' > /container.env 2>/dev/null || true
+    # Contem MOODLE_DBPASS: legivel so por root e pelo usuario do cron (www-data).
+    chown root:www-data /container.env 2>/dev/null || true
+    chmod 640 /container.env 2>/dev/null || true
 
     # Imagem: /usr/local/etc/moodle-cron. Fallback legado: raiz do codigo.
     CRON_FILE="/usr/local/etc/moodle-cron"
     [ -f "$CRON_FILE" ] || CRON_FILE="/var/www/html/moodle-cron"
 
     if [ -f "$CRON_FILE" ] && command -v crontab >/dev/null 2>&1; then
-        crontab "$CRON_FILE"
+        # cron.php roda como www-data (mesmo usuario do Apache): como root ele
+        # criava arquivos root no moodledata e obrigava directorypermissions 0777.
+        crontab -r 2>/dev/null || true
+        crontab -u www-data "$CRON_FILE"
         service cron restart 2>/dev/null || true
         echo "✅ Service Cron Configured ($CRON_FILE)"
     else
@@ -153,16 +159,19 @@ fi
 # ======================== PERMISSIONS ========================
 echo "🔧 Adjusting file permissions..."
 
+# Moodle usa $CFG->directorypermissions = 02770 (arquivos 0660): so o usuario
+# e o grupo www-data escrevem. Normaliza instalacoes antigas (0777/0755).
 CURRENT_PERM=$(stat -c "%a" /var/www/moodledata)
-if [ "$CURRENT_PERM" != "755" ]; then
-    find /var/www/moodledata -type d -exec chmod 755 {} + 2>/dev/null || true
-    find /var/www/moodledata -type f -exec chmod 644 {} + 2>/dev/null || true
-    echo "✅ Adjusted permissions CHMOD!"
+if [ "$CURRENT_PERM" != "2770" ]; then
+    find /var/www/moodledata -type d -exec chmod 2770 {} + 2>/dev/null || true
+    find /var/www/moodledata -type f -exec chmod 0660 {} + 2>/dev/null || true
+    echo "✅ Adjusted permissions CHMOD (2770/0660)!"
 fi
 
 # So o moodledata: /var/www/html pode ser bind-mount do codigo (producao v2),
 # e um chown ali quebraria o git do usuario dono do checkout na VPS.
-if [ "$(stat -c '%U' /var/www/moodledata)" != "www-data" ]; then
+# Varre ate o 1o arquivo de outro dono (ex.: criado pelo antigo cron como root).
+if [ -n "$(find /var/www/moodledata ! -user www-data -print -quit 2>/dev/null)" ]; then
     chown -R www-data:www-data /var/www/moodledata 2>/dev/null || true
     echo "✅ Adjusted permissions CHOWN!"
 fi

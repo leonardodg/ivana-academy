@@ -22,6 +22,11 @@ services:
     container_name: moodle-v2
     restart: unless-stopped
 
+    # Limites (VPS ~945 MiB; uso normal ~410 MiB / ~20 PIDs). Contem um
+    # vazamento/abuso (fork bomb, OOM) dentro do container sem derrubar o host.
+    mem_limit: ${MOODLE_MEM_LIMIT:-700m}
+    pids_limit: ${MOODLE_PIDS_LIMIT:-256}
+
     environment:
       - ENVIRONMENT=production
       - MOODLE_URL=${MOODLE_URL}
