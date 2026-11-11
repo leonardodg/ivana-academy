@@ -29,7 +29,7 @@ IMAGE="leodg/moodle-academy:${IMAGE_TAG}"
 free_gb=$(df --output=avail -BG / | tail -1 | tr -dc '0-9')
 log "💾 Livre em /: ${free_gb}G"
 [ "$free_gb" -ge 3 ] || die "Menos de 3G livres. Limpe imagens antigas: docker image prune"
-require_files
+[ -f "$ENV_FILE" ] || die "Arquivo ausente: $ENV_FILE"
 
 # 2. Imagem ---------------------------------------------------------------------
 log "🐳 docker pull $IMAGE"
@@ -42,6 +42,7 @@ if ! managed_by_compose; then
     exit 0
 fi
 require_compose
+require_files
 set_env IMAGE_TAG "$IMAGE_TAG"
 
 # 3. Codigo ---------------------------------------------------------------------
