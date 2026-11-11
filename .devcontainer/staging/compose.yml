@@ -1,0 +1,52 @@
+# =============================================================================
+# .devcontainer/staging/compose.yml - STAGING LOCAL fiel a producao
+# =============================================================================
+# Mesma imagem da producao + o codigo deste checkout (bind-mount) + dump e
+# moodledata reais. E-mails trocados e nada sai para o mundo: ver
+# anonymize.sql e config.php. So escuta em 127.0.0.1.
+#
+#   .devcontainer/staging/restore.sh <dump.sql.gz> [moodledata.tar.gz]
+#   https://localhost:8543  (STAGING_PORT muda a porta)
+# =============================================================================
+
+name: ivana-staging
+
+services:
+  db:
+    image: mariadb:11.4                       # mesma versao da producao
+    environment:
+      MARIADB_DATABASE: moodle
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: staging
+      MARIADB_ROOT_PASSWORD: staging-root
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_bin",
+              "--max_allowed_packet=256M", "--innodb_buffer_pool_size=512M"]
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  moodle:
+    image: leodg/moodle-academy:${IMAGE_TAG:-4.5.15-php8.3}
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: staging
+      MOODLE_URL: https://localhost:${STAGING_PORT:-8543}
+      CRON_ENABLED: "false"                  # sem crontab no container
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: "1"   # codigo editado aparece sem restart
+    ports:
+      - "127.0.0.1:${STAGING_PORT:-8543}:443"
+    volumes:
+      - ../..:/var/www/html
+      - ./config.php:/var/www/html/config.php:ro
+      - ${STAGING_DATA:-./data/moodledata}:/var/www/moodledata
+      - ../certs/develop-local.crt:/run/secrets/ssl_cert:ro
+      - ../certs/develop-local.key:/run/secrets/ssl_key:ro
+
+volumes:
+  dbdata:

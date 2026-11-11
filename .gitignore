@@ -71,3 +71,7 @@ UPGRADING-CURRENT.md
 .devcontainer/env/db.env
 .devcontainer/env/dev.env
 .devcontainer/env/prod.env
+
+# Staging local (dados reais de producao)
+.devcontainer/staging/data/
+*.sql.gz
