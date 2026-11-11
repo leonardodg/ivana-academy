@@ -265,8 +265,10 @@ class course_renderer extends \core_course_renderer {
 
         // Visitors (and crawlers): course/view.php redirects to the login page
         // (noindex), so link the public course page instead. Ivana Academy, SEO.
+        // The landing site sells the course: send visitors to its page when there is one.
         if (!isloggedin() || isguestuser()) {
-            return new moodle_url('/course/info.php', ['id' => $courseid]);
+            $landing = class_exists('\local_seo\landing') ? \local_seo\landing::visitor_url((int) $courseid) : null;
+            return new moodle_url($landing ?? '/course/info.php', $landing ? [] : ['id' => $courseid]);
         }
 
         return new moodle_url('/course/view.php', ['id' => $courseid]);

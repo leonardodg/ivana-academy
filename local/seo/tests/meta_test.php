@@ -23,6 +23,7 @@ namespace local_seo;
  * @copyright  2026 Ivana Academy
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers     \local_seo\meta
+ * @covers     \local_seo\landing
  */
 final class meta_test extends \advanced_testcase {
     public function test_is_indexable(): void {
@@ -65,22 +66,52 @@ final class meta_test extends \advanced_testcase {
         $this->assertStringNotContainsString('noindex', $html);
     }
 
-    public function test_head_html_course_info(): void {
+    public function test_head_html_course_info_with_landing_page(): void {
         global $PAGE;
         $this->resetAfterTest();
-        $course = $this->getDataGenerator()->create_course(['fullname' => 'Velas Coctel',
+        $course = $this->getDataGenerator()->create_course(['fullname' => 'Tecnicatura en Velas',
             'summary' => '<p>Aprendé a hacer velas</p>', 'summaryformat' => FORMAT_HTML]);
+        $landing = 'https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-diseno-velas/';
+        set_config('landingcanonical', "{$course->id} {$landing}  # Velas", 'local_seo');
         $PAGE->set_url(new \moodle_url('/course/info.php', ['id' => $course->id, 'lang' => 'pt_br']));
         $PAGE->set_course($course);
         $PAGE->set_pagetype('course-info');
 
         $html = meta::head_html($PAGE, $PAGE->get_renderer('core'));
 
-        $canonical = (new \moodle_url('/course/info.php', ['id' => $course->id]))->out(false);
-        $this->assertStringContainsString('<link rel="canonical" href="' . s($canonical) . '" />', $html);
+        $this->assertStringContainsString('<link rel="canonical" href="' . $landing . '" />', $html);
         $this->assertStringContainsString('content="Aprendé a hacer velas"', $html);
-        $this->assertStringContainsString('"@type":"Course"', $html);
-        $this->assertStringContainsString('"name":"Velas Coctel"', $html);
+        $this->assertStringNotContainsString('noindex', $html);
+        $this->assertStringNotContainsString('"@type":"Course"', $html);
+    }
+
+    public function test_head_html_course_info_without_landing_page_is_noindex(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['fullname' => 'Mesas de rio']);
+        set_config('landingcanonical', '', 'local_seo');
+        set_config('landingparent', "{$course->id} https://courses.ivana.academy/es-ar/carreras/x/", 'local_seo');
+        $PAGE->set_url(new \moodle_url('/course/info.php', ['id' => $course->id]));
+        $PAGE->set_course($course);
+        $PAGE->set_pagetype('course-info');
+
+        $html = meta::head_html($PAGE, $PAGE->get_renderer('core'));
+
+        $this->assertSame('<meta name="robots" content="noindex, follow" />' . "\n", $html);
+    }
+
+    public function test_landing_lists(): void {
+        $this->resetAfterTest();
+        $text = "# comentario\n4 https://a.test/velas/  # Velas\n21 = https://a.test/velas/\n\nx https://b.test/\n7: ftp://c.test/";
+        $map = landing::parse($text);
+        $this->assertSame([4 => 'https://a.test/velas/', 21 => 'https://a.test/velas/'], $map);
+
+        set_config('landingcanonical', '4 https://a.test/velas/', 'local_seo');
+        set_config('landingparent', "40 https://a.test/velas/\n4 https://a.test/otra/", 'local_seo');
+        $this->assertSame('https://a.test/velas/', landing::visitor_url(4));
+        $this->assertSame('https://a.test/velas/', landing::visitor_url(40));
+        $this->assertNull(landing::canonical(40));
+        $this->assertNull(landing::visitor_url(99));
     }
 
     public function test_head_html_system_page_is_noindex(): void {

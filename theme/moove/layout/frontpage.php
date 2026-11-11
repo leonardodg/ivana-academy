@@ -91,6 +91,7 @@ $bodyattributes = $OUTPUT->body_attributes($extraclasses);
 
 $templatecontext = [
     'sitename' => format_string($SITE->shortname, true, ['context' => \core\context\course::instance(SITEID), "escape" => false]),
+    'sitefullname' => format_string($SITE->fullname, true, ['context' => \core\context\course::instance(SITEID)]),
     'output' => $OUTPUT,
     'sidepreblocks' => $blockshtml,
     'hasblocks' => $hasblocks,

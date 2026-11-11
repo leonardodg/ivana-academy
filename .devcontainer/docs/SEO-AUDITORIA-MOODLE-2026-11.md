@@ -43,37 +43,46 @@ os números de performance são de medição direta, não de Core Web Vitals de 
 
 ## Achados, por prioridade
 
+### Decisão de 11/11: os cursos pertencem à landing
+
+A landing (`courses.ivana.academy`) informa e vende; o Moodle é a plataforma. Então o
+`course/info.php` não deve disputar com ela no Google. Isso substitui os itens "sitemap do
+Moodle" e "conteúdo das páginas de curso" da primeira versão desta auditoria.
+
+*Correção (PR `feat/seo-landing-canonical`, `local_seo` 1.1.0):*
+- Duas listas em *Plugins › local_seo*, uma linha `idcurso URL` por curso:
+  - **Mesmo produto na landing**: `course/info.php` aponta o `canonical` para a landing.
+    São 11 cursos: as 6 carreras, os 3 profesorados (continuação da tecnicatura, vendidos na
+    mesma página) e os 2 cursos online pt-BR.
+  - **Parte de uma carrera**: módulos vendidos dentro de uma carrera. Ficam com `noindex`, e
+    o visitante que clica vai para a página da carrera. São 9 cursos.
+  - Fora das duas listas: `noindex`. São 14 cursos.
+- Na home do Moodle, para quem não fez login, o card leva à landing quando há ligação.
+- O JSON-LD `Course` saiu do Moodle: ele fica nas páginas da landing, que são as canônicas.
+- Os cursos sem página na landing estão listados no plano da landing
+  (`ivana-courses-landing-pages/docs/SEO-AUDITORIA-2026-11.md`, "Cursos do Moodle sem página na
+  landing"). Ao criar uma página, basta acrescentar a linha na lista, sem deploy.
+
+*Como saber se falhou:* em 4–8 semanas, o Search Console ainda mostra `course/info.php`
+indexado, ou as páginas da landing não ganham impressões nas buscas pelo nome dos cursos.
+
 ### Alta
 
-1. **Sem sitemap do Moodle.** O `robots.txt` só aponta o sitemap da landing, que não lista os
-   cursos. O Google não conhece nenhum `course/info.php`.
-   *Correção:* `local_seo` gera `/local/seo/sitemap.php` (home, `course/index.php`, um
-   `course/info.php` por curso visível, com `lastmod`), linha `Sitemap:` no `robots.txt`, e envio
-   no Search Console. *Como saber se falhou:* em 2–4 semanas, "Páginas indexadas" continua sem
-   `course/info.php`.
-2. **15 MB de imagens na home.** 34 imagens de curso como `background-image` (o navegador baixa
-   todas na hora), 9 acima de 500 KB, a maior com 1,6 MB. No celular isso derruba o LCP.
-   *Correção:* nos cards do Moove (`moove_coursecard.mustache`, `core_course/coursecard.mustache`),
-   trocar o `background-image` por `<img loading="lazy" decoding="async" width height>` com
-   `object-fit: cover`; e reenviar as imagens maiores com até ~1200 px / 200 KB (conteúdo).
-   *Como saber se falhou:* peso da home acima de 3 MB no primeiro carregamento.
-3. **Páginas de curso fracas.** O título é "Información del curso | Nome | Ivana Academy"
-   (até 75 caracteres), o H1 é "Información del curso" em todas, e o texto tem 55–115 caracteres
-   de resumo. Para o Google são páginas finas e iguais entre si.
-   *Correção (código):* no `course/info.php`, título "Nome do curso | Ivana Academy" e H1 = nome
-   do curso (pelo renderer do tema, sem mexer no core).
-   *Correção (conteúdo, Ivana):* resumo de 150–300 palavras por curso: para quem é, o que se
-   aprende, duração, formato (vídeo/PDF), certificado, professora.
+1. **15 MB de imagens na home.** 34 imagens de curso como `background-image` (o navegador baixa
+   todas na hora), 9 acima de 500 KB, a maior com 1,6 MB.
+   *Correção (no mesmo PR):* os cards do Moove usam `<img loading="lazy" decoding="async">`.
+   Medido no staging: 7,8 MB e 20 imagens no primeiro carregamento, em vez de 15 MB e 34.
+   *Falta (conteúdo):* reenviar as imagens maiores com até ~1200 px e 200 KB. Sem isso a home
+   continua pesada no celular.
 
 ### Média
 
 4. **Home sem H1** e título curto ("Inicio | Ivana Academy", 22 caracteres).
-   *Correção:* H1 com o nome e a proposta (ex.: "Ivana Academy — cursos online de artesanía");
-   nome da página inicial em *Administração › Página inicial* com algo como
+   *Correção:* H1 com o nome do site no tema (no mesmo PR, visível só para leitores de tela).
+   Falta o título: nome da página inicial em *Administração › Página inicial*, com algo como
    "Cursos online de artesanía | Ivana Academy".
-5. **Course sem dados para rich result.** Faltam `offers` (preço/moeda) e `hasCourseInstance`
-   (`courseMode: online`, `courseWorkload`).
-   *Correção:* `local_seo` lê o custo do método de inscrição (PayPal) e preenche os dois.
+5. ~~Course sem dados para rich result~~: o JSON-LD `Course` agora fica só na landing (ver o plano
+   da landing).
 6. **`sameAs` não bate com o rodapé.** O rodapé tem YouTube, TikTok, Facebook e
    Instagram `ivana_da_mora`; o `sameAs` tem só os dois Instagram `ivana.lerea.*` e a landing.
    *Correção (configuração):* *Plugins › local_seo › sameAs*, uma URL por linha com todos os
@@ -94,12 +103,15 @@ os números de performance são de medição direta, não de Core Web Vitals de 
      editor do n8n).
    - Remoção temporária no Search Console por prefixo de host.
    - Trocar as senhas do n8n.
+   **Feito em 11/11:** a Transform Rule "noindex subdominios de infraestrutura" está ativa
+   (os 12 hosts conferidos de fora) e foi pedida a remoção temporária dos 12 hosts no Search
+   Console. O Cloudflare Access continua pendente.
    A `loja` fica fora da regra: ela vende os cursos. Só as páginas de conta, pedidos e busca
    (`customer/`, `sales/`, `checkout/`, `catalogsearch/`) devem receber `noindex` no Magento.
 
 ### Baixa
 
-9. Imagens sem `width`/`height` (risco de CLS), incluindo o logo.
+9. Imagens sem `width`/`height` (risco de CLS). Os cards de curso já têm (mesmo PR); falta o logo.
 10. `Content-Signal` do Cloudflare só no grupo `*`; os grupos nomeados (GPTBot, ClaudeBot…) não
     o repetem. Só importa se a política de IA mudar.
 11. Sem `/llms.txt` (Google ignora; só conta para o Lighthouse Agentic).
@@ -115,13 +127,14 @@ os números de performance são de medição direta, não de Core Web Vitals de 
 
 | Fase | Quando | Itens | Quem |
 |---|---|---|---|
-| 1 | esta semana | sitemap (1), cards com lazy-load (2), título/H1 do curso (3), H1 da home (4) | código (PR) |
-| 1 | esta semana | `sameAs` (6), nome da página inicial (4), noindex do webhook (8) | configuração |
-| 2 | 2–3 semanas | resumos dos cursos (3), imagens menores (2) | Ivana |
-| 2 | 2–3 semanas | `offers`/`hasCourseInstance` (5), `aria-label` (7), dimensões (9) | código |
-| 3 | mensal | Search Console: páginas `course/info.php` indexadas, impressões fora da marca | acompanhamento |
+| 1 | esta semana | canonical/noindex dos cursos e cards para a landing; lazy-load; H1 da home | código (PR `feat/seo-landing-canonical`) |
+| 1 | esta semana | `sameAs` (6), nome da página inicial (4) | configuração |
+| 2 | 2–3 semanas | imagens menores (1); páginas dos cursos que faltam na landing | Ivana / projeto da landing |
+| 2 | 2–3 semanas | `aria-label` (7), dimensões (9) | código |
+| 3 | mensal | Search Console: `course/info.php` fora do índice, páginas da landing com impressões | acompanhamento |
 
 **Indicadores para acompanhar** (sem rodar a auditoria de novo):
-- Search Console › Páginas: número de `course/info.php` indexados (hoje 0).
+- Search Console › Páginas: `course/info.php` deve continuar fora do índice; as páginas da landing,
+  dentro.
 - Search Console › Desempenho: consultas que não contêm "ivana" (hoje quase zero).
 - GA4: sessões "Organic Search" no fluxo Academy.

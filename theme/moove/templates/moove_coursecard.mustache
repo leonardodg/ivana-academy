@@ -1,6 +1,8 @@
 <div class="card dashboard-card {{^visible}}dimmed{{/visible}}" role="listitem" data-region="course-content" data-course-id="{{{id}}}">
     <a href="{{courseurl}}" tabindex="-1">
-        <div class="card-img dashboard-card-img" style="background-image: url({{{image}}});">
+        <div class="card-img dashboard-card-img">
+            {{! <img loading=lazy> instead of background-image: the front page listed 34 courses and the browser downloaded all ~15 MB up front. Ivana Academy, SEO. }}
+            <img src="{{{image}}}" alt="" loading="lazy" decoding="async" width="400" height="160" class="dashboard-card-imgtag">
             <span class="sr-only">{{fullname}}</span>
             <div class="course-category">
                 {{{category}}}
