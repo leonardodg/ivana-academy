@@ -11,7 +11,11 @@ function get_moodle_setting($env_name, $secret_path = null) {
         return $val;
     }
 
-    // 2. Se não achar e houver um caminho de secret, tenta ler o arquivo
+    // 2. Copia legivel por www-data publicada pelo entrypoint (secrets do compose)
+    if ($secret_path && is_readable('/run/moodle-secrets/' . basename($secret_path))) {
+        $secret_path = '/run/moodle-secrets/' . basename($secret_path);
+    }
+    // 3. Se não achar e houver um caminho de secret, tenta ler o arquivo
     if ($secret_path && file_exists($secret_path)) {
         $secret_val = trim(file_get_contents($secret_path));
         if ($secret_val !== '') {
@@ -36,8 +40,9 @@ $CFG->wwwroot   = getenv('MOODLE_URL') ?: 'https://develop.local';
 $CFG->dataroot  = getenv('MOODLE_DATA') ?: '/var/www/moodledata';
 $CFG->admin     = getenv('MOODLE_ADMIN') ?: 'admin';
 
-$CFG->directorypermissions = 0777;
-$CFG->sslproxy  = true;
+$CFG->directorypermissions = 02770; // so www-data (Apache + cron); nunca 0777
+// Apache termina o TLS (Cloudflare Full strict -> :443), entao NAO ha proxy SSL.
+$CFG->sslproxy  = false;
 
 // MOODLE DEV PERFORMANCE SETTINGS
 $CFG->debug = 0;

@@ -49,6 +49,17 @@ load_secret() {
 load_secret "MOODLE_DBUSER"     "/run/secrets/db_user"      "moodle"
 load_secret "MOODLE_DBPASS"     "/run/secrets/db_password"  "moodle"
 
+# Secrets do compose (sem swarm) sao bind-mounts com o dono/modo do host
+# (0600 admin): www-data nao le. Publica copias legiveis so por root e pelo
+# grupo www-data - o config.php le daqui (vale para Apache, cron e
+# `docker exec -u www-data php admin/cli/*`, que nao herdam este env).
+install -d -o root -g www-data -m 0750 /run/moodle-secrets
+for s in db_user db_password; do
+    if [ -f "/run/secrets/$s" ]; then
+        install -o root -g www-data -m 0440 "/run/secrets/$s" "/run/moodle-secrets/$s"
+    fi
+done
+
 if [ -f "/run/secrets/ssl_cert" ] && [ -f "/run/secrets/ssl_key" ]; then
     CERT_PATH="/run/secrets/ssl_cert"
     KEY_PATH="/run/secrets/ssl_key"
@@ -132,14 +143,20 @@ if [[ "${ENVIRONMENT:-production}" =~ ^(production|prod)$ || "${CRON_ENABLED}" =
     chmod 0666 /var/log/moodle-cron.log
     echo "📄 Cron log file created"
 
-    declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID' > /container.env 2>/dev/null || true
+    # Sem MOODLE_DBPASS: o cron.php le a senha de /run/moodle-secrets.
+    declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID|MOODLE_DBPASS' > /container.env 2>/dev/null || true
+    chown root:www-data /container.env 2>/dev/null || true
+    chmod 640 /container.env 2>/dev/null || true
 
     # Imagem: /usr/local/etc/moodle-cron. Fallback legado: raiz do codigo.
     CRON_FILE="/usr/local/etc/moodle-cron"
     [ -f "$CRON_FILE" ] || CRON_FILE="/var/www/html/moodle-cron"
 
     if [ -f "$CRON_FILE" ] && command -v crontab >/dev/null 2>&1; then
-        crontab "$CRON_FILE"
+        # cron.php roda como www-data (mesmo usuario do Apache): como root ele
+        # criava arquivos root no moodledata e obrigava directorypermissions 0777.
+        crontab -r 2>/dev/null || true
+        crontab -u www-data "$CRON_FILE"
         service cron restart 2>/dev/null || true
         echo "✅ Service Cron Configured ($CRON_FILE)"
     else
@@ -153,16 +170,19 @@ fi
 # ======================== PERMISSIONS ========================
 echo "🔧 Adjusting file permissions..."
 
+# Moodle usa $CFG->directorypermissions = 02770 (arquivos 0660): so o usuario
+# e o grupo www-data escrevem. Normaliza instalacoes antigas (0777/0755).
 CURRENT_PERM=$(stat -c "%a" /var/www/moodledata)
-if [ "$CURRENT_PERM" != "755" ]; then
-    find /var/www/moodledata -type d -exec chmod 755 {} + 2>/dev/null || true
-    find /var/www/moodledata -type f -exec chmod 644 {} + 2>/dev/null || true
-    echo "✅ Adjusted permissions CHMOD!"
+if [ "$CURRENT_PERM" != "2770" ]; then
+    find /var/www/moodledata -type d -exec chmod 2770 {} + 2>/dev/null || true
+    find /var/www/moodledata -type f -exec chmod 0660 {} + 2>/dev/null || true
+    echo "✅ Adjusted permissions CHMOD (2770/0660)!"
 fi
 
 # So o moodledata: /var/www/html pode ser bind-mount do codigo (producao v2),
 # e um chown ali quebraria o git do usuario dono do checkout na VPS.
-if [ "$(stat -c '%U' /var/www/moodledata)" != "www-data" ]; then
+# Varre ate o 1o arquivo de outro dono (ex.: criado pelo antigo cron como root).
+if [ -n "$(find /var/www/moodledata ! -user www-data -print -quit 2>/dev/null)" ]; then
     chown -R www-data:www-data /var/www/moodledata 2>/dev/null || true
     echo "✅ Adjusted permissions CHOWN!"
 fi

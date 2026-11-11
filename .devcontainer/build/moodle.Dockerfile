@@ -57,13 +57,20 @@ FROM composer-base AS composer-dev
 # =============================================================================
 #         STAGE BASE - SETUP SHARED BETWEEN DEVELOPMENT AND PRODUCTION
 # =============================================================================
-FROM moodlehq/moodle-php-apache:8.3 AS base
+# Imagem fixada por digest (reprodutivel; o Dependabot "docker" propoe novos
+# digests). 8.3.36 = PHP2Shell CVE-2026-109618 / CVE-2026-109619 corrigidos.
+FROM moodlehq/moodle-php-apache:8.3@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e AS base
+
+# Trava de seguranca: o build FALHA se o PHP da imagem base for vulneravel.
+ARG PHP_MIN_VERSION=8.3.36
+RUN php -r 'exit(version_compare(PHP_VERSION, getenv("PHP_MIN_VERSION"), ">=") ? 0 : 1);' \
+    || { echo "PHP $(php -r 'echo PHP_VERSION;') < ${PHP_MIN_VERSION} (CVE-2026-109618/109619)"; exit 1; }
 
 # Metadata
 LABEL maintainer="LeoDG <callme@leodg.dev>" \
       org.opencontainers.image.title="Ivana Academy - Moodle 4.5" \
       org.opencontainers.image.source="https://github.com/leonardodg/ivana-academy" \
-      org.opencontainers.image.version="4.5"
+      org.opencontainers.image.version="4.5.15+"
 
 ENV MOODLE_DBTYPE=mariadb \
     MOODLE_DBLIB=native \
