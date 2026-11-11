@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_seo';
-$plugin->version   = 2026111100;
-$plugin->release   = '1.0.0';
+$plugin->version   = 2026111200;
+$plugin->release   = '1.1.0';
 $plugin->requires  = 2024100700; // Moodle 4.5 (output hooks).
 $plugin->maturity  = MATURITY_STABLE;

@@ -24,7 +24,8 @@ use moodle_url;
  *
  * Only the public catalogue is indexable. Everything else (policies, data
  * privacy summary, signup, password reset, profiles...) gets noindex, which
- * is what Search Console showed being indexed in its place.
+ * is what Search Console showed being indexed in its place. Course pages
+ * belong to the landing site: see {@see landing}.
  *
  * @package    local_seo
  * @copyright  2026 Ivana Academy
@@ -51,14 +52,16 @@ class meta {
      * Canonical URL for an indexable page, without ?lang= and other noise.
      *
      * @param moodle_page $page
-     * @return moodle_url|null null when the page is not indexable.
+     * @return moodle_url|null null when the page must not be indexed.
      */
     public static function canonical_url(moodle_page $page): ?moodle_url {
         switch ($page->pagetype) {
             case 'site-index':
                 return new moodle_url('/');
             case 'course-info':
-                return new moodle_url('/course/info.php', ['id' => $page->course->id]);
+                // The sales page on the landing site; none: the page is noindex.
+                $landing = landing::canonical((int) $page->course->id);
+                return $landing ? new moodle_url($landing) : null;
             case 'course-index':
             case 'course-index-category':
                 $categoryid = (int) $page->url->get_param('categoryid');
@@ -157,7 +160,8 @@ class meta {
     }
 
     /**
-     * JSON-LD: EducationalOrganization on the front page, Course on course/info.php.
+     * JSON-LD: EducationalOrganization on the front page. Course data lives on the
+     * landing pages, which are the canonical ones.
      *
      * @param moodle_page $page
      * @param string $description
@@ -190,23 +194,6 @@ class meta {
             }
             return $data;
         }
-        if ($page->pagetype === 'course-info') {
-            $data = [
-                '@context' => 'https://schema.org',
-                '@type' => 'Course',
-                'name' => format_string($page->course->fullname, true, ['context' => $page->context]),
-                'description' => $description !== '' ? $description : format_string($page->course->fullname),
-                'url' => self::canonical_url($page)->out(false),
-                'provider' => $organization,
-            ];
-            if (!empty($page->course->lang)) {
-                $data['inLanguage'] = str_replace('_', '-', $page->course->lang);
-            }
-            if ($image) {
-                $data['image'] = $image;
-            }
-            return $data;
-        }
         return null;
     }
 
@@ -235,7 +222,7 @@ class meta {
 
         $canonical = self::canonical_url($page);
         if (!$canonical) {
-            return '';
+            return $page->pagetype === 'course-info' ? '<meta name="robots" content="noindex, follow" />' . "\n" : '';
         }
         $url = $canonical->out(false);
         $description = self::description($page);

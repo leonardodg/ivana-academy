@@ -15,6 +15,22 @@
         height: 10rem !important;
         background-position: center;
         background-size: cover;
+        overflow: hidden;
+
+        // Course image as a lazy <img> (was background-image); badges stay on top.
+        > .dashboard-card-imgtag {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        > :not(.dashboard-card-imgtag):not(.sr-only) {
+            position: relative;
+            z-index: 1;
+        }
 
         .course-category {
             background-color: $brand-primary;

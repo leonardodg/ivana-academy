@@ -21,6 +21,7 @@
 
     Context variables required for this template:
     * sitename - The name of the site
+    * sitefullname - The full name of the site (front page H1)
     * output - The core renderer for the page
     * bodyattributes - attributes for the body tag as a string of html attributes
     * sidepreblocks - HTML for the blocks
@@ -174,6 +175,8 @@
                 <div id="region-main-box">
                     <section id="region-main" aria-label="{{#str}}content{{/str}}">
                         {{{ output.course_content_header }}}
+                        {{! The front page had no H1 (only "Cursos disponibles" as H2). Ivana Academy, SEO. }}
+                        <h1 class="sr-only">{{sitefullname}}</h1>
                         {{{ output.main_content }}}
                         {{{ output.course_content_footer }}}
                     </section>

@@ -47,6 +47,49 @@ if ($hassiteconfig) {
         5
     ));
 
+    // Course pages belong to the landing site (local_seo\landing). Defaults: map of 2026-11-11.
+    $settings->add(new admin_setting_configtextarea(
+        'local_seo/landingcanonical',
+        get_string('landingcanonical', 'local_seo'),
+        get_string('landingcanonical_desc', 'local_seo'),
+        implode("\n", [
+            '4 https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-diseno-velas/  # Tecnicatura Velas',
+            '21 https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-diseno-velas/  # Profesorado Velas',
+            '6 https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-decoracion-resinas/  # Tecnicatura Resinas',
+            '34 https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-decoracion-resinas/  # Profesorado Resinas',
+            '5 https://courses.ivana.academy/es-ar/carreras/tecnicatura-macrame/  # Tecnicatura en Macramé',
+            '8 https://courses.ivana.academy/es-ar/carreras/tecnicatura-macrame/  # Profesorado Macramé',
+            '26 https://courses.ivana.academy/es-ar/carreras/tecnicatura-estampas-textiles/  # Tecnicatura en estampas textiles',
+            '25 https://courses.ivana.academy/es-ar/carreras/tecnicatura-diseno-interiores/  # Tecnicatura en Diseño de interiores',
+            '7 https://courses.ivana.academy/es-ar/carreras/profesorado-arte-mix-media/  # Profesorado en Arte Mix Media',
+            '16 https://courses.ivana.academy/pt-br/cursos/online/velas-aromaticas/  # Velas aromáticas, com moldes e wax melts',
+            '38 https://courses.ivana.academy/pt-br/cursos/online/saboaria-com-extratos-naturais/  # Saboaria e extratos naturais',
+        ]),
+        PARAM_RAW_TRIMMED,
+        90,
+        12
+    ));
+
+    $settings->add(new admin_setting_configtextarea(
+        'local_seo/landingparent',
+        get_string('landingparent', 'local_seo'),
+        get_string('landingparent_desc', 'local_seo'),
+        implode("\n", [
+            '39 https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-decoracion-resinas/  # Mesas de rio',
+            '29 https://courses.ivana.academy/es-ar/carreras/tecnicatura-macrame/  # Porta Macetas',
+            '36 https://courses.ivana.academy/es-ar/carreras/tecnicatura-macrame/  # Lampara en macrame',
+            '43 https://courses.ivana.academy/es-ar/carreras/tecnicatura-macrame/  # Encordado y tapiceria',
+            '18 https://courses.ivana.academy/es-ar/carreras/tecnicatura-macrame/  # Vestido de playa',
+            '40 https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-diseno-velas/  # Velas Coctel',
+            '31 https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-diseno-velas/  # Velas con piedras y resina',
+            '14 https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-diseno-velas/  # Workshop Velas gourmet',
+            '15 https://courses.ivana.academy/es-ar/carreras/profesorado-arte-mix-media/  # Workshop Cuadro con relieve',
+        ]),
+        PARAM_RAW_TRIMMED,
+        90,
+        10
+    ));
+
     $settings->add(new admin_setting_configcheckbox(
         'local_seo/consentbanner',
         get_string('consentbanner', 'local_seo'),
