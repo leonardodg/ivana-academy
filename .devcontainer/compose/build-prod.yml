@@ -2,7 +2,8 @@
 # PRODUCTION OVERRIDE - Optimized for production deployment
 # =============================================================================
 # Usage:
-#     docker compose -f .devcontainer/compose/base.yml -f .devcontainer/compose/prod.yml -f .devcontainer/compose/build.prod.yml up --build -d
+#     docker compose -f .devcontainer/compose/base.yml -f .devcontainer/compose/build-prod.yml build
+#   (so builda a imagem localmente; producao real: .devcontainer/production/compose.yml)
 # =============================================================================
 
 services:

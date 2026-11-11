@@ -24,7 +24,7 @@ $CFG->wwwroot   = 'https://develop.ivana.academy';
 $CFG->dataroot  = '/var/www/moodledata-academy';
 $CFG->admin     = 'admin';
 
-$CFG->directorypermissions = 0777;
+$CFG->directorypermissions = 02770; // so www-data (Apache + cron); nunca 0777
 
 $CFG->phpunit_dbtype    = 'mysqli';
 $CFG->phpunit_dblibrary = 'native';

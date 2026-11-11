@@ -4,7 +4,7 @@
 # =============================================================================
 # Usage:
 #   Dev:  docker compose -f .devcontainer/compose/base.yml -f .devcontainer/compose/dev.yml up
-#   Prod: docker compose -f .devcontainer/compose/base.yml -f .devcontainer/compose/prod.yml up
+#   Prod: NAO usa este arquivo - ver .devcontainer/production/compose.yml
 # =============================================================================
 
 name: ivana-academy
