@@ -32,3 +32,7 @@ UPDATE mdl_payment_gateways SET enabled = 0;
 UPDATE mdl_task_scheduled SET disabled = 1;
 DELETE FROM mdl_task_adhoc;
 DELETE FROM mdl_sessions;
+
+-- GA colado a mao no HTML adicional (alem da config do Moove) -----------------
+UPDATE mdl_config SET value = REGEXP_REPLACE(value, 'G-[A-Z0-9]{6,}', 'G-STAGING000')
+ WHERE name IN ('additionalhtmlhead', 'additionalhtmltopofbody', 'additionalhtmlfooter');

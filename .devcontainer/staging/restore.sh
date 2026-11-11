@@ -2,7 +2,7 @@
 # =============================================================================
 # restore.sh - sobe o STAGING LOCAL a partir de um backup da producao
 # =============================================================================
-#   1. importa o dump (/backups/*.sql.gz da VPS) numa MariaDB 11.4 local
+#   1. importa o dump (/backups/*.sql.gz ou db_*.tar.gz mensal) numa MariaDB 11.4 local
 #   2. anonymize.sql: e-mails -> user<id>@staging.invalid; zera SMTP, push,
 #      tokens, segredos de plugins, pagamentos; desliga tarefas agendadas
 #   3. extrai o moodledata (opcional; sem ele o tema perde logo/imagens)
@@ -40,7 +40,12 @@ if [ "$(dc exec -T db mariadb -umoodle -pstaging -Nse "SELECT COUNT(*) FROM info
     die "o banco staging ja tem tabelas - use STAGING_RESET=1 para recomecar"
 fi
 log "🗄  Importando $(basename "$DUMP") ($(du -h "$DUMP" | cut -f1))"
-gunzip -c "$DUMP" | dc exec -T db mariadb -umoodle -pstaging moodle
+# Diario: <dump>.sql.gz. Mensal: db_*.tar.gz com um unico .bkp (SQL puro) dentro.
+case "$DUMP" in
+    *.tar.gz|*.tgz) unpack() { tar -xzOf "$DUMP"; } ;;
+    *)              unpack() { gunzip -c "$DUMP"; } ;;
+esac
+unpack | dc exec -T db mariadb -umoodle -pstaging moodle
 
 # 2. Anonimizar (antes de o Moodle subir) -------------------------------------------
 log "🕶  anonymize.sql"
@@ -75,6 +80,8 @@ for _ in $(seq 1 60); do
 done
 log "⬆  upgrade.php (plugins/versoes desta branch)"
 dc exec -T -u www-data moodle php admin/cli/upgrade.php --non-interactive
+# upgrade.php ressincroniza as tarefas agendadas e religa as padrao: desliga de novo.
+dc exec -T db mariadb -umoodle -pstaging moodle -e "UPDATE mdl_task_scheduled SET disabled = 1"
 dc exec -T -u www-data moodle php admin/cli/purge_caches.php
 dc exec -T moodle sh -c 'crontab -u www-data -l 2>/dev/null | grep -q cron.php && echo "❌ cron ativo" || echo "✅ sem cron"'
 curl -sk -o /dev/null -w "   ${URL} -> HTTP %{http_code}\n" "${URL}/"
