@@ -230,6 +230,18 @@ class course_renderer extends \core_course_renderer {
             'courseurl' => $this->get_course_url($course->id),
         ];
 
+        // Visitors: the card opens the course (login, then straight into it). Crawlers must not
+        // follow it to the login page, and the landing site, which sells the course, gets its own
+        // link. Ivana Academy, SEO.
+        if (!isloggedin() || isguestuser()) {
+            $data['nofollow'] = true;
+            $landing = class_exists('\local_seo\landing') ? \local_seo\landing::visitor_url((int) $course->id) : null;
+            if ($landing) {
+                $data['landingurl'] = $landing;
+                $data['landingtext'] = get_string('coursemoreinfo', 'local_seo');
+            }
+        }
+
         return $this->render_from_template('theme_moove/moove_coursecard', $data);
     }
 
@@ -261,14 +273,6 @@ class course_renderer extends \core_course_renderer {
     private function get_course_url($courseid) {
         if (class_exists('\local_course\output\index')) {
             return new moodle_url('/local/course/index.php', ['id' => $courseid]);
-        }
-
-        // Visitors (and crawlers): course/view.php redirects to the login page
-        // (noindex), so link the public course page instead. Ivana Academy, SEO.
-        // The landing site sells the course: send visitors to its page when there is one.
-        if (!isloggedin() || isguestuser()) {
-            $landing = class_exists('\local_seo\landing') ? \local_seo\landing::visitor_url((int) $courseid) : null;
-            return new moodle_url($landing ?? '/course/info.php', $landing ? [] : ['id' => $courseid]);
         }
 
         return new moodle_url('/course/view.php', ['id' => $courseid]);

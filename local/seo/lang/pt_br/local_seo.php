@@ -31,6 +31,7 @@ $string['consent_terms'] = 'Ao continuar navegando, você concorda com nossas po
 $string['consent_text'] = 'Usamos cookies de análise (Google Analytics) para entender como o site é usado e melhorar nossos cursos. Não usamos cookies de publicidade.';
 $string['consentbanner'] = 'Aviso de consentimento de análise';
 $string['consentbanner_desc'] = 'Define os padrões do Consent Mode do Google (análise negada até aceitar, publicidade sempre negada) e mostra um aviso. A escolha fica salva só no navegador do visitante.';
+$string['coursemoreinfo'] = 'Conheça o curso';
 $string['landingcanonical'] = 'Mesmo produto na landing (canônica)';
 $string['landingcanonical_desc'] = 'Uma linha por curso: <code>idcurso URL</code>. A página do curso aponta a URL canônica para a landing, e o Google mostra a landing. Usar só quando a landing vende este mesmo curso (um profesorado vendido na página da sua tecnicatura conta). O que vem depois de # é comentário.';
 $string['landingparent'] = 'Parte de uma carrera na landing';
