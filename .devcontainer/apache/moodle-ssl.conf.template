@@ -35,6 +35,13 @@
 	RedirectMatch 404 "(?i)/[^/]*readme[^/]*$"
 	RedirectMatch 404 "/(upgrade\.txt|UPGRADING\.md|UPGRADING-CURRENT\.md|CHANGES\.md)$"
 
+	# SEO: paginas de sistema fora do Google (Search Console 11/2026 mostrou
+	# politicas, dataprivacy, signup e switchdevice indexados). O local_seo
+	# tambem marca noindex no HTML; aqui cobre redirects e respostas nao-HTML.
+	<LocationMatch "^/(admin/|login/(forgot_password|signup|confirm)\.php|theme/switchdevice\.php|lib/requirejs\.php|user/|message/|calendar/|badges/|blog/|search/|r\.php)">
+		Header always set X-Robots-Tag "noindex, follow"
+	</LocationMatch>
+
     ErrorLog ${APACHE_LOG_DIR}/moodle_error.log
     CustomLog ${APACHE_LOG_DIR}/moodle_access.log combined
 </VirtualHost>

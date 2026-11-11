@@ -263,6 +263,12 @@ class course_renderer extends \core_course_renderer {
             return new moodle_url('/local/course/index.php', ['id' => $courseid]);
         }
 
+        // Visitors (and crawlers): course/view.php redirects to the login page
+        // (noindex), so link the public course page instead. Ivana Academy, SEO.
+        if (!isloggedin() || isguestuser()) {
+            return new moodle_url('/course/info.php', ['id' => $courseid]);
+        }
+
         return new moodle_url('/course/view.php', ['id' => $courseid]);
     }
 }
