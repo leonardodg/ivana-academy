@@ -1,0 +1,11 @@
+# Moodle (ivana.academy). A Cloudflare prefixa o bloco "Managed content".
+# Paginas de sistema saem do indice via noindex (HTML + X-Robots-Tag), que o
+# Google so le se puder rastrear: por isso /admin/ e /login/ NAO estao aqui.
+# Cursos e catalogo: https://courses.ivana.academy/
+User-agent: *
+Disallow: /theme/switchdevice.php
+Disallow: /search/
+Disallow: /r.php/
+Disallow: /*?*sesskey=
+
+Sitemap: https://courses.ivana.academy/sitemap.xml
