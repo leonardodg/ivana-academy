@@ -40,6 +40,7 @@ rollback() {
 # 0. Pre-checagens -----------------------------------------------------------------
 managed_by_compose && { log "✅ Ja migrado: $CONTAINER e gerenciado pelo compose"; exit 0; }
 require_compose
+ensure_db_secrets
 require_files
 container_running "$OLD_CONTAINER" || die "$OLD_CONTAINER nao esta rodando - estado inesperado"
 SRC_CODE="$OLD_BASE_DIR/code"
@@ -52,6 +53,11 @@ if grep -lE "moodle-v2|docker (exec|restart|start|stop) moodle" /backups/backup.
     log "⚠  /backups/backup.sh cita nomes de container: revise depois (novo nome: $CONTAINER)"
 fi
 dc config --quiet
+# Seguro com o moodle-v2 no ar: sem /run/moodle-secrets ele cai no getenv().
+patch_config_secrets "$SRC_CODE/config.php"
+docker exec "$OLD_CONTAINER" php -l /var/www/html/config.php >/dev/null || die "config.php invalido apos patch"
+docker exec -u www-data "$OLD_CONTAINER" php admin/cli/cfg.php --name=release >/dev/null \
+    || die "moodle-v2 nao conecta no banco com o config.php novo (backup: config.php.bak-*)"
 
 log "Plano: dump -> remove v1 '$CONTAINER' -> para $OLD_CONTAINER -> compose up -> upgrade.php"
 read -r -p "Migrar a PRODUCAO para docker compose agora? Digite 'sim': " ok
@@ -118,6 +124,9 @@ moosh admin/cli/maintenance.php --disable
 trap - ERR
 docker exec "$CONTAINER" php -r 'echo "   PHP ", PHP_VERSION, " upload_progress=", var_export(ini_get("session.upload_progress.enabled"), true), PHP_EOL;'
 grep -E '^\$release' "$CODE_DIR/version.php"
+docker exec -u www-data "$CONTAINER" test -r /run/moodle-secrets/db_password || die "secret nao legivel por www-data"
+docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$CONTAINER" | grep -q '^MOODLE_DBPASS=' \
+    && die "MOODLE_DBPASS ainda aparece no env do container"
 docker inspect -f '   limites: mem={{.HostConfig.Memory}} pids={{.HostConfig.PidsLimit}}' "$CONTAINER"
 curl -s -o /dev/null -w "   publico: HTTP %{http_code} em %{time_total}s\n" "$PUBLIC_URL"
 moosh admin/cli/checks.php || true

@@ -10,6 +10,7 @@
 #   - imagens que nenhum container usa (v1 4.5.1, builds antigos)
 #   - /home/admin/public_html            (codigo do v1, Moodle 4.5.1+ / PHP 8.1)
 #   - /home/admin/local/letsencrypt      (certificado do v1; hoje: Cloudflare Origin CA)
+#   - secrets/db.env (senha em formato env, usado so pelo moodle-v2)
 #   - /home/admin/devcontainer/bin/prod-v2 e compose/ antigos (scripts docker run)
 # =============================================================================
 set -euo pipefail
@@ -28,6 +29,11 @@ fi
 
 if confirm "Remover imagens sem container (docker image prune -a)?"; then
     docker image prune -a -f | tail -1
+fi
+
+if [ -f "$LEGACY_DB_ENV" ] && ! docker inspect moodle-v2 >/dev/null 2>&1 \
+   && confirm "Remover $LEGACY_DB_ENV (senha em formato env; hoje: secrets/db_user|db_password)?"; then
+    rm -f -- "$LEGACY_DB_ENV" && log "🗑  $LEGACY_DB_ENV"
 fi
 
 for d in /home/admin/public_html /home/admin/local/letsencrypt \

@@ -37,6 +37,7 @@ fi
 docker compose version
 
 # Valida o compose.yml e a compatibilidade com o daemon 20.10.
+ensure_db_secrets
 require_files
 dc config --quiet && log "✅ compose.yml valido"
 log "🧪 Teste de API: compose run descartavel (projeto compose-smoke)"

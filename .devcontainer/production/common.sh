@@ -9,7 +9,8 @@ CODE_DIR="${BASE_DIR}/code"             # git checkout (detached) servido pelo A
 DEVCONTAINER_DIR="/home/admin/devcontainer"
 PROD_DIR="${DEVCONTAINER_DIR}/production"   # este diretorio (compose.yml + scripts)
 ENV_FILE="${DEVCONTAINER_DIR}/env/prod.env"
-DB_ENV_FILE="${DEVCONTAINER_DIR}/secrets/db.env"
+SECRETS_DIR="${DEVCONTAINER_DIR}/secrets"
+LEGACY_DB_ENV="${SECRETS_DIR}/db.env"     # formato antigo (env); so p/ migracao
 BACKUP_DIR="/backups"
 REPO_URL="https://github.com/leonardodg/ivana-academy.git"
 PUBLIC_URL="https://ivana.academy/login/index.php"
@@ -30,7 +31,8 @@ require_compose() {
 
 require_files() {
     local f
-    for f in "$ENV_FILE" "$DB_ENV_FILE" "$DEVCONTAINER_DIR/certs/server.crt" \
+    for f in "$ENV_FILE" "$SECRETS_DIR/db_user" "$SECRETS_DIR/db_password" \
+             "$DEVCONTAINER_DIR/certs/server.crt" \
              "$DEVCONTAINER_DIR/certs/server.key"; do
         [ -f "$f" ] || die "Arquivo ausente: $f"
     done
@@ -40,6 +42,33 @@ require_files() {
 set_env() {
     if grep -q "^$1=" "$ENV_FILE"; then sed -i "s|^$1=.*|$1=$2|" "$ENV_FILE"
     else echo "$1=$2" >> "$ENV_FILE"; fi
+}
+
+# secrets/db_user + db_password (0600) a partir do db.env antigo, se faltarem.
+ensure_db_secrets() {
+    [ -s "$SECRETS_DIR/db_user" ] && [ -s "$SECRETS_DIR/db_password" ] && return 0
+    [ -f "$LEGACY_DB_ENV" ] || die "Faltam $SECRETS_DIR/db_user|db_password (e nao ha db.env para gerar)"
+    local u p
+    u=$(sed -n 's/^MOODLE_DBUSER=//p' "$LEGACY_DB_ENV" | head -1)
+    p=$(sed -n 's/^MOODLE_DBPASS=//p' "$LEGACY_DB_ENV" | head -1)
+    [ -n "$u" ] && [ -n "$p" ] || die "MOODLE_DBUSER/MOODLE_DBPASS vazios em $LEGACY_DB_ENV"
+    ( umask 077; printf '%s' "$u" > "$SECRETS_DIR/db_user"; printf '%s' "$p" > "$SECRETS_DIR/db_password" )
+    log "🔑 secrets/db_user e db_password gerados a partir de db.env"
+}
+
+# config.php da VPS: credenciais do arquivo publicado pelo entrypoint, com
+# fallback para getenv() (continua valendo no moodle-v2 antigo / rollback).
+patch_config_secrets() {   # $1 = config.php
+    local cfg=$1
+    grep -q "/run/moodle-secrets/db_password" "$cfg" && return 0
+    cp -p "$cfg" "$cfg.bak-$(date +%Y%m%d-%H%M%S)"
+    sed -i \
+      -e "s|getenv('MOODLE_DBUSER')|((\$ivsec = @file_get_contents('/run/moodle-secrets/db_user')) !== false ? trim(\$ivsec) : getenv('MOODLE_DBUSER'))|" \
+      -e "s|getenv('MOODLE_DBPASS')|((\$ivsec = @file_get_contents('/run/moodle-secrets/db_password')) !== false ? trim(\$ivsec) : getenv('MOODLE_DBPASS'))|" \
+      "$cfg"
+    [ "$(grep -c '/run/moodle-secrets/db_' "$cfg")" = 2 ] \
+        || die "config.php nao tem getenv('MOODLE_DBUSER'/'MOODLE_DBPASS') no formato esperado - ajustar a mao"
+    log "🔑 config.php le as credenciais de /run/moodle-secrets (fallback getenv)"
 }
 
 container_running() {

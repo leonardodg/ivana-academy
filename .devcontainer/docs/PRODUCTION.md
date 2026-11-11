@@ -7,7 +7,8 @@ Só existe **uma** versão em produção: o container `moodle`, definido em
 |---|---|
 | Código (git checkout detached de `main`) | `/home/admin/moodle/code` — `config.php` só existe aqui, fora do git |
 | Scripts + `compose.yml` | `/home/admin/devcontainer/production/` (o CI sincroniza a partir de `.devcontainer/production/`) |
-| Env / secrets / certs (fora do git) | `/home/admin/devcontainer/{env/prod.env, secrets/db.env, certs/server.{crt,key}}` |
+| Env (sem senha) | `/home/admin/devcontainer/env/prod.env` |
+| Secrets do compose (0600, fora do git) | `secrets/db_user`, `secrets/db_password`, `certs/server.{crt,key}`, montados em `/run/secrets/*` (**nunca** como env, nem em `docker inspect`). O entrypoint publica cópias `root:www-data 0440` em `/run/moodle-secrets/`, que o `config.php` lê (com fallback para `getenv`) |
 | moodledata | `/home/admin/moodledata` → `/moodledata` |
 | Banco | MariaDB 11.4 em outro host; o dump noturno é feito por `/backups/backup.sh` |
 | Certificado | Cloudflare Origin CA (até 2041), SSL Full (strict) |
@@ -54,12 +55,13 @@ Até 11/2026 a produção era o container `moodle-v2`, criado por `docker run`, 
    mexer no daemon. Depois testa a API do Docker 20.10 com um `compose run` descartável.
 2. **Janela (~10 min):** `production/cutover.sh`. Faz modo manutenção, dump, remove o
    container v1, para o `moodle-v2` (que fica como rollback), move
-   `/home/admin/moodle-v2` para `/home/admin/moodle`, roda `compose up` com a imagem
+   `/home/admin/moodle-v2` para `/home/admin/moodle`, gera `secrets/db_user|db_password` a partir do
+   `db.env` antigo e faz o `config.php` ler as credenciais do arquivo (testado no `moodle-v2` antes da troca), roda `compose up` com a imagem
    endurecida, `upgrade.php` e muda `directorypermissions` para `02770`. Se der problema:
    `cutover.sh --rollback`.
 3. **Depois de 1–2 dias estável:** `production/retire-legacy.sh`. Pede confirmação item a
    item e remove o container `moodle-v2`, as imagens órfãs, `/home/admin/public_html` (código
-   do v1), `/home/admin/local/letsencrypt` e os scripts antigos `devcontainer/bin/prod-v2`.
+   do v1), `/home/admin/local/letsencrypt`, o `secrets/db.env` e os scripts antigos `devcontainer/bin/prod-v2`.
 
 > Se `install-compose.sh` falhar no teste de API (compose v5 incompatível com o Docker 20.10),
 > não siga para o cutover. A alternativa é atualizar o Docker Engine da VPS (docker-ce),

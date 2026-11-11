@@ -49,6 +49,17 @@ load_secret() {
 load_secret "MOODLE_DBUSER"     "/run/secrets/db_user"      "moodle"
 load_secret "MOODLE_DBPASS"     "/run/secrets/db_password"  "moodle"
 
+# Secrets do compose (sem swarm) sao bind-mounts com o dono/modo do host
+# (0600 admin): www-data nao le. Publica copias legiveis so por root e pelo
+# grupo www-data - o config.php le daqui (vale para Apache, cron e
+# `docker exec -u www-data php admin/cli/*`, que nao herdam este env).
+install -d -o root -g www-data -m 0750 /run/moodle-secrets
+for s in db_user db_password; do
+    if [ -f "/run/secrets/$s" ]; then
+        install -o root -g www-data -m 0440 "/run/secrets/$s" "/run/moodle-secrets/$s"
+    fi
+done
+
 if [ -f "/run/secrets/ssl_cert" ] && [ -f "/run/secrets/ssl_key" ]; then
     CERT_PATH="/run/secrets/ssl_cert"
     KEY_PATH="/run/secrets/ssl_key"
@@ -132,8 +143,8 @@ if [[ "${ENVIRONMENT:-production}" =~ ^(production|prod)$ || "${CRON_ENABLED}" =
     chmod 0666 /var/log/moodle-cron.log
     echo "📄 Cron log file created"
 
-    declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID' > /container.env 2>/dev/null || true
-    # Contem MOODLE_DBPASS: legivel so por root e pelo usuario do cron (www-data).
+    # Sem MOODLE_DBPASS: o cron.php le a senha de /run/moodle-secrets.
+    declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID|MOODLE_DBPASS' > /container.env 2>/dev/null || true
     chown root:www-data /container.env 2>/dev/null || true
     chmod 640 /container.env 2>/dev/null || true
 

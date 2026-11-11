@@ -39,10 +39,15 @@ services:
       CRON_ENABLED: ${CRON_ENABLED:-true}
       PHP_OPCACHE_VALIDATE_TIMESTAMPS: "0"
 
-    # MOODLE_DBUSER/MOODLE_DBPASS como env do container: o config.php usa
-    # getenv() e `docker exec php admin/cli/...` so ve o env do container.
-    env_file:
-      - ../secrets/db.env
+    # Credenciais e certificado como secrets (/run/secrets/*), nunca env:
+    # nao aparecem em `docker inspect`. O entrypoint publica copias
+    # root:www-data 0440 em /run/moodle-secrets/ para Apache, cron e
+    # `docker exec -u www-data php admin/cli/*` (o config.php le de la).
+    secrets:
+      - db_user
+      - db_password
+      - ssl_cert
+      - ssl_key
 
     ports:
       - "${PROD_HTTP_PORT:-80}:80"
@@ -51,9 +56,6 @@ services:
     volumes:
       - ${MOODLE_CODE_DIR:-/home/admin/moodle/code}:/var/www/html
       - ${MOODLE_DATA_HOST:-/home/admin/moodledata}:/var/www/moodledata
-      # Cloudflare Origin CA (SSL Full strict); o entrypoint le de /run/secrets
-      - ../certs/server.crt:/run/secrets/ssl_cert:ro
-      - ../certs/server.key:/run/secrets/ssl_key:ro
 
     healthcheck:
       test: ["CMD-SHELL", "curl -fsk -o /dev/null https://localhost/login/index.php || exit 1"]
@@ -67,3 +69,15 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+# Arquivos na VPS (fora do git, 0600 do usuario admin). ssl_*: Cloudflare
+# Origin CA (SSL Full strict).
+secrets:
+  db_user:
+    file: ../secrets/db_user
+  db_password:
+    file: ../secrets/db_password
+  ssl_cert:
+    file: ../certs/server.crt
+  ssl_key:
+    file: ../certs/server.key

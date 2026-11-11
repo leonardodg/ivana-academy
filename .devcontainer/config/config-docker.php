@@ -11,7 +11,11 @@ function get_moodle_setting($env_name, $secret_path = null) {
         return $val;
     }
 
-    // 2. Se não achar e houver um caminho de secret, tenta ler o arquivo
+    // 2. Copia legivel por www-data publicada pelo entrypoint (secrets do compose)
+    if ($secret_path && is_readable('/run/moodle-secrets/' . basename($secret_path))) {
+        $secret_path = '/run/moodle-secrets/' . basename($secret_path);
+    }
+    // 3. Se não achar e houver um caminho de secret, tenta ler o arquivo
     if ($secret_path && file_exists($secret_path)) {
         $secret_val = trim(file_get_contents($secret_path));
         if ($secret_val !== '') {
