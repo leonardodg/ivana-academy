@@ -24,14 +24,14 @@ use moodle_url;
  * Without an explicit choice the Google tag sent analytics_storage=denied
  * (gcs=G100) and GA4 recorded nothing. This sets the defaults before the
  * theme's gtag('config'), shows a banner until the visitor chooses, and
- * stores the choice in the browser (localStorage) only. Ads stay denied.
+ * stores the choice in a first-party cookie only. Ads stay denied.
  *
  * @package    local_seo
  * @copyright  2026 Ivana Academy
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class consent {
-    /** @var string localStorage key holding 'granted' or 'denied'. */
+    /** @var string Cookie holding 'granted' or 'denied'. */
     const STORAGE_KEY = 'ivana_analytics_consent';
 
     /**
@@ -48,6 +48,7 @@ class consent {
             'accept' => get_string('consent_accept', 'local_seo'),
             'reject' => get_string('consent_reject', 'local_seo'),
             'policy' => get_string('consent_policy', 'local_seo'),
+            'terms' => get_string('consent_terms', 'local_seo'),
             'policyurl' => (new moodle_url('/admin/tool/policy/viewall.php'))->out(false),
             'key' => self::STORAGE_KEY,
         ];
@@ -67,20 +68,42 @@ class consent {
 (function(cfg){
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
-  var choice = null;
-  try { choice = window.localStorage.getItem(cfg.key); } catch (e) {}
+  // A first-party cookie, not localStorage: Moodle's storagewrapper clears all of
+  // localStorage whenever jsrev changes (every purge_caches/deploy).
+  var m = document.cookie.match(new RegExp('(?:^|; )' + cfg.key + '=(granted|denied)'));
+  var choice = m ? m[1] : null;
   window.gtag('consent', 'default', {
     ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
     analytics_storage: choice === 'granted' ? 'granted' : 'denied',
     wait_for_update: 500
   });
   if (choice === 'granted' || choice === 'denied') { return; }
-  function decide(value, box) {
-    try { window.localStorage.setItem(cfg.key, value); } catch (e) {}
+
+  // tool_policy shows guests its own bar ("If you continue browsing... Terms of Use").
+  // While this banner is up it carries that notice too, and either button also
+  // records tool_policy's acceptance, so the visitor sees one notice, not two.
+  var TERMS_COOKIE = 'EU_COOKIE_LAW_CONSENT';
+  function termsPending() {
+    return !!document.querySelector('.eupopup-markup') && document.cookie.indexOf(TERMS_COOKIE + '=') === -1;
+  }
+  function acceptTerms() {
+    var d = new Date(); d.setTime(d.getTime() + 30 * 864e5);   // same as tool_policy
+    document.cookie = TERMS_COOKIE + '=true; expires=' + d.toGMTString() + ';path=/';
+  }
+  function decide(value, box, terms) {
+    document.cookie = cfg.key + '=' + value + ';max-age=15552000;path=/;SameSite=Lax'
+      + (location.protocol === 'https:' ? ';Secure' : '');   // 180 days
     if (value === 'granted') { window.gtag('consent', 'update', {analytics_storage: 'granted'}); }
-    box.parentNode && box.parentNode.removeChild(box);
+    if (terms) { acceptTerms(); }
+    box.parentNode && box.parentNode.removeChild(box);   // the style hiding tool_policy's bar stays
+  }
+  function link(href, text) {
+    var a = document.createElement('a');
+    a.href = href; a.textContent = text;
+    return a;
   }
   function show() {
+    var terms = termsPending();
     var box = document.createElement('div');
     box.id = 'local-seo-consent';
     box.setAttribute('role', 'region');
@@ -91,37 +114,32 @@ class consent {
     var p = document.createElement('p');
     p.style.cssText = 'margin:0;flex:1 1 280px;';
     p.appendChild(document.createTextNode(cfg.text + ' '));
-    var a = document.createElement('a');
-    a.href = cfg.policyurl; a.textContent = cfg.policy;
-    p.appendChild(a);
+    if (terms) {
+      // The guest policy links tool_policy rendered (name + view.php?versionid=...).
+      var links = document.querySelectorAll('.eupopup-markup a[data-action="view-guest"]');
+      p.appendChild(document.createTextNode(cfg.terms + ' '));
+      Array.prototype.forEach.call(links, function(l, i) {
+        if (i) { p.appendChild(document.createTextNode(', ')); }
+        p.appendChild(link(l.getAttribute('href'), l.textContent.trim()));
+      });
+      p.appendChild(document.createTextNode('.'));
+      var css = document.createElement('style');
+      css.id = 'local-seo-consent-css';
+      css.textContent = '.eupopup-container{display:none!important}';
+      document.head.appendChild(css);
+    } else {
+      p.appendChild(link(cfg.policyurl, cfg.policy));
+    }
     var actions = document.createElement('div');
     actions.style.cssText = 'display:flex;gap:8px;';
     [['reject', 'denied', 'btn btn-outline-secondary'], ['accept', 'granted', 'btn btn-primary']].forEach(function(b){
       var btn = document.createElement('button');
       btn.type = 'button'; btn.className = b[2]; btn.textContent = cfg[b[0]];
-      btn.addEventListener('click', function(){ decide(b[1], box); });
+      btn.addEventListener('click', function(){ decide(b[1], box, terms); });
       actions.appendChild(btn);
     });
     box.appendChild(p); box.appendChild(actions);
     document.body.appendChild(box);
-    // tool_policy shows its own bottom bar to guests (Terms of Use): sit above it, drop when it closes.
-    var mo = null;
-    function place() {
-      if (!box.parentNode) { mo && mo.disconnect(); window.removeEventListener('resize', place); return; }
-      var h = 0;   // the bar is position:fixed, so offsetParent is always null: measure it instead
-      Array.prototype.forEach.call(document.querySelectorAll('.eupopup-container'), function(bar) {
-        var r = bar.getBoundingClientRect();
-        if (r.height && window.getComputedStyle(bar).display !== 'none') { h = Math.max(h, window.innerHeight - r.top); }
-      });
-      box.style.bottom = (16 + h) + 'px';
-    }
-    place();
-    window.addEventListener('resize', place);
-    if (window.MutationObserver) {
-      mo = new MutationObserver(place);
-      mo.observe(document.body, {attributes: true, childList: true, subtree: true,
-        attributeFilter: ['style', 'class']});
-    }
   }
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', show); } else { show(); }
 })({$config});
