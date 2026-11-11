@@ -28,7 +28,7 @@ ivana-academy/
     │   ├── dev.yml               # Development override (hot-reload, xdebug)
     │   ├── build-dev.yml         # Build local target: development (optional)
     │   └── build-prod.yml        # Build local target: production (optional)
-    ├── production/               # PRODUCAO real (EC2): compose.yml + deploy/cutover - docs/PRODUCTION.md
+    ├── production/               # PRODUCAO real (EC2): compose.yml + deploy.sh - docs/PRODUCTION.md
     ├── env/
     │   ├── defaults.env          # Shared non-sensitive defaults
     │   ├── db.env                # Database vars

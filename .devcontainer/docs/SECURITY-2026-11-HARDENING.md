@@ -11,21 +11,20 @@ com comandos somente leitura.
 | 3.3 `directorypermissions = 0777` | 0777, pastas world-writable no moodledata | Templates → `02770`; cron passa a rodar como `www-data`; o entrypoint normaliza o moodledata para 2770/0660 e corrige o dono. **config.php da VPS: passo manual abaixo** |
 | 3.3 `sslproxy = true` | **Não** está no config.php de prod | Removido do config padrão da imagem (o Apache termina o TLS; Cloudflare Full strict) |
 | 3.3 Sem limites de memória/PIDs | Sem limites (uso ~412 MiB / 21 PIDs) | `mem_limit 700m` / `pids_limit 256` em `production/compose.yml` (`MOODLE_MEM_LIMIT` / `MOODLE_PIDS_LIMIT`) |
-| 3.3 Dockerfile legado (PHP 8.1, credenciais em ARG/ENV) | Não é usado (o v1 está parado e só serve de rollback) | Removidos: `Dockerfile`, `my-entrypoint`, `moodle-cron`, `docker-compose*.yml` da raiz (PHP 8.0), `config-docker.php`/`config.docker-develop.php` da raiz (acessíveis pela web), `production.yml` e `default-ssl.conf`. O v1 é aposentado de vez pelo `cutover.sh` / `retire-legacy.sh` |
+| 3.3 Dockerfile legado (PHP 8.1, credenciais em ARG/ENV) | Não é usado (o v1 está parado e só serve de rollback) | Removidos: `Dockerfile`, `my-entrypoint`, `moodle-cron`, `docker-compose*.yml` da raiz (PHP 8.0), `config-docker.php`/`config.docker-develop.php` da raiz (acessíveis pela web), `production.yml` e `default-ssl.conf`. O v1 foi removido na migração para compose (11/11); o resto sai com o `retire-legacy.sh` |
 | 3.4 Qual container atende | `moodle-v2` (Up 9 days); o v1 está parado | Produção passa para `docker compose` (container `moodle`) e o v1 é removido, ver PRODUCTION.md |
 
 Achado extra: o cron rodava `cron.php` como **root**. Os arquivos que ele criava no moodledata
 ficavam com dono root, e era por isso que o 0777 "funcionava". `/container.env` (que tem
 MOODLE_DBPASS) ficava legível por qualquer usuário do container; agora é `640 root:www-data`.
 
-## Aplicar em produção
+## Aplicado em produção — 11/11/2026
 
-Tudo é aplicado pela migração para docker compose, descrita em [PRODUCTION.md](PRODUCTION.md):
-`install-compose.sh` e depois `cutover.sh`. O cutover recria o container com a imagem nova
-(cron como www-data, normalização 2770/0660, limites), roda o `upgrade.php` (4.5.15+) e **só
-então** muda o `config.php` da VPS para `02770`. Se o `config.php` mudar antes, o cron antigo,
-rodando como root, cria pastas `root:root 2770` que o Apache não consegue gravar. Por isso o
-`cutover.sh --rollback` desfaz essa troca.
+Tudo entrou junto com a migração para docker compose ([PRODUCTION.md](PRODUCTION.md)): a imagem
+nova (cron como www-data, normalização 2770/0660, limites), o upgrade para 4.5.15+ e, **por
+último**, o `config.php` em `02770`. A ordem importa: se o `config.php` mudar antes, o cron
+antigo, rodando como root, cria pastas `root:root 2770` que o Apache não consegue gravar. Por
+isso o rollback manual volta o valor para `0777`.
 
 Conferir depois:
 ```bash

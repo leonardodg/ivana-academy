@@ -58,7 +58,8 @@ services:
       - ${MOODLE_DATA_HOST:-/home/admin/moodledata}:/var/www/moodledata
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsk -o /dev/null https://localhost/login/index.php || exit 1"]
+      # 503 = modo manutencao do Moodle (upgrade/janela): Apache+PHP estao ok.
+      test: ["CMD-SHELL", "c=$$(curl -sk -o /dev/null -w '%{http_code}' https://localhost/login/index.php); case $$c in 2*|3*|503) exit 0;; esac; exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3

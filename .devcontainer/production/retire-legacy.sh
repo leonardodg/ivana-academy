@@ -2,11 +2,11 @@
 # =============================================================================
 # retire-legacy.sh - remove os vestigios do v1 e do moodle-v2 (docker run)
 # =============================================================================
-# Rodar so depois do cutover.sh, com o compose estavel (1-2 dias). Cada item
+# Rodar com o compose estavel (1-2 dias apos a migracao de 11/11/2026). Cada item
 # pede confirmacao; o que for removido aqui NAO tem volta (os backups do
 # /backups e do Google Drive continuam).
 #
-#   - container moodle-v2 (parado, rollback do cutover) + symlink moodle-v2
+#   - container moodle-v2 (parado, rollback da migracao) + symlink moodle-v2
 #   - imagens que nenhum container usa (v1 4.5.1, builds antigos)
 #   - /home/admin/public_html            (codigo do v1, Moodle 4.5.1+ / PHP 8.1)
 #   - /home/admin/local/letsencrypt      (certificado do v1; hoje: Cloudflare Origin CA)
@@ -17,12 +17,12 @@ set -euo pipefail
 source "$(dirname "$0")/common.sh"
 
 managed_by_compose && container_running "$CONTAINER" \
-    || die "$CONTAINER nao esta no ar via compose - rode o cutover.sh antes"
+    || die "$CONTAINER nao esta no ar via compose"
 wait_http_ok || die "$CONTAINER nao responde - nao e hora de remover o rollback"
 
 confirm() { read -r -p "$1 [s/N] " a; [ "$a" = s ] || [ "$a" = S ]; }
 
-if docker inspect moodle-v2 >/dev/null 2>&1 && confirm "Remover container moodle-v2 (rollback do cutover)?"; then
+if docker inspect moodle-v2 >/dev/null 2>&1 && confirm "Remover container moodle-v2 (rollback da migracao)?"; then
     docker rm -f moodle-v2 >/dev/null && log "🗑  moodle-v2 removido"
     [ -L /home/admin/moodle-v2 ] && rm /home/admin/moodle-v2 && log "🗑  symlink /home/admin/moodle-v2"
 fi
