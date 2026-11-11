@@ -1,0 +1,69 @@
+# =============================================================================
+# .devcontainer/production/compose.yml - PRODUCAO (EC2 ivana-moodle-aws)
+# =============================================================================
+# Fonte unica da definicao do container de producao. Na VPS fica em
+# /home/admin/devcontainer/production/ (sincronizado pelo production-v2.yml);
+# env/, secrets/ e certs/ ficam em /home/admin/devcontainer/ (fora do git).
+#
+# Runtime (PHP 8.3 + Apache) vem da imagem; o CODIGO e um git checkout na VPS
+# montado em /var/www/html (config.php fica so na VPS, fora do git).
+#
+# Uso (na VPS):
+#   cd /home/admin/devcontainer/production
+#   docker compose --env-file ../env/prod.env up -d --wait
+# Normalmente quem roda e o deploy.sh (CI) - ver ../docs/PRODUCTION.md
+# =============================================================================
+
+name: ivana-academy
+
+services:
+  moodle:
+    image: leodg/moodle-academy:${IMAGE_TAG:?defina IMAGE_TAG em env/prod.env}
+    container_name: moodle
+    restart: unless-stopped
+
+    # Limites (VPS ~945 MiB; uso normal ~410 MiB / ~20 PIDs): contem
+    # vazamento/abuso (fork bomb, OOM) sem derrubar o host.
+    mem_limit: ${MOODLE_MEM_LIMIT:-700m}
+    pids_limit: ${MOODLE_PIDS_LIMIT:-256}
+
+    environment:
+      ENVIRONMENT: production
+      MOODLE_URL: ${MOODLE_URL:?}
+      MOODLE_DBTYPE: ${MOODLE_DBTYPE:-mariadb}
+      MOODLE_DBHOST: ${MOODLE_DBHOST:?}
+      MOODLE_DBNAME: ${MOODLE_DBNAME:?}
+      MOODLE_DBPFX: mdl_
+      MOODLE_DBCOLL: utf8mb4_bin
+      MOODLE_DATA: /var/www/moodledata
+      CRON_ENABLED: ${CRON_ENABLED:-true}
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: "0"
+
+    # MOODLE_DBUSER/MOODLE_DBPASS como env do container: o config.php usa
+    # getenv() e `docker exec php admin/cli/...` so ve o env do container.
+    env_file:
+      - ../secrets/db.env
+
+    ports:
+      - "${PROD_HTTP_PORT:-80}:80"
+      - "${PROD_HTTPS_PORT:-443}:443"
+
+    volumes:
+      - ${MOODLE_CODE_DIR:-/home/admin/moodle/code}:/var/www/html
+      - ${MOODLE_DATA_HOST:-/home/admin/moodledata}:/var/www/moodledata
+      # Cloudflare Origin CA (SSL Full strict); o entrypoint le de /run/secrets
+      - ../certs/server.crt:/run/secrets/ssl_cert:ro
+      - ../certs/server.key:/run/secrets/ssl_key:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsk -o /dev/null https://localhost/login/index.php || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

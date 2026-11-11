@@ -8,7 +8,7 @@
 # is about to be deployed, so the security & performance gate reflects the
 # real deployable artifact - not a dev container with xdebug/grunt/tools.
 #
-# Usage (CI only, never for real prod - that's prod-v2.yml + a real DB/host):
+# Usage (CI only, never for real prod - that's production/compose.yml + a real DB/host):
 #   VALIDATE_IMAGE=leodg/moodle-academy:production-ci \
 #     docker compose -f .devcontainer/compose/sandbox-production.yml up -d
 # =============================================================================

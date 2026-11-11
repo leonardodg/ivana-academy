@@ -7,7 +7,7 @@
 // ephemeral container defined by compose/sandbox-production.yml.
 //
 // This is NOT the real production config.php (that one lives on the EC2
-// host and is generated from config-docker.php / env vars, see prod-v2.yml).
+// host and is generated from config-docker.php / env vars, see production/compose.yml).
 // This file exists so that `admin/cli/checks.php -t security|performance`
 // runs against the SAME hardening flags that ship in config-docker.php,
 // letting the CI gate validate the settings before they ever reach prod.

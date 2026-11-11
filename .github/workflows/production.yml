@@ -1,16 +1,15 @@
-name: Deploy PRODUCTION v2 (build + prepare)
+name: Deploy PRODUCTION (build + deploy)
 
 # Dispara em todo merge (push) na main = deploy automatico na VPS.
-# 1. docker:          builda e publica a imagem v2 (target production)
-# 2. validate:        security & performance gate na mesma imagem
-# 3. prepare-vps:     na EC2 (prepare.sh + deploy-code.sh):
-#                     checkout do codigo em /home/admin/moodle-v2/code, env,
-#                     secrets, certs e docker pull. Se o moodle-v2 ja estiver
-#                     no ar, o deploy-code.sh atualiza o codigo (restart so
-#                     se .php mudou + purge). upgrade.php: pelo painel admin.
+# 1. docker:      builda e publica a imagem (target production)
+# 2. validate:    security & performance gate na mesma imagem
+# 3. deploy-vps:  sincroniza .devcontainer/production/ e roda deploy.sh na EC2:
+#                 docker pull, checkout do codigo em /home/admin/moodle/code,
+#                 `docker compose up -d --wait` (recria so se a imagem mudou;
+#                 senao restart se .php mudou) + purge_caches.
+#                 upgrade.php NUNCA roda aqui: Administracao do site > Notificacoes.
 #
-# A TROCA v1 -> v2 e o upgrade.php NUNCA rodam aqui: sao manuais, etapas C/E de
-# .devcontainer/docs/UPGRADE-PHP83-MOODLE-4515-MANUAL.md
+# Detalhes e operacao: .devcontainer/docs/PRODUCTION.md
 
 env:
   IMAGE_TAG: 4.5.15-php8.3
@@ -22,7 +21,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: production-v2
+  group: production
   cancel-in-progress: false
 
 jobs:
@@ -71,8 +70,8 @@ jobs:
       image_ref: leodg/moodle-academy:4.5.15-php8.3
     secrets: inherit
 
-  prepare-vps:
-    name: Prepare v2 on AWS EC2 (no downtime, no switch)
+  deploy-vps:
+    name: Deploy on AWS EC2 (docker compose)
     needs: [docker, validate-production]
     runs-on: ubuntu-latest
     environment: production
@@ -80,21 +79,19 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
 
-      # Scripts ficam fora do diretorio de codigo: o prepare.sh faz checkout
-      # em /home/admin/moodle-v2/code e nao pode estar rodando de dentro dele.
-      - name: Sync prod-v2 scripts
+      # Scripts + compose.yml ficam fora do diretorio de codigo: o deploy.sh faz
+      # checkout em /home/admin/moodle/code e nao pode rodar de dentro dele.
+      - name: Sync production scripts
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          # --mkpath: cria /home/admin/devcontainer/bin/ na 1a vez (sem
-          # SCRIPT_BEFORE, que deixava local_ssh_script-before-*.sh na VPS)
           ARGS: "-rlzvc --delete --mkpath"
-          SOURCE: ".devcontainer/bin/prod-v2/"
+          SOURCE: ".devcontainer/production/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: /home/admin/devcontainer/bin/prod-v2/
+          TARGET: /home/admin/devcontainer/production/
 
-      - name: Run prepare.sh
+      - name: Run deploy.sh
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.REMOTE_HOST }}
@@ -105,9 +102,5 @@ jobs:
           command_timeout: 20m
           script: |
             set -e
-            chmod +x /home/admin/devcontainer/bin/prod-v2/*.sh
-            /home/admin/devcontainer/bin/prod-v2/prepare.sh "${{ github.ref_name }}" "${{ env.IMAGE_TAG }}"
-            # Com o moodle-v2 no ar: atualiza o codigo (checkout sem mudanca
-            # local). version.php alterado: NAO roda upgrade.php - o admin
-            # conclui em Administracao do site > Notificacoes.
-            /home/admin/devcontainer/bin/prod-v2/deploy-code.sh "${{ github.ref_name }}"
+            chmod +x /home/admin/devcontainer/production/*.sh
+            /home/admin/devcontainer/production/deploy.sh "${{ github.ref_name }}" "${{ env.IMAGE_TAG }}"

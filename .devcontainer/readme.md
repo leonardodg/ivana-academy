@@ -26,9 +26,9 @@ ivana-academy/
     │   ├── base.yml              # Shared resources (volumes, secrets, networks)
     │   ├── db.yml                # MariaDB service
     │   ├── dev.yml               # Development override (hot-reload, xdebug)
-    │   ├── prod.yml              # Production override
     │   ├── build-dev.yml         # Build local target: development (optional)
     │   └── build-prod.yml        # Build local target: production (optional)
+    ├── production/               # PRODUCAO real (EC2): compose.yml + deploy/cutover - docs/PRODUCTION.md
     ├── env/
     │   ├── defaults.env          # Shared non-sensitive defaults
     │   ├── db.env                # Database vars
@@ -138,19 +138,8 @@ docker compose \
 
 ### Production
 
-```bash
-# Up
-docker compose \
-    -f .devcontainer/compose/base.yml \
-    -f .devcontainer/compose/prod.yml \
-    up -d
-
-# Down
-docker compose \
-    -f .devcontainer/compose/base.yml \
-    -f .devcontainer/compose/prod.yml \
-    down
-```
+Producao (EC2) usa `.devcontainer/production/compose.yml` e os scripts ao lado
+(`deploy.sh` roda no CI). Ver [docs/PRODUCTION.md](docs/PRODUCTION.md).
 
 ### Via environment variable (avoids typing every time)
 

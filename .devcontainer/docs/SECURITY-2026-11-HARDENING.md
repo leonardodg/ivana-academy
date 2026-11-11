@@ -10,47 +10,28 @@ com comandos somente leitura.
 | 3.2 post_max_size 210M | 210M | Mantido. A redução para 32M do CERT-EU é mitigação *temporária* para PHP sem correção; o PHP já está corrigido, e o Moodle precisa de uploads grandes (SCORM/vídeo) |
 | 3.3 `directorypermissions = 0777` | 0777, pastas world-writable no moodledata | Templates → `02770`; cron passa a rodar como `www-data`; o entrypoint normaliza o moodledata para 2770/0660 e corrige o dono. **config.php da VPS: passo manual abaixo** |
 | 3.3 `sslproxy = true` | **Não** está no config.php de prod | Removido do config padrão da imagem (o Apache termina o TLS; Cloudflare Full strict) |
-| 3.3 Sem limites de memória/PIDs | Sem limites (uso ~412 MiB / 21 PIDs) | `--memory 700m --pids-limit 256` (common.sh e prod-v2.yml; dá para trocar com `MOODLE_MEM_LIMIT` / `MOODLE_PIDS_LIMIT`) |
-| 3.3 Dockerfile legado (PHP 8.1, credenciais em ARG/ENV) | Não é usado (o v1 está parado e só serve de rollback) | Removidos: `Dockerfile`, `my-entrypoint`, `moodle-cron`, `docker-compose*.yml` da raiz (PHP 8.0), `config-docker.php`/`config.docker-develop.php` da raiz (acessíveis pela web), `production.yml` e `default-ssl.conf`. O rollback-to-v1 só dá `docker start` no container antigo, então não depende de nenhum deles |
-| 3.4 Qual container atende | `moodle-v2` (Up 9 days); o v1 está parado | — |
+| 3.3 Sem limites de memória/PIDs | Sem limites (uso ~412 MiB / 21 PIDs) | `mem_limit 700m` / `pids_limit 256` em `production/compose.yml` (`MOODLE_MEM_LIMIT` / `MOODLE_PIDS_LIMIT`) |
+| 3.3 Dockerfile legado (PHP 8.1, credenciais em ARG/ENV) | Não é usado (o v1 está parado e só serve de rollback) | Removidos: `Dockerfile`, `my-entrypoint`, `moodle-cron`, `docker-compose*.yml` da raiz (PHP 8.0), `config-docker.php`/`config.docker-develop.php` da raiz (acessíveis pela web), `production.yml` e `default-ssl.conf`. O v1 é aposentado de vez pelo `cutover.sh` / `retire-legacy.sh` |
+| 3.4 Qual container atende | `moodle-v2` (Up 9 days); o v1 está parado | Produção passa para `docker compose` (container `moodle`) e o v1 é removido, ver PRODUCTION.md |
 
 Achado extra: o cron rodava `cron.php` como **root**. Os arquivos que ele criava no moodledata
 ficavam com dono root, e era por isso que o 0777 "funcionava". `/container.env` (que tem
 MOODLE_DBPASS) ficava legível por qualquer usuário do container; agora é `640 root:www-data`.
 
-## Aplicar em produção (manual, nesta ordem)
+## Aplicar em produção
 
-O merge em `main` só builda a imagem e atualiza o código. **O container que está rodando
-continua com o entrypoint antigo** até ser recriado.
+Tudo é aplicado pela migração para docker compose, descrita em [PRODUCTION.md](PRODUCTION.md):
+`install-compose.sh` e depois `cutover.sh`. O cutover recria o container com a imagem nova
+(cron como www-data, normalização 2770/0660, limites), roda o `upgrade.php` (4.5.15+) e **só
+então** muda o `config.php` da VPS para `02770`. Se o `config.php` mudar antes, o cron antigo,
+rodando como root, cria pastas `root:root 2770` que o Apache não consegue gravar. Por isso o
+`cutover.sh --rollback` desfaz essa troca.
 
-1. **Backup** (como em 22/10): DB + `tar` do moodledata.
-2. **Recriar o v2 com a imagem nova** (cron como www-data, normalização 2770/0660, limites):
-   ```bash
-   cd /home/admin/devcontainer && source bin/prod-v2/common.sh
-   docker pull leodg/moodle-academy:4.5.15-php8.3
-   v2_down && v2_up && wait_http_ok moodle-v2
-   ```
-   Na primeira subida o `find chmod/chown` passa pelo moodledata inteiro, então pode levar
-   alguns minutos.
-3. **Conferir**:
-   ```bash
-   docker exec moodle-v2 crontab -u www-data -l     # job do cron.php
-   docker exec moodle-v2 crontab -l                  # root: vazio
-   docker exec moodle-v2 sh -c 'find /var/www/moodledata -maxdepth 1 -perm -o+w'   # vazio
-   docker exec moodle-v2 sh -c 'find /var/www/moodledata ! -user www-data | head'  # vazio
-   docker inspect -f '{{.HostConfig.Memory}} {{.HostConfig.PidsLimit}}' moodle-v2
-   ```
-4. **Só depois do passo 3**, restringir o config.php da VPS:
-   ```bash
-   sed -i 's/^\$CFG->directorypermissions = 0777;/$CFG->directorypermissions = 02770;/' \
-       /home/admin/moodle-v2/code/config.php
-   ```
-   (O config.php está fora do git. Se ele mudar antes do passo 2, o cron como root cria pastas
-   `root:root 2770` que o Apache não consegue gravar.)
-5. **Upgrade do core 4.5.15+**: Administração do site › Notificações (ou
-   `docker exec -u www-data moodle-v2 php admin/cli/upgrade.php --non-interactive`).
-6. Observar `docker stats moodle-v2` por 1–2 dias. Se aparecer OOM-kill (`docker inspect -f
-   '{{.State.OOMKilled}}'`), subir `MOODLE_MEM_LIMIT` no env/prod.env.
-
-Rollback: `bin/prod-v2/rollback-to-v1.sh` (igual ao de antes) ou recriar o v2 com a tag
-`4.5.15-php8.3-<sha anterior>`.
+Conferir depois:
+```bash
+docker exec moodle crontab -u www-data -l                                   # job do cron.php
+docker exec moodle sh -c 'find /var/www/moodledata -perm -o+w | head'       # vazio
+docker inspect -f '{{.HostConfig.Memory}} {{.HostConfig.PidsLimit}}' moodle
+docker inspect -f '{{.State.OOMKilled}}' moodle                             # false
+```
+Se aparecer OOM-kill, aumentar `MOODLE_MEM_LIMIT` em `env/prod.env` e rodar `dc up -d`.
