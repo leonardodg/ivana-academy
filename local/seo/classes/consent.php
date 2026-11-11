@@ -104,6 +104,24 @@ class consent {
     });
     box.appendChild(p); box.appendChild(actions);
     document.body.appendChild(box);
+    // tool_policy shows its own bottom bar to guests (Terms of Use): sit above it, drop when it closes.
+    var mo = null;
+    function place() {
+      if (!box.parentNode) { mo && mo.disconnect(); window.removeEventListener('resize', place); return; }
+      var h = 0;   // the bar is position:fixed, so offsetParent is always null: measure it instead
+      Array.prototype.forEach.call(document.querySelectorAll('.eupopup-container'), function(bar) {
+        var r = bar.getBoundingClientRect();
+        if (r.height && window.getComputedStyle(bar).display !== 'none') { h = Math.max(h, window.innerHeight - r.top); }
+      });
+      box.style.bottom = (16 + h) + 'px';
+    }
+    place();
+    window.addEventListener('resize', place);
+    if (window.MutationObserver) {
+      mo = new MutationObserver(place);
+      mo.observe(document.body, {attributes: true, childList: true, subtree: true,
+        attributeFilter: ['style', 'class']});
+    }
   }
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', show); } else { show(); }
 })({$config});
