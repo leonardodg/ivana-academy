@@ -13,9 +13,6 @@
 # version.php alterado: o codigo vai para o servidor, mas o upgrade.php NAO
 # roda aqui - o admin conclui em Administracao do site > Notificacoes.
 #
-# Enquanto o cutover.sh nao rodou (container ainda e o moodle-v2 de docker
-# run), so faz o pull e avisa: nada no ar e alterado.
-#
 # Uso: deploy.sh [GIT_REF] [IMAGE_TAG]
 # =============================================================================
 set -euo pipefail
@@ -29,21 +26,15 @@ IMAGE="leodg/moodle-academy:${IMAGE_TAG}"
 free_gb=$(df --output=avail -BG / | tail -1 | tr -dc '0-9')
 log "💾 Livre em /: ${free_gb}G"
 [ "$free_gb" -ge 3 ] || die "Menos de 3G livres. Limpe imagens antigas: docker image prune"
-[ -f "$ENV_FILE" ] || die "Arquivo ausente: $ENV_FILE"
+
+managed_by_compose || die "$CONTAINER nao e gerenciado pelo compose (projeto ivana-academy) - estado inesperado"
+require_compose
+require_files
+set_env IMAGE_TAG "$IMAGE_TAG"
 
 # 2. Imagem ---------------------------------------------------------------------
 log "🐳 docker pull $IMAGE"
 docker pull --quiet "$IMAGE"
-
-if ! managed_by_compose; then
-    log "⏸  Cutover pendente ($CONTAINER nao e gerenciado pelo compose): nada alterado no ar."
-    log "   Rodar manualmente, na janela: $PROD_DIR/cutover.sh"
-    echo "::warning::Producao ainda nao migrada para docker compose - rodar cutover.sh na VPS"
-    exit 0
-fi
-require_compose
-require_files
-set_env IMAGE_TAG "$IMAGE_TAG"
 
 # 3. Codigo ---------------------------------------------------------------------
 git -C "$CODE_DIR" fetch --quiet origin

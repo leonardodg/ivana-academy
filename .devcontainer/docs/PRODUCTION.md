@@ -44,25 +44,33 @@ docker stats --no-stream moodle
 `git -C /home/admin/moodle/code checkout --detach <sha>` e depois `dc restart moodle`. Banco:
 dumps em `/backups` (e no Google Drive).
 
-## Migração única: docker run → compose (aposenta o v1)
+## Histórico: migração docker run → compose (11/11/2026)
 
-Até 11/2026 a produção era o container `moodle-v2`, criado por `docker run`, e o v1
-(`moodle`, PHP 8.1) ficava parado como rollback. Enquanto a migração não for feita, o
-`deploy.sh` só faz o `pull` e avisa no CI.
+Até 11/2026 a produção era o container `moodle-v2`, criado por `docker run`, e o v1 (`moodle`,
+PHP 8.1) ficava parado. A migração instalou o plugin `docker compose` v5.6.1 em
+`~admin/.docker/cli-plugins` (binário oficial, sha256 conferido). Também gerou
+`secrets/db_user|db_password`, ajustou o `config.php` (credenciais lidas de arquivo, `02770`),
+removeu o v1 e subiu o `moodle` pelo compose. Fez ainda o upgrade 4.5.15 → 4.5.15+ e o dump
+`/backups/pre-compose-20261111-112643.sql.gz`. Os scripts de uso único (`install-compose.sh`,
+`cutover.sh`) foram removidos depois. Estão no histórico do git (PR #117).
 
-1. **Uma vez, sem downtime:** `production/install-compose.sh`. Instala o plugin
-   `docker compose` v5.6.1 (sha256 conferido) em `~/.docker/cli-plugins`, sem sudo e sem
-   mexer no daemon. Depois testa a API do Docker 20.10 com um `compose run` descartável.
-2. **Janela (~10 min):** `production/cutover.sh`. Faz modo manutenção, dump, remove o
-   container v1, para o `moodle-v2` (que fica como rollback), move
-   `/home/admin/moodle-v2` para `/home/admin/moodle`, gera `secrets/db_user|db_password` a partir do
-   `db.env` antigo e faz o `config.php` ler as credenciais do arquivo (testado no `moodle-v2` antes da troca), roda `compose up` com a imagem
-   endurecida, `upgrade.php` e muda `directorypermissions` para `02770`. Se der problema:
-   `cutover.sh --rollback`.
-3. **Depois de 1–2 dias estável:** `production/retire-legacy.sh`. Pede confirmação item a
-   item e remove o container `moodle-v2`, as imagens órfãs, `/home/admin/public_html` (código
-   do v1), `/home/admin/local/letsencrypt`, o `secrets/db.env` e os scripts antigos `devcontainer/bin/prod-v2`.
+**Rollback para o `moodle-v2`**, só enquanto o `retire-legacy.sh` não rodar:
+```bash
+cd /home/admin/devcontainer/production && source common.sh
+dc down
+# o moodle-v2 roda o cron como root: com 02770 ele cria pastas que o Apache nao grava
+sed -i 's/^\$CFG->directorypermissions = 02770;/$CFG->directorypermissions = 0777;/' $CODE_DIR/config.php
+docker update --restart=unless-stopped moodle-v2 && docker start moodle-v2
+```
+O `config.php` continua lendo as credenciais via `getenv` (o `moodle-v2` usa `--env-file db.env`).
 
-> Se `install-compose.sh` falhar no teste de API (compose v5 incompatível com o Docker 20.10),
-> não siga para o cutover. A alternativa é atualizar o Docker Engine da VPS (docker-ce),
-> que precisa de uma janela própria.
+**Depois de 1–2 dias estável:** `production/retire-legacy.sh`. Pede confirmação item a item e
+remove o container `moodle-v2`, as imagens órfãs, `/home/admin/public_html` (código do v1),
+`/home/admin/local/letsencrypt`, o `secrets/db.env` e os scripts antigos
+`devcontainer/bin/prod-v2`.
+
+## Healthcheck
+
+O `compose.yml` considera saudável 2xx/3xx **e 503**. 503 é o modo manutenção do Moodle
+(upgrade, janela), e nele Apache e PHP estão funcionando. Sem isso, `up --wait` falha durante
+uma manutenção.
