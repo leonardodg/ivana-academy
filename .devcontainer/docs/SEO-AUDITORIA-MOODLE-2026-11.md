@@ -57,7 +57,9 @@ Moodle" e "conteúdo das páginas de curso" da primeira versão desta auditoria.
   - **Parte de uma carrera**: módulos vendidos dentro de uma carrera. Ficam com `noindex`, e
     o visitante que clica vai para a página da carrera. São 9 cursos.
   - Fora das duas listas: `noindex`. São 14 cursos.
-- Na home do Moodle, para quem não fez login, o card leva à landing quando há ligação.
+- Na home do Moodle, sem login: o card continua abrindo o curso (o Moodle pede o login e leva a
+  aluna direto para dentro dele), com `rel="nofollow"` para o Google não seguir até a tela de
+  login. Quando o curso tem página na landing, o card ganha o link "Conocé el curso →" para ela.
 - O JSON-LD `Course` saiu do Moodle: ele fica nas páginas da landing, que são as canônicas.
 - Os cursos sem página na landing estão listados no plano da landing
   (`ivana-courses-landing-pages/docs/SEO-AUDITORIA-2026-11.md`, "Cursos do Moodle sem página na
@@ -127,7 +129,7 @@ indexado, ou as páginas da landing não ganham impressões nas buscas pelo nome
 
 | Fase | Quando | Itens | Quem |
 |---|---|---|---|
-| 1 | esta semana | canonical/noindex dos cursos e cards para a landing; lazy-load; H1 da home | código (PR `feat/seo-landing-canonical`) |
+| 1 | esta semana | canonical/noindex dos cursos; link "Conocé el curso" nos cards; lazy-load; H1 da home | código (PR `feat/seo-landing-canonical`) |
 | 1 | esta semana | `sameAs` (6), nome da página inicial (4) | configuração |
 | 2 | 2–3 semanas | imagens menores (1); páginas dos cursos que faltam na landing | Ivana / projeto da landing |
 | 2 | 2–3 semanas | `aria-label` (7), dimensões (9) | código |

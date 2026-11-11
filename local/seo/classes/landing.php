@@ -77,7 +77,7 @@ class landing {
     }
 
     /**
-     * Where to send a visitor (not logged in) who clicks the course: the landing page, if any.
+     * Landing page to show visitors (not logged in) next to the course: same product or its career.
      *
      * @param int $courseid
      * @return string|null
