@@ -82,6 +82,16 @@ hr {
         display: flex;
         align-items: center;
 
+        // Como no Boost: no celular estes itens ficam so no menu hamburguer (gaveta primaria).
+        // Sem isto, com 3 itens (admin) as pilulas empilhavam e vazavam da navbar.
+        @include media-breakpoint-down(sm) {
+            display: none;
+        }
+
+        .moremenu .navigation {
+            flex-wrap: nowrap;
+        }
+
         .navigation {
             height: auto;
             align-items: center;
