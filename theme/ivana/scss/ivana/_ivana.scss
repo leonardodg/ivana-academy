@@ -878,3 +878,71 @@ hr {
         padding-right: 0;
     }
 }
+
+// ─── Aviso de termos do tool_policy (barra preta do Moodle) ─────────
+// Normalmente vem dentro do aviso de cookies do local_seo; aparece sozinho quando a escolha de
+// cookies (180 dias) ainda vale e o aceite dos termos (30 dias) venceu. Mesmo cartao do aviso.
+.eupopup-container.eupopup-container-bottom {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1rem 2.5rem 1rem 1rem;
+    background-color: #fff;
+    color: $ivana-on-surface;
+    border: 1px solid $ivana-border-subtle;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+    font-family: $ivana-font-sans;
+    font-size: .875rem;
+    line-height: 1.5;
+    text-align: left;
+
+    .eupopup-body a {
+        color: $ivana-primary;
+    }
+
+    .eupopup-buttons {
+        padding: .75rem 0 0;
+    }
+
+    .eupopup-button {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.5rem;
+        margin: 0;
+        padding: .5rem 1.25rem;
+        border-radius: .5rem;
+        background-color: $ivana-primary;
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+
+        &:hover,
+        &:focus {
+            background-color: darken($ivana-primary, 6%);
+            color: #fff;
+            text-decoration: none;
+        }
+    }
+
+    .eupopup-closebutton {
+        color: $ivana-on-surface-variant;
+        opacity: .6;
+        font-size: 1.25rem;
+        padding: .5rem .75rem;
+    }
+}
+
+// Login no celular: idioma e "Aviso sobre cookies" quebram linha em vez de espremer.
+.pagelayout-login .loginform .d-flex:has(> [data-modal="alert"]) {
+    flex-wrap: wrap;
+    gap: .5rem;
+
+    > [data-modal="alert"] {
+        white-space: nowrap;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
