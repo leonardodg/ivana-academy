@@ -818,3 +818,63 @@ hr {
 .ivana-lp-drawer .ivana-lp-langs {
     align-self: flex-start;
 }
+
+// ─── Videos responsivos (YouTube, Vimeo, Google Drive) ──────────────
+// As paginas (mod_page) colam o embed do YouTube com width="560" height="315". No celular o
+// video ficava cortado dentro de uma caixa com rolagem lateral, o play saia da tela e o toque
+// caia no titulo ou em "Assistir no YouTube", que abria o YouTube em outra janela (o "popup").
+// Aqui o embed ocupa a largura disponivel e mantem 16:9, sem editar nenhuma pagina.
+#region-main,
+.course-content,
+.activity-description {
+    iframe[src*="youtube.com"],
+    iframe[src*="youtube-nocookie.com"],
+    iframe[src*="youtu.be"],
+    iframe[src*="player.vimeo.com"],
+    iframe[src*="drive.google.com"] {
+        display: block;
+        width: 100% !important; /* stylelint-disable-line declaration-no-important */
+        max-width: 100%;
+        height: auto !important; /* stylelint-disable-line declaration-no-important */
+        aspect-ratio: 16 / 9;
+        margin-left: auto;
+        margin-right: auto;
+        border: 0;
+        border-radius: 1rem;
+    }
+
+    // Em telas grandes o video nao precisa passar de ~860px (fica centralizado).
+    @include media-breakpoint-up(lg) {
+        iframe[src*="youtube.com"],
+        iframe[src*="youtube-nocookie.com"],
+        iframe[src*="player.vimeo.com"] {
+            max-width: 860px;
+        }
+    }
+}
+
+// Celular: menos moldura em volta do conteudo, para o video e o texto ganharem largura.
+@include media-breakpoint-down(sm) {
+    #page.drawers {
+        padding-left: .5rem;
+        padding-right: .5rem;
+    }
+
+    #page > #page-footer.ivana-lp-footer {
+        margin-left: -.5rem;
+        margin-right: -.5rem;
+    }
+
+    #page.drawers .main-inner {
+        padding: .75rem;
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: 1rem;
+    }
+
+    #region-main .box.generalbox,
+    #region-main [role="main"] > .box {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}

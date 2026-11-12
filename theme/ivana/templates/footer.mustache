@@ -92,6 +92,15 @@
     require(['theme_boost/footer-popover'], function(FooterPopover) {
         FooterPopover.init();
     });
+    // YouTube embeds play inside the page on iPhone (without playsinline=1 Safari opens its
+    // full-screen player, which students saw as a popup). Pages keep their pasted embed code.
+    Array.prototype.forEach.call(document.querySelectorAll('iframe[src*="youtube.com/embed/"], iframe[src*="youtube-nocookie.com/embed/"]'),
+        function(frame) {
+            var src = frame.getAttribute('src');
+            if (src && !/[?&]playsinline=/.test(src)) {
+                frame.setAttribute('src', src + (src.indexOf('?') === -1 ? '?' : '&') + 'playsinline=1');
+            }
+        });
     // "Cookie preferences": reopens the local_seo consent banner (shown only when that banner is on).
     (function() {
         var button = document.querySelector('[data-action="ivana-cookie-preferences"]');

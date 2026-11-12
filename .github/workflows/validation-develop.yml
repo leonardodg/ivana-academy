@@ -179,6 +179,13 @@ jobs:
           docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
             vendor/bin/phpcs --standard=moodle --extensions=php theme/moove/ 2>&1 || true
 
+      - name: "PHPCS theme/ivana"
+        env:
+          basedir: ${{ github.workspace }}
+        run: |
+          docker compose -f "${basedir}/.devcontainer/compose/sandbox.yml" exec -T moodle \
+            vendor/bin/phpcs --standard=moodle --extensions=php theme/ivana/ local/seo/ 2>&1 || true
+
       - name: "PHPCS login/auth (codechecker)"
         env:
           basedir: ${{ github.workspace }}

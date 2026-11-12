@@ -36,10 +36,17 @@ $CFG->airnotifieraccesskey = '';
 $CFG->enablewebservices    = 0;
 $CFG->enablemobilewebservice = 0;
 
+// reCAPTCHA: as chaves de teste publicas do Google (developers.google.com/recaptcha/docs/faq),
+// que funcionam em qualquer dominio (localhost incluso) e sempre validam. A chave real da
+// producao nao aceita localhost e nao deve aceitar.
+$CFG->recaptchapublickey  = '6LeIxAcTAAAAAJcZVRqyHh4-UIOtB3Ba_-KZsW0C';
+$CFG->recaptchaprivatekey = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe';
+
 // GA4: ID inexistente. A tag carrega (testa a ordem consentimento -> gtag) mas
 // nao suja a propriedade de producao. PayPal sem conta.
 $CFG->forced_plugin_settings = [
     'theme_moove' => ['googleanalytics' => 'G-STAGING000'],
+    'theme_ivana' => ['googleanalytics' => 'G-STAGING000'],
     'enrol_paypal' => ['paypalbusiness' => 'staging@example.invalid'],
 ];
 

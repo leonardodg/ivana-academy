@@ -1,4 +1,7 @@
 #page-enrol-index #region-main {
+    // Contem os floats das caixas (o cartao do curso transbordava a caixa branca).
+    display: flow-root;
+
     .generalbox:first-of-type {
         width: 33.33%;
         float: left;
