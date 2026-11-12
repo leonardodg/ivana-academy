@@ -33,109 +33,51 @@
 }}
 
 
-<footer id="page-footer">
-    <div class="moove-container-fluid footer-columns">
-        <div class="row">
-            <div class="col-md-4 column-left">
-                <div class="row">
-                    <div class="col-md">
-                        <div class="socialnetworks">
-                            <ul class="mb-0">
-                            <li>
-                                <a href="https://www.youtube.com/@ivanalerea719" target="_blank" class="youtube btn btn-link btn-rounded">
-                                    <i class="fa fa-youtube"></i>
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="https://www.tiktok.com/@ivanalerea" target="_blank" class="youtube btn btn-link btn-rounded">
-                                    <i class="fa-brands fa-tiktok"></i>
-                                </a>
-                            </li>
-
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md">
-                        <div class="socialnetworks">
-                            <ul class="mb-0">
-
-                                <li>
-                                    <a href="https://www.facebook.com/profile.php?id=100092594777140" target="_blank" class="youtube btn btn-link btn-rounded">
-                                        <i class="fa-brands fa-facebook"></i>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="https://www.instagram.com/ivana_da_mora" target="_blank" class="instagram btn btn-link btn-rounded">
-                                        <i class="fa fa-instagram"></i>
-                                    </a>
-                                </li>
-                                <li>  <img src="{{config.wwwroot}}/theme/ivana/pix/brazil.svg" alt="Brasil" style="height: 24px; with: 24px"></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md">
-                        <div class="socialnetworks">
-                            <ul class="mb-0">
-
-                            <li>
-                                <a href="https://www.facebook.com/profile.php?id=100059997320063" target="_blank" class="youtube btn btn-link btn-rounded">
-                                    <i class="fa-brands fa-facebook"></i>
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="https://www.instagram.com/ivana_de_mi_taller_" target="_blank" class="instagram btn btn-link btn-rounded">
-                                    <i class="fa fa-instagram"></i>
-                                </a>
-                            </li>
-
-                            <li> <img src="{{config.wwwroot}}/theme/ivana/pix/argentina.svg" alt="Argentina" style="height: 24px; with: 24px"></li>
-
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
+<footer id="page-footer" class="ivana-lp-footer d-print-none">
+    {{#output.ivana_lp_footer}}
+        <div class="ivana-footer-grid">
+            <div class="ivana-footer-about">
+                <img src="{{logo}}" alt="Ivana Academy" class="ivana-footer-logo" loading="lazy" decoding="async" width="95" height="88">
+                <p>{{about}}</p>
+                <p>{{address}}</p>
+                <ul class="ivana-footer-social" aria-label="{{sociallabel}}">
+                    {{#social}}
+                        <li>
+                            <a href="{{href}}" aria-label="{{label}}" title="{{label}}"{{#newtab}} target="_blank" rel="noreferrer"{{/newtab}}>{{{icon}}}</a>
+                        </li>
+                    {{/social}}
+                </ul>
             </div>
-            <div class="col-md-4 column-center">
-                <div class="madeby">
-                    <p>{{#str}}themedevelopedby, theme_ivana{{/str}}</p>
-                    <a href="https://www.linkedin.com/in/le0dg/" target="_blank">
-                        <img src="{{config.wwwroot}}/theme/ivana/pix/leodg.svg" alt="Conecti.me" style="height: 60px; with: 20px">
-                    </a>
-                </div>
-            </div>
-            <div class="col-md-4 column-right">
-                {{#enablemobilewebservice}}
-                    {{#mobilesetuplink}}
-                        <a href="{{{mobilesetuplink}}}">{{#str}}getmoodleonyourmobile, tool_mobile{{/str}}</a>
-                    {{/mobilesetuplink}}
-                    {{^mobilesetuplink}}
-                        <h3 class="footer-title">{{#str}}getmoodleonyourmobile, tool_mobile{{/str}}</h3>
-                    {{/mobilesetuplink}}
-                    <div class="stores">
-                        {{#androidappid}}
-                            <a href="https://play.google.com/store/apps/details?id={{androidappid}}">
-                                <img src="{{config.wwwroot}}/theme/ivana/pix/store_google.svg" alt="Play Store">
-                            </a>
-                        {{/androidappid}}
-                        {{#iosappid}}
-                            <a class="mt-1" href="https://apps.apple.com/app/id{{iosappid}}">
-                                <img src="{{config.wwwroot}}/theme/ivana/pix/store_apple.svg" alt="App Store">
-                            </a>
-                        {{/iosappid}}
-                    </div>
-                {{/enablemobilewebservice}}
-            </div>
+
+            {{#groups}}
+                <nav class="ivana-footer-group" aria-label="{{title}}">
+                    <span class="ivana-footer-title">{{title}}</span>
+                    <ul>
+                        {{#links}}
+                            <li><a href="{{href}}"{{#newtab}} target="_blank" rel="noreferrer"{{/newtab}}>{{label}}</a></li>
+                        {{/links}}
+                    </ul>
+                </nav>
+            {{/groups}}
         </div>
-    </div>
+
+        <div class="ivana-footer-bottom">
+            <nav aria-label="{{legallabel}}" class="ivana-footer-legal">
+                {{#legal}}
+                    <a href="{{href}}">{{label}}</a>
+                {{/legal}}
+                <button type="button" class="ivana-footer-cookies" data-action="ivana-cookie-preferences" hidden>{{cookieslabel}}</button>
+            </nav>
+            <p>{{company}}</p>
+            <p>{{rights}}</p>
+            <p class="ivana-footer-madeby">
+                <span>{{maintainedby}}</span>
+                <a href="https://www.linkedin.com/in/le0dg/" target="_blank" rel="noreferrer" aria-label="LEODG">
+                    <img src="{{leodglogo}}" alt="LEODG" class="ivana-footer-leodg" loading="lazy" decoding="async" width="57" height="22">
+                </a>
+            </p>
+        </div>
+    {{/output.ivana_lp_footer}}
 
     <div class="footer-content-debugging footer-dark bg-dark text-light">
         <div class="moove-container-fluid footer-dark-inner">
@@ -150,4 +92,14 @@
     require(['theme_boost/footer-popover'], function(FooterPopover) {
         FooterPopover.init();
     });
+    // "Cookie preferences": reopens the local_seo consent banner (shown only when that banner is on).
+    (function() {
+        var button = document.querySelector('[data-action="ivana-cookie-preferences"]');
+        if (button && typeof window.localSeoConsentOpen === 'function') {
+            button.hidden = false;
+            button.addEventListener('click', function() {
+                window.localSeoConsentOpen();
+            });
+        }
+    })();
 {{/js}}

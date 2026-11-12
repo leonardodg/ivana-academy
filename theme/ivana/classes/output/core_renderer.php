@@ -110,6 +110,21 @@ class core_renderer extends \theme_boost\output\core_renderer {
     }
 
     /**
+     * Landing pages footer (everyone, logged in or not).
+     *
+     * @return array|false Template context, or false when data/lp.json is missing.
+     */
+    public function ivana_lp_footer() {
+        static $context = null;
+
+        if ($context === null) {
+            $context = \theme_ivana\util\lp::footer() ?: false;
+        }
+
+        return $context;
+    }
+
+    /**
      * Landing pages menu for visitors (not logged in, or guest). Logged-in users keep the Moodle navbar.
      *
      * @return array|false Template context, or false to render the Moodle navbar.

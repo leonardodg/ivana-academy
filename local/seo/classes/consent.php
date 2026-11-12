@@ -77,7 +77,6 @@ class consent {
     analytics_storage: choice === 'granted' ? 'granted' : 'denied',
     wait_for_update: 500
   });
-  if (choice === 'granted' || choice === 'denied') { return; }
 
   // tool_policy shows guests its own bar ("If you continue browsing... Terms of Use").
   // While this banner is up it carries that notice too, and either button also
@@ -93,7 +92,7 @@ class consent {
   function decide(value, box, terms) {
     document.cookie = cfg.key + '=' + value + ';max-age=15552000;path=/;SameSite=Lax'
       + (location.protocol === 'https:' ? ';Secure' : '');   // 180 days
-    if (value === 'granted') { window.gtag('consent', 'update', {analytics_storage: 'granted'}); }
+    window.gtag('consent', 'update', {analytics_storage: value});   // reopened banner can also withdraw
     if (terms) { acceptTerms(); }
     box.parentNode && box.parentNode.removeChild(box);   // the style hiding tool_policy's bar stays
   }
@@ -141,6 +140,11 @@ class consent {
     box.appendChild(p); box.appendChild(actions);
     document.body.appendChild(box);
   }
+  // "Cookie preferences" in the theme footer reopens the banner to change the choice.
+  window.localSeoConsentOpen = function() {
+    if (!document.getElementById('local-seo-consent')) { show(); }
+  };
+  if (choice) { return; }
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', show); } else { show(); }
 })({$config});
 JS;

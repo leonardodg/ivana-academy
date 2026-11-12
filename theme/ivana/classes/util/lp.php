@@ -201,4 +201,69 @@ class lp {
             'icons' => $data['icons'] ?? [],
         ];
     }
+
+    /**
+     * Template context of the footer: the same footer as the landing pages, plus a small
+     * "platform maintained by LEODG" line.
+     *
+     * @return array
+     */
+    public static function footer(): array {
+        global $CFG;
+
+        $data = self::data();
+        if (empty($data['footer'])) {
+            return [];
+        }
+        $lang = self::lang();
+        $f = $data['footer'];
+        $text = $f['text'][$lang] ?? [];
+
+        $legal = array_map(fn($l) => [
+            'label' => self::pick($l['label'], $lang),
+            'href' => self::pick($l['href'], $lang),
+        ], $f['legal']);
+        if ($lang === 'es') {
+            foreach ($f['legal_es_extra'] as $l) {
+                $legal[] = ['label' => $l['label'], 'href' => $l['href']];
+            }
+        }
+
+        $t = [
+            'pt' => ['social' => 'Redes e contato', 'legal' => 'Informações legais', 'cookies' => 'Preferências de cookies',
+                'maintained' => 'Plataforma mantida e atualizada por'],
+            'es' => ['social' => 'Redes y contacto', 'legal' => 'Información legal', 'cookies' => 'Preferencias de cookies',
+                'maintained' => 'Plataforma mantenida y actualizada por'],
+        ][$lang];
+
+        return [
+            'lang' => $lang,
+            'logo' => (new moodle_url('/theme/ivana/pix/logo-square.png'))->out(false),
+            'about' => $text['about'] ?? '',
+            'address' => trim(($text['addressBR'] ?? '') . ' · ' . ($text['addressAR'] ?? ''), ' ·'),
+            'sociallabel' => $t['social'],
+            'social' => array_map(fn($l) => [
+                'label' => self::pick($l['label'], $lang),
+                'href' => self::pick($l['href'], $lang),
+                'newtab' => !empty($l['newtab']),
+                'icon' => $l['icon'],
+            ], $f['social']),
+            'groups' => array_map(fn($g) => [
+                'title' => self::pick($g['title'], $lang),
+                'links' => array_map(fn($l) => [
+                    'label' => self::pick($l['label'], $lang),
+                    'href' => self::pick($l['href'], $lang),
+                    'newtab' => !empty($l['newtab']),
+                ], $g['links']),
+            ], $f['groups']),
+            'legallabel' => $t['legal'],
+            'legal' => $legal,
+            'cookieslabel' => $t['cookies'],
+            'company' => $f['company']['legalName'] . ' · CNPJ ' . $f['company']['cnpj'] . ' · '
+                . self::pick($f['company']['email'], $lang),
+            'rights' => $text['rights'] ?? '',
+            'maintainedby' => $t['maintained'],
+            'leodglogo' => $CFG->wwwroot . '/theme/ivana/pix/leodg.svg',
+        ];
+    }
 }
