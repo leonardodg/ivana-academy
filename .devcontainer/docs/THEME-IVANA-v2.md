@@ -66,6 +66,11 @@ moosh admin/cli/purge_caches.php
   Google Fonts, que o tema não usa mais, e não cita o reCAPTCHA). Aplicar com
   `moosh local/seo/cli/update_policy.php --file=.devcontainer/docs/POLITICA-PRIVACIDADE-v5.md --revision=v5 --run`
   (nova versão: todos aceitam de novo no próximo login; `--minor` para não pedir).
+- **Cartões dos cursos (formato Tiles):** cada curso guardava a própria cor (30 azuis, 5 roxos, 1 verde, 1 vermelho).
+  Unificados no rosa da LP (aplicado na produção em 12/11/2026):
+  `moosh admin/cli/cfg.php --component=theme_ivana --name=brandcolor --set=#805252` e
+  `moosh admin/cli/cfg.php --component=format_tiles --name=followthemecolour --set=1`.
+  Para voltar às cores por curso: `followthemecolour=0` (elas continuam salvas).
 - **Logo:** o tema usa o logo da LP (`theme/ivana/pix/logo.svg`). Não precisa subir nada.
 
 ## Rollback
