@@ -1,0 +1,27 @@
+{
+  "extends": "stylelint-config-standard",
+  "overrides": [
+    {
+      "files": [
+        "scss/ivana/_accessibilitystyles.scss",
+        "scss/ivana/_blocks.scss",
+        "scss/ivana/_course.scss",
+        "scss/ivana/_enrol.scss",
+        "scss/ivana/_frontpage.scss",
+        "scss/ivana/_general.scss",
+        "scss/ivana/_labels.scss",
+        "scss/ivana/_mydashboard.scss",
+        "scss/ivana/_navbar.scss",
+        "scss/ivana/_profile.scss",
+        "scss/ivana/_security.scss"
+      ],
+      "rules": {
+        "declaration-no-important": null
+      }
+    }
+  ],
+  "ignoreFiles": [
+    "style/**/*.css",
+    "amd/build/**"
+  ]
+}
