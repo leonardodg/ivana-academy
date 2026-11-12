@@ -53,6 +53,8 @@ $string['presetfiles'] = 'Additional theme preset files';
 $string['presetfiles_desc'] = 'Preset files can be used to dramatically alter the appearance of the theme. See <a href="https://docs.moodle.org/dev/Boost_Presets">Boost presets</a> for information on creating and sharing your own preset files.';
 $string['loginbgimg'] = 'Login page background';
 $string['loginbgimg_desc'] = 'Upload your custom background image for the login page.';
+$string['loginbgimgmobile'] = 'Login page background (phones)';
+$string['loginbgimgmobile_desc'] = 'Portrait image used on phones and tablets held upright (up to 991px wide). Empty: the theme version (pix/loginbg-mobile.jpg), made from the desktop image with its corner details kept visible. Suggested size: 828 x 1472 px.';
 $string['brandcolor'] = 'Brand colour';
 $string['brandcolor_desc'] = 'The accent colour.';
 $string['secondarymenucolor'] = 'Secondary menu color';

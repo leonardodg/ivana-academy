@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'theme_ivana';
-$plugin->version = 2026111200;
+$plugin->version = 2026111201;
 $plugin->release = '2.0.0';
 $plugin->maturity = MATURITY_BETA;
 $plugin->requires = 2024100100;
