@@ -479,3 +479,342 @@ hr {
 .nav-tabs .nav-link.active {
     color: $ivana-primary;
 }
+
+// ─── Navbar de visitante: o menu principal da LP (NavHeader + SiteNavbar) ──
+
+.ivana-lp-navbar {
+    display: block;
+    padding: 0;
+    height: auto;
+    min-height: $ivana-navbar-height;
+
+    .ivana-lp-navbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        max-width: 1280px;
+        min-height: $ivana-navbar-height;
+        margin: 0 auto;
+        padding: .5rem 1rem;
+
+        @include media-breakpoint-up(md) {
+            padding: .5rem 3rem;
+        }
+    }
+
+    .ivana-lp-brand {
+        display: flex;
+        align-items: center;
+        min-height: 2.75rem;
+        padding: 0 .5rem;
+        flex-shrink: 0;
+    }
+
+    .ivana-lp-logo {
+        height: 2.5rem;
+        width: auto;
+        object-fit: contain;
+
+        @include media-breakpoint-up(md) {
+            height: 3rem;
+        }
+    }
+
+    .ivana-nav-icon {
+        width: 1rem;
+        height: 1rem;
+        color: $ivana-primary;
+        flex-shrink: 0;
+    }
+
+    .ivana-flag {
+        width: 1.125rem;
+        height: .75rem;
+        border-radius: 1px;
+        flex-shrink: 0;
+    }
+
+    .ivana-chevron {
+        width: .875rem;
+        height: .875rem;
+        transition: transform .2s ease;
+    }
+}
+
+// Grupo de pilulas (navGroupClass) e pilula (navPill).
+.ivana-lp-pills {
+    align-items: center;
+    gap: .5rem;
+    padding: .25rem;
+    background-color: $ivana-surface-container;
+    border: 1px solid $ivana-border-subtle;
+    border-radius: 9999px;
+}
+
+.ivana-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    min-height: 2.25rem;
+    padding: .375rem .875rem;
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: $ivana-on-surface-variant;
+    font-family: $ivana-font-sans;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .025em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all .2s ease;
+
+    .ivana-nav-icon {
+        width: .875rem;
+        height: .875rem;
+    }
+
+    &:hover,
+    &:focus {
+        background-color: $ivana-surface-container-high;
+        color: $ivana-on-surface-variant;
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $ivana-primary;
+        outline-offset: 2px;
+    }
+
+    &[aria-expanded="true"] {
+        background-color: $ivana-primary;
+        color: $ivana-on-primary;
+        box-shadow: $ivana-shadow-sm;
+
+        .ivana-nav-icon {
+            color: $ivana-on-primary;
+        }
+
+        .ivana-chevron {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+// Painel suspenso (bg-white rounded-2xl border shadow-lg p-3, w-80 / w-[34rem]).
+.ivana-lp-dropdown .dropdown-menu.ivana-lp-panel {
+    width: 20rem;
+    margin-top: .5rem;
+    padding: .75rem;
+    border-radius: 1rem;
+    border: 1px solid $ivana-border-muted;
+    background-color: #fff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -4px rgba(0, 0, 0, .1);
+
+    &.ivana-lp-panel-wide {
+        width: 34rem;
+    }
+}
+
+.ivana-lp-panel-all {
+    border-bottom: 1px solid $ivana-border-muted;
+    padding-bottom: .5rem;
+    margin-bottom: 1rem;
+}
+
+.ivana-lp-panel-groups {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.ivana-lp-panel-title {
+    margin: 0;
+    padding: 0 .75rem .25rem;
+    font-family: $ivana-font-mono;
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.ivana-lp-panel-link {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 2.75rem;
+    padding: .625rem .75rem;
+    border-radius: .5rem;
+    font-size: .875rem;
+    color: #111827;
+
+    &:hover,
+    &:focus {
+        background-color: $ivana-surface;
+        color: #111827;
+        text-decoration: none;
+    }
+}
+
+.ivana-lp-right {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+// Seletor PT | ES (LangSwitch).
+.ivana-lp-langs {
+    align-items: center;
+    gap: .25rem;
+    padding: .25rem;
+    background-color: $ivana-surface-container;
+    border: 1px solid $ivana-border-subtle;
+    border-radius: 9999px;
+}
+
+.ivana-lang {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 2.75rem;
+    padding: .375rem .75rem;
+    border-radius: 9999px;
+    font-family: $ivana-font-mono;
+    font-size: .75rem;
+    font-weight: 700;
+    color: #4b5563;
+    transition: all .3s ease;
+
+    .ivana-flag {
+        filter: grayscale(1);
+        opacity: .4;
+        transition: all .3s ease;
+    }
+
+    &:hover,
+    &:focus {
+        background-color: rgba(229, 231, 235, .5);
+        color: #4b5563;
+        text-decoration: none;
+
+        .ivana-flag {
+            opacity: .75;
+        }
+    }
+
+    &.active {
+        background-color: $ivana-primary;
+        color: #fff;
+        box-shadow: $ivana-shadow-sm;
+
+        .ivana-flag {
+            filter: none;
+            opacity: .95;
+            transform: scale(1.05);
+        }
+    }
+}
+
+.ivana-lp-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #374151;
+
+    .ivana-nav-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        color: currentColor;
+    }
+
+    &:hover {
+        color: $ivana-primary;
+    }
+
+    .ivana-lp-toggle-close {
+        display: none;
+    }
+
+    &:not(.collapsed) {
+        .ivana-lp-toggle-open {
+            display: none;
+        }
+
+        .ivana-lp-toggle-close {
+            display: inline-flex;
+        }
+    }
+}
+
+// Gaveta do celular.
+.ivana-lp-drawer {
+    background-color: $ivana-surface-hero;
+    border-top: 1px solid $ivana-border-subtle;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, .05);
+    max-height: 80vh;
+    overflow-y: auto;
+
+    .ivana-lp-drawer-inner {
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        padding: 1rem 1.5rem;
+    }
+}
+
+.ivana-lp-drawer-heading {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: .75rem 0 0;
+    font-family: $ivana-font-mono;
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #6b7280;
+
+    .ivana-nav-icon {
+        width: .875rem;
+        height: .875rem;
+    }
+}
+
+.ivana-lp-drawer-subheading {
+    margin: 0;
+    font-size: .6875rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.ivana-lp-drawer-item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 2.75rem;
+    padding: .625rem;
+    border: 1px solid #e5e7eb;
+    border-radius: .5rem;
+    background-color: #fff;
+    font-size: .75rem;
+    font-weight: 600;
+    color: #374151;
+
+    &:hover,
+    &:focus {
+        background-color: $ivana-surface-container-high;
+        color: $ivana-on-surface-variant;
+        text-decoration: none;
+    }
+}
+
+.ivana-lp-drawer .ivana-lp-langs {
+    align-self: flex-start;
+}

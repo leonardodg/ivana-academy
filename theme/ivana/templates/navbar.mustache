@@ -55,6 +55,11 @@
         ]
     }
 }}
+{{! Ivana Academy: visitors get the landing pages menu; logged-in users keep the Moodle navbar. }}
+{{#output.ivana_lp_navbar}}
+    {{> theme_ivana/lp_navbar }}
+{{/output.ivana_lp_navbar}}
+{{^output.ivana_lp_navbar}}
 <nav class="navbar fixed-top navbar-light bg-white navbar-expand shadow" aria-label="{{#str}}sitemenubar, admin{{/str}}">
 
     <button class="navbar-toggler aabtn d-block d-md-none px-1 my-1 border-0" data-toggler="drawers" data-action="toggle" data-target="theme_ivana-drawers-primary">
@@ -103,6 +108,7 @@
         {{{ output.edit_switch }}}
     </div>
 </nav>
+{{/output.ivana_lp_navbar}}
 
 {{#secondarymoremenu}}
     <div class="secondary-navigation d-print-none moove">

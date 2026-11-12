@@ -110,6 +110,24 @@ class core_renderer extends \theme_boost\output\core_renderer {
     }
 
     /**
+     * Landing pages menu for visitors (not logged in, or guest). Logged-in users keep the Moodle navbar.
+     *
+     * @return array|false Template context, or false to render the Moodle navbar.
+     */
+    public function ivana_lp_navbar() {
+        static $context = null;
+
+        if (isloggedin() && !isguestuser()) {
+            return false;
+        }
+        if ($context === null) {
+            $context = \theme_ivana\util\lp::navbar($this->page->url) ?: false;
+        }
+
+        return $context;
+    }
+
+    /**
      * Whether we should display the main theme or site logo in the navbar.
      *
      * @return bool

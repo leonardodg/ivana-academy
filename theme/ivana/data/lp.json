@@ -1,0 +1,650 @@
+{
+  "source": "ivana-courses-landing-pages",
+  "site": "https://courses.ivana.academy",
+  "nav": {
+    "brasil": {
+      "label": {
+        "pt": "Brasil",
+        "es": "Brasil"
+      },
+      "icon": "<svg viewBox=\"0 0 720 500\" class=\"ivana-flag\" aria-hidden=\"true\"><rect width=\"720\" height=\"500\" fill=\"#009c3b\"></rect><polygon points=\"360,60 60,250 360,440 660,250\" fill=\"#ffdf00\"></polygon><circle cx=\"360\" cy=\"250\" r=\"120\" fill=\"#002776\"></circle></svg>",
+      "all": {
+        "label": {
+          "pt": "Todos os cursos",
+          "es": "Todos los cursos"
+        },
+        "href": "https://courses.ivana.academy/pt-br/",
+        "external": true,
+        "newtab": false,
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\"></rect><rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\"></rect><rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\"></rect><rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\"></rect></svg>"
+      },
+      "groups": [
+        {
+          "title": {
+            "pt": "Cursos presenciais",
+            "es": "Cursos presenciales"
+          },
+          "items": [
+            {
+              "label": {
+                "pt": "Velas",
+                "es": "Velas"
+              },
+              "href": "https://courses.ivana.academy/pt-br/cursos/velas/",
+              "external": true,
+              "newtab": false,
+              "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4\"></path></svg>"
+            },
+            {
+              "label": {
+                "pt": "Sabonetes",
+                "es": "Jabones"
+              },
+              "href": "https://courses.ivana.academy/pt-br/cursos/sabonetes/",
+              "external": true,
+              "newtab": false,
+              "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z\"></path><path d=\"M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97\"></path></svg>"
+            },
+            {
+              "label": {
+                "pt": "Aromas e incensos",
+                "es": "Aromas e inciensos"
+              },
+              "href": "https://courses.ivana.academy/pt-br/cursos/aromas/",
+              "external": true,
+              "newtab": false,
+              "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M12.8 19.6A2 2 0 1 0 14 16H2\"></path><path d=\"M17.5 8a2.5 2.5 0 1 1 2 4H2\"></path><path d=\"M9.8 4.4A2 2 0 1 1 11 8H2\"></path></svg>"
+            },
+            {
+              "label": {
+                "pt": "Resina e decoração",
+                "es": "Resina y decoración"
+              },
+              "href": "https://courses.ivana.academy/pt-br/cursos/resinas/",
+              "external": true,
+              "newtab": false,
+              "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M10.5 3 8 9l4 13 4-13-2.5-6\"></path><path d=\"M17 3a2 2 0 0 1 1.6.8l3 4a2 2 0 0 1 .013 2.382l-7.99 10.986a2 2 0 0 1-3.247 0l-7.99-10.986A2 2 0 0 1 2.4 7.8l2.998-3.997A2 2 0 0 1 7 3z\"></path><path d=\"M2 9h20\"></path></svg>"
+            }
+          ]
+        },
+        {
+          "title": {
+            "pt": "Cursos online",
+            "es": "Cursos online"
+          },
+          "items": [
+            {
+              "label": {
+                "pt": "Velas aromáticas",
+                "es": "Velas aromáticas"
+              },
+              "href": "https://courses.ivana.academy/pt-br/cursos/online/velas-aromaticas/",
+              "external": true,
+              "newtab": false,
+              "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z\"></path><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg>"
+            },
+            {
+              "label": {
+                "pt": "Saboaria com extratos naturais",
+                "es": "Jabonería con extractos naturales"
+              },
+              "href": "https://courses.ivana.academy/pt-br/cursos/online/saboaria-com-extratos-naturais/",
+              "external": true,
+              "newtab": false,
+              "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z\"></path><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg>"
+            },
+            {
+              "label": {
+                "pt": "Apostila 60 receitas de sabonetes",
+                "es": "Apostilla de 60 recetas de jabones"
+              },
+              "href": "https://courses.ivana.academy/pt-br/apostilas/60-receitas-de-sabonetes/",
+              "external": true,
+              "newtab": false,
+              "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"></path><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"></path><path d=\"M10 9H8\"></path><path d=\"M16 13H8\"></path><path d=\"M16 17H8\"></path></svg>"
+            }
+          ]
+        }
+      ]
+    },
+    "argentina": {
+      "label": {
+        "pt": "Argentina",
+        "es": "Argentina"
+      },
+      "icon": "<svg viewBox=\"0 0 3 2\" class=\"ivana-flag\" aria-hidden=\"true\"><rect width=\"3\" height=\"2\" fill=\"#74ACDF\"></rect><rect y=\"0.66\" width=\"3\" height=\"0.66\" fill=\"#FFFFFF\"></rect><circle cx=\"1.5\" cy=\"1\" r=\"0.18\" fill=\"#FFAF36\"></circle></svg>",
+      "items": [
+        {
+          "label": {
+            "pt": "Todas as carreras",
+            "es": "Todas las carreras"
+          },
+          "href": "https://courses.ivana.academy/es-ar/",
+          "external": true,
+          "newtab": false,
+          "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\"></rect><rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\"></rect><rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\"></rect><rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\"></rect></svg>"
+        },
+        {
+          "label": {
+            "pt": "Tecnicatura en arte y diseño de velas",
+            "es": "Tecnicatura en arte y diseño de velas"
+          },
+          "href": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-diseno-velas/",
+          "external": true,
+          "newtab": false,
+          "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4\"></path></svg>"
+        },
+        {
+          "label": {
+            "pt": "Tecnicatura en arte y decoración con resinas",
+            "es": "Tecnicatura en arte y decoración con resinas"
+          },
+          "href": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-decoracion-resinas/",
+          "external": true,
+          "newtab": false,
+          "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M10.5 3 8 9l4 13 4-13-2.5-6\"></path><path d=\"M17 3a2 2 0 0 1 1.6.8l3 4a2 2 0 0 1 .013 2.382l-7.99 10.986a2 2 0 0 1-3.247 0l-7.99-10.986A2 2 0 0 1 2.4 7.8l2.998-3.997A2 2 0 0 1 7 3z\"></path><path d=\"M2 9h20\"></path></svg>"
+        },
+        {
+          "label": {
+            "pt": "Tecnicatura en macramé",
+            "es": "Tecnicatura en macramé"
+          },
+          "href": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-macrame/",
+          "external": true,
+          "newtab": false,
+          "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"4.5\" r=\"2.5\"></circle><path d=\"m10.2 6.3-3.9 3.9\"></path><circle cx=\"4.5\" cy=\"12\" r=\"2.5\"></circle><path d=\"M7 12h10\"></path><circle cx=\"19.5\" cy=\"12\" r=\"2.5\"></circle><path d=\"m13.8 17.7 3.9-3.9\"></path><circle cx=\"12\" cy=\"19.5\" r=\"2.5\"></circle></svg>"
+        },
+        {
+          "label": {
+            "pt": "Tecnicatura en estampas textiles",
+            "es": "Tecnicatura en estampas textiles"
+          },
+          "href": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-estampas-textiles/",
+          "external": true,
+          "newtab": false,
+          "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z\"></path></svg>"
+        },
+        {
+          "label": {
+            "pt": "Tecnicatura en diseño de interiores",
+            "es": "Tecnicatura en diseño de interiores"
+          },
+          "href": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-diseno-interiores/",
+          "external": true,
+          "newtab": false,
+          "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3\"></path><path d=\"M2 16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z\"></path><path d=\"M4 18v2\"></path><path d=\"M20 18v2\"></path><path d=\"M12 4v9\"></path></svg>"
+        },
+        {
+          "label": {
+            "pt": "Profesorado en arte mix media",
+            "es": "Profesorado en arte mix media"
+          },
+          "href": "https://courses.ivana.academy/es-ar/carreras/profesorado-arte-mix-media/",
+          "external": true,
+          "newtab": false,
+          "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z\"></path><circle cx=\"13.5\" cy=\"6.5\" r=\".5\" fill=\"currentColor\"></circle><circle cx=\"17.5\" cy=\"10.5\" r=\".5\" fill=\"currentColor\"></circle><circle cx=\"6.5\" cy=\"12.5\" r=\".5\" fill=\"currentColor\"></circle><circle cx=\"8.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\"></circle></svg>"
+        }
+      ]
+    },
+    "agenda": {
+      "label": {
+        "pt": "Agenda",
+        "es": "Agenda"
+      },
+      "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M8 2v4\"></path><path d=\"M16 2v4\"></path><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"></rect><path d=\"M3 10h18\"></path><path d=\"M8 14h.01\"></path><path d=\"M12 14h.01\"></path><path d=\"M16 14h.01\"></path><path d=\"M8 18h.01\"></path><path d=\"M12 18h.01\"></path><path d=\"M16 18h.01\"></path></svg>",
+      "items": [
+        {
+          "label": {
+            "pt": "Agenda Brasil (turmas presenciais)",
+            "es": "Agenda Brasil (clases presenciales)"
+          },
+          "href": "https://courses.ivana.academy/pt-br/agenda/",
+          "external": true,
+          "newtab": false,
+          "icon": "<svg viewBox=\"0 0 720 500\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><rect width=\"720\" height=\"500\" fill=\"#009c3b\"></rect><polygon points=\"360,60 60,250 360,440 660,250\" fill=\"#ffdf00\"></polygon><circle cx=\"360\" cy=\"250\" r=\"120\" fill=\"#002776\"></circle></svg>"
+        },
+        {
+          "label": {
+            "pt": "Agenda Argentina (Cohorte 2027)",
+            "es": "Agenda Argentina (Cohorte 2027)"
+          },
+          "href": "https://courses.ivana.academy/es-ar/agenda/",
+          "external": true,
+          "newtab": false,
+          "icon": "<svg viewBox=\"0 0 3 2\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><rect width=\"3\" height=\"2\" fill=\"#74ACDF\"></rect><rect y=\"0.66\" width=\"3\" height=\"0.66\" fill=\"#FFFFFF\"></rect><circle cx=\"1.5\" cy=\"1\" r=\"0.18\" fill=\"#FFAF36\"></circle></svg>"
+        }
+      ]
+    },
+    "loja": {
+      "label": {
+        "pt": "Loja",
+        "es": "Tienda"
+      },
+      "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M16 10a4 4 0 0 1-8 0\"></path><path d=\"M3.103 6.034h17.794\"></path><path d=\"M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z\"></path></svg>",
+      "items": [
+        {
+          "label": {
+            "pt": "Loja Brasil",
+            "es": "Tienda Brasil"
+          },
+          "href": "https://loja.ivana.academy",
+          "external": true,
+          "newtab": true,
+          "icon": "<svg viewBox=\"0 0 720 500\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><rect width=\"720\" height=\"500\" fill=\"#009c3b\"></rect><polygon points=\"360,60 60,250 360,440 660,250\" fill=\"#ffdf00\"></polygon><circle cx=\"360\" cy=\"250\" r=\"120\" fill=\"#002776\"></circle></svg>"
+        },
+        {
+          "label": {
+            "pt": "Tienda Argentina",
+            "es": "Tienda Argentina"
+          },
+          "href": "https://tienda.ivana.academy",
+          "external": true,
+          "newtab": true,
+          "icon": "<svg viewBox=\"0 0 3 2\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><rect width=\"3\" height=\"2\" fill=\"#74ACDF\"></rect><rect y=\"0.66\" width=\"3\" height=\"0.66\" fill=\"#FFFFFF\"></rect><circle cx=\"1.5\" cy=\"1\" r=\"0.18\" fill=\"#FFAF36\"></circle></svg>"
+        }
+      ]
+    },
+    "interesse": {
+      "label": {
+        "pt": "Interesse",
+        "es": "Interés"
+      },
+      "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\"></path></svg>",
+      "href": {
+        "pt": "https://courses.ivana.academy/pt-br/interesse/",
+        "es": "https://courses.ivana.academy/es-ar/interes/"
+      }
+    },
+    "portal": {
+      "label": {
+        "pt": "Portal do Aluno",
+        "es": "Portal del Alumno"
+      },
+      "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z\"></path><path d=\"M22 10v6\"></path><path d=\"M6 12.5V16a6 3 0 0 0 12 0v-3.5\"></path></svg>"
+    },
+    "home": {
+      "pt": "https://courses.ivana.academy/pt-br/",
+      "es": "https://courses.ivana.academy/es-ar/"
+    }
+  },
+  "icons": {
+    "menu": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M4 5h16\"></path><path d=\"M4 12h16\"></path><path d=\"M4 19h16\"></path></svg>",
+    "close": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-nav-icon\" aria-hidden=\"true\"><path d=\"M18 6 6 18\"></path><path d=\"m6 6 12 12\"></path></svg>",
+    "chevron": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-chevron\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"></path></svg>",
+    "flag_br": "<svg viewBox=\"0 0 720 500\" class=\"ivana-flag\" aria-hidden=\"true\"><rect width=\"720\" height=\"500\" fill=\"#009c3b\"></rect><polygon points=\"360,60 60,250 360,440 660,250\" fill=\"#ffdf00\"></polygon><circle cx=\"360\" cy=\"250\" r=\"120\" fill=\"#002776\"></circle></svg>",
+    "flag_ar": "<svg viewBox=\"0 0 3 2\" class=\"ivana-flag\" aria-hidden=\"true\"><rect width=\"3\" height=\"2\" fill=\"#74ACDF\"></rect><rect y=\"0.66\" width=\"3\" height=\"0.66\" fill=\"#FFFFFF\"></rect><circle cx=\"1.5\" cy=\"1\" r=\"0.18\" fill=\"#FFAF36\"></circle></svg>"
+  },
+  "footer": {
+    "text": {
+      "pt": {
+        "about": "Ivana Academy é focada na profissionalização feminina através do artesanato de alto padrão, capacitando mulheres a aprender, criar e empreender com o artesanato.",
+        "aboutLabel": "Sobre Mim",
+        "addressBR": "Florianópolis, SC, Brasil",
+        "addressAR": "Buenos Aires, Argentina",
+        "cardsCourses": "Catálogo de Cursos",
+        "coursesLabel": "Cursos",
+        "interestLabel": "Registrar Interesse",
+        "contactLabel": "Contato",
+        "contact": "Inscrições & WhatsApp",
+        "contactMe": "Fale Conosco",
+        "platform": "Plataforma: ",
+        "platformUrl": "https://ivana.academy",
+        "platformText": "ivana.academy",
+        "platformLabel": "Plataforma de Ensino",
+        "platformLinks": "Links do Portal",
+        "rights": "© 2026 Ivana Lerea LTDA. Todos os direitos reservados."
+      },
+      "es": {
+        "about": "Ivana Academy está enfocada en el empoderamiento e independencia financiera de las mujeres mediante manualidades de alta gama y diseño contemporáneo.",
+        "aboutLabel": "Sobre Mí",
+        "addressBR": "Florianópolis, SC, Brasil",
+        "addressAR": "Buenos Aires, Argentina",
+        "cardsCourses": "Ver Clases Disponibles",
+        "coursesLabel": "Cursos",
+        "interestLabel": "Registrar Interés",
+        "contactLabel": "Contacto",
+        "contact": "Inscripciones & Soporte",
+        "contactMe": "Escribinos",
+        "platform": "Plataforma: ",
+        "platformLinks": "Enlaces Clave",
+        "platformUrl": "https://ivana.academy",
+        "platformText": "ivana.academy",
+        "platformLabel": "Plataforma de Aprendizaje",
+        "rights": "© 2026 Ivana Lerea LTDA. Reservados todos los derechos. Clases presenciales y online en Argentina y Brasil."
+      }
+    },
+    "groups": [
+      {
+        "title": {
+          "pt": "Cursos presenciais",
+          "es": "Cursos presenciales"
+        },
+        "links": [
+          {
+            "label": {
+              "pt": "Velas",
+              "es": "Velas"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/pt-br/cursos/velas/",
+              "es": "https://courses.ivana.academy/pt-br/cursos/velas/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Saboaria",
+              "es": "Jabonería"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/pt-br/cursos/sabonetes/",
+              "es": "https://courses.ivana.academy/pt-br/cursos/sabonetes/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Aromas e Incensos",
+              "es": "Aromas e Inciensos"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/pt-br/cursos/aromas/",
+              "es": "https://courses.ivana.academy/pt-br/cursos/aromas/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Resina e Decoração",
+              "es": "Resina y Decoración"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/pt-br/cursos/resinas/",
+              "es": "https://courses.ivana.academy/pt-br/cursos/resinas/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Agenda de turmas",
+              "es": "Agenda de clases"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/pt-br/agenda/",
+              "es": "https://courses.ivana.academy/pt-br/agenda/"
+            },
+            "newtab": false
+          }
+        ]
+      },
+      {
+        "title": {
+          "pt": "Carreras online (Argentina)",
+          "es": "Carreras online"
+        },
+        "links": [
+          {
+            "label": {
+              "pt": "Todas as carreras",
+              "es": "Todas las carreras"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/es-ar/",
+              "es": "https://courses.ivana.academy/es-ar/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Tecnicatura en arte y diseño de velas",
+              "es": "Tecnicatura en arte y diseño de velas"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-diseno-velas/",
+              "es": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-diseno-velas/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Tecnicatura en arte y decoración con resinas",
+              "es": "Tecnicatura en arte y decoración con resinas"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-decoracion-resinas/",
+              "es": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-arte-decoracion-resinas/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Tecnicatura en macramé",
+              "es": "Tecnicatura en macramé"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-macrame/",
+              "es": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-macrame/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Tecnicatura en estampas textiles",
+              "es": "Tecnicatura en estampas textiles"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-estampas-textiles/",
+              "es": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-estampas-textiles/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Tecnicatura en diseño de interiores",
+              "es": "Tecnicatura en diseño de interiores"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-diseno-interiores/",
+              "es": "https://courses.ivana.academy/es-ar/carreras/tecnicatura-diseno-interiores/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Profesorado en arte mix media",
+              "es": "Profesorado en arte mix media"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/es-ar/carreras/profesorado-arte-mix-media/",
+              "es": "https://courses.ivana.academy/es-ar/carreras/profesorado-arte-mix-media/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Calendário Cohorte 2027",
+              "es": "Agenda Cohorte 2027"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/es-ar/agenda/",
+              "es": "https://courses.ivana.academy/es-ar/agenda/"
+            },
+            "newtab": false
+          }
+        ]
+      },
+      {
+        "title": {
+          "pt": "Online e materiais",
+          "es": "Online y materiales"
+        },
+        "links": [
+          {
+            "label": {
+              "pt": "Curso online de Velas",
+              "es": "Curso online de Velas"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/pt-br/cursos/online/velas-aromaticas/",
+              "es": "https://courses.ivana.academy/pt-br/cursos/online/velas-aromaticas/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Curso online de Saboaria",
+              "es": "Curso online de Jabonería"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/pt-br/cursos/online/saboaria-com-extratos-naturais/",
+              "es": "https://courses.ivana.academy/pt-br/cursos/online/saboaria-com-extratos-naturais/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Apostila de 60 receitas",
+              "es": "Apostilla de 60 recetas"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/pt-br/apostilas/60-receitas-de-sabonetes/",
+              "es": "https://courses.ivana.academy/pt-br/apostilas/60-receitas-de-sabonetes/"
+            },
+            "newtab": false
+          },
+          {
+            "label": {
+              "pt": "Loja (compre seu curso)",
+              "es": "Tienda (compra tu curso)"
+            },
+            "href": {
+              "pt": "https://loja.ivana.academy",
+              "es": "https://loja.ivana.academy"
+            },
+            "newtab": true
+          },
+          {
+            "label": {
+              "pt": "Plataforma de ensino",
+              "es": "Plataforma de aprendizaje"
+            },
+            "href": {
+              "pt": "https://ivana.academy",
+              "es": "https://ivana.academy"
+            },
+            "newtab": true
+          },
+          {
+            "label": {
+              "pt": "Registrar interesse",
+              "es": "Registrar interés"
+            },
+            "href": {
+              "pt": "https://courses.ivana.academy/pt-br/interesse/",
+              "es": "https://courses.ivana.academy/es-ar/interes/"
+            },
+            "newtab": false
+          }
+        ]
+      }
+    ],
+    "social": [
+      {
+        "label": {
+          "pt": "Instagram (links do Brasil)",
+          "es": "Instagram (enlaces de Argentina)"
+        },
+        "href": {
+          "pt": "https://courses.ivana.academy/pt-br/links/",
+          "es": "https://courses.ivana.academy/es-ar/links/"
+        },
+        "newtab": false,
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-social-icon\" aria-hidden=\"true\"><rect width=\"20\" height=\"20\" x=\"2\" y=\"2\" rx=\"5\" ry=\"5\"></rect><path d=\"M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z\"></path><line x1=\"17.5\" x2=\"17.51\" y1=\"6.5\" y2=\"6.5\"></line></svg>"
+      },
+      {
+        "label": {
+          "pt": "WhatsApp (48) 99167-1659",
+          "es": "WhatsApp +54 9 3757 20-1014"
+        },
+        "href": {
+          "pt": "https://wa.me/5548991671659",
+          "es": "https://wa.me/5493757201014"
+        },
+        "newtab": true,
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-social-icon\" aria-hidden=\"true\"><path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\"></path></svg>"
+      },
+      {
+        "label": {
+          "pt": "contato@ivana.academy",
+          "es": "contacto@ivana.academy"
+        },
+        "href": {
+          "pt": "mailto:contato@ivana.academy",
+          "es": "mailto:contacto@ivana.academy"
+        },
+        "newtab": false,
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ivana-social-icon\" aria-hidden=\"true\"><path d=\"m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7\"></path><rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"></rect></svg>"
+      }
+    ],
+    "legal": [
+      {
+        "label": {
+          "pt": "Política de Privacidade",
+          "es": "Política de Privacidad"
+        },
+        "href": {
+          "pt": "https://courses.ivana.academy/pt-br/privacidade/",
+          "es": "https://courses.ivana.academy/es-ar/privacidad/"
+        }
+      },
+      {
+        "label": {
+          "pt": "Termos de Uso",
+          "es": "Términos de Uso"
+        },
+        "href": {
+          "pt": "https://courses.ivana.academy/pt-br/termos/",
+          "es": "https://courses.ivana.academy/es-ar/terminos/"
+        }
+      },
+      {
+        "label": {
+          "pt": "Reembolso e Cancelamento",
+          "es": "Reembolso y Cancelación"
+        },
+        "href": {
+          "pt": "https://courses.ivana.academy/pt-br/reembolso/",
+          "es": "https://courses.ivana.academy/es-ar/reembolso/"
+        }
+      },
+      {
+        "label": {
+          "pt": "Direitos LGPD",
+          "es": "Derechos sobre tus datos"
+        },
+        "href": {
+          "pt": "https://courses.ivana.academy/pt-br/lgpd/",
+          "es": "https://courses.ivana.academy/es-ar/derechos/"
+        }
+      }
+    ],
+    "legal_es_extra": [
+      {
+        "label": "Botón de arrepentimiento",
+        "href": "https://courses.ivana.academy/es-ar/arrepentimiento/"
+      },
+      {
+        "label": "Defensa de las y los Consumidores: para reclamos, ingresá acá",
+        "href": "https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario"
+      }
+    ],
+    "company": {
+      "legalName": "Ivana Lerea LTDA",
+      "cnpj": "63.991.300/0001-08",
+      "email": {
+        "pt": "contato@ivana.academy",
+        "es": "contacto@ivana.academy"
+      }
+    }
+  }
+}
