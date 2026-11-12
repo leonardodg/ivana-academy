@@ -4,6 +4,7 @@
 
 # Plugins customizados do tema
 theme/moove
+theme/ivana
 
 # Plugin de disponibilidade por matrículas (Trilha 4 - descomentar quando instalado)
 # availability/condition/enrol_dates

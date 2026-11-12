@@ -1,0 +1,880 @@
+// Ivana Academy v2: camada do design system da LP sobre o Moove/Boost.
+// Entra por ultimo em default.scss, entao vence os parciais herdados do Moove.
+// Referencia visual: courses.ivana.academy (NavHeader, Card, styles.ts, index.css).
+
+// ─── Base e tipografia ──────────────────────────────────────────────
+
+body {
+    font-family: $ivana-font-sans;
+    color: $ivana-on-surface;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4,
+.h1, .h2, .h3, .h4 {
+    font-family: $ivana-font-serif;
+    font-weight: 400;
+    color: $ivana-on-surface;
+    letter-spacing: -.01em;
+}
+
+h5, h6, .h5, .h6 {
+    font-family: $ivana-font-sans;
+    font-weight: 600;
+}
+
+// Titulo da pagina (Hi, Admin! / Site administration / nome do curso).
+#page-header h1,
+.page-header-headings h1,
+#page-site-index #region-main h2 {
+    font-family: $ivana-font-serif;
+    font-weight: 400;
+}
+
+a {
+    color: $ivana-primary;
+
+    &:hover,
+    &:focus {
+        color: darken($ivana-primary, 10%);
+    }
+}
+
+::selection {
+    background-color: $ivana-primary-fixed;
+    color: $ivana-on-primary-container;
+}
+
+hr {
+    border-top-color: $ivana-border-muted;
+}
+
+.text-muted {
+    color: $text-muted !important; /* stylelint-disable-line declaration-no-important */
+}
+
+// Etiquetas pequenas da LP (mono, caixa alta).
+.ivana-label {
+    font-family: $ivana-font-mono;
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+// ─── Navbar fixa (logo + navegacao principal + menu do usuario) ─────
+
+.navbar.fixed-top {
+    background-color: rgba($ivana-surface, .95) !important; /* stylelint-disable-line declaration-no-important */
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid $ivana-border-subtle;
+    box-shadow: $ivana-shadow-sm !important; /* stylelint-disable-line declaration-no-important */
+
+    .navbar-brand .logo {
+        max-height: 48px;
+        width: auto;
+    }
+
+    // Home / My courses / Site administration como as pilulas do menu da LP.
+    .primary-navigation {
+        display: flex;
+        align-items: center;
+
+        .navigation {
+            height: auto;
+            align-items: center;
+            gap: .25rem;
+            padding: .25rem;
+            background-color: $ivana-surface-container;
+            border: 1px solid $ivana-border-subtle;
+            border-radius: 9999px;
+
+            .nav-link {
+                height: auto;
+                min-height: 2.25rem;
+                display: inline-flex;
+                align-items: center;
+                padding: .375rem .875rem;
+                border: none;
+                border-radius: 9999px;
+                font-size: .8125rem;
+                font-weight: 600;
+                letter-spacing: .01em;
+                color: $ivana-on-surface-variant;
+                background-color: transparent;
+                transition: background-color .2s ease, color .2s ease;
+
+                &:hover,
+                &:focus {
+                    background-color: $ivana-surface-container-high;
+                    color: $ivana-on-surface;
+                }
+
+                &.active {
+                    font-weight: 600;
+                    border-bottom: none;
+                    background-color: $ivana-primary;
+                    color: $ivana-on-primary;
+                    box-shadow: $ivana-shadow-sm;
+                }
+
+                &:focus-visible {
+                    box-shadow: 0 0 0 .2rem $input-btn-focus-color;
+                }
+            }
+
+            .dropdown-menu {
+                border-radius: 1rem;
+            }
+        }
+    }
+
+    .usermenu .avatar.current,
+    .usermenu .userinitials {
+        background-color: $ivana-primary-fixed;
+        color: $ivana-on-primary-container;
+        border: 1px solid $ivana-border-subtle;
+    }
+
+    .popover-region-toggle .icon,
+    .usermenu .dropdown-toggle,
+    .editmode-switch-form label {
+        color: $ivana-on-surface-variant;
+    }
+
+    .divider {
+        border-color: $ivana-border-subtle !important; /* stylelint-disable-line declaration-no-important */
+    }
+}
+
+// Interruptor "Edit mode".
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: $ivana-primary;
+    border-color: $ivana-primary;
+}
+
+// ─── Barra secundaria (Settings, Participants, Reports...) ─────────
+
+.secondary-navigation {
+    background-color: $ivana-surface-hero;
+    border-bottom: 1px solid $ivana-border-subtle;
+    filter: none;
+    box-shadow: $ivana-shadow-sm;
+
+    .moremenu .nav-tabs .nav-link {
+        color: $ivana-on-surface-variant;
+        font-size: .875rem;
+        font-weight: 600;
+
+        &.active {
+            color: $ivana-primary;
+            border-bottom: 2px solid $ivana-primary;
+            font-weight: 700;
+        }
+
+        &:hover,
+        &:focus {
+            background-color: $ivana-surface-container-high;
+            color: $ivana-on-surface;
+        }
+    }
+}
+
+// ─── Menus suspensos ────────────────────────────────────────────────
+
+.dropdown-menu {
+    border: 1px solid $ivana-border-muted;
+    border-radius: 1rem;
+    box-shadow: $ivana-shadow-lg;
+    padding: .5rem;
+
+    .dropdown-item {
+        border-radius: .5rem;
+        color: $ivana-on-surface;
+        padding: .5rem .75rem;
+    }
+
+    .dropdown-divider {
+        border-top-color: $ivana-border-muted;
+    }
+}
+
+.dropdown-item:active,
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item:focus-within {
+    background-color: $ivana-surface-container-high;
+    color: $ivana-on-surface;
+}
+
+.dropdown-item.active,
+.dropdown-item[aria-current="true"] {
+    background-color: $ivana-primary;
+    color: $ivana-on-primary;
+}
+
+// ─── Botoes (styles.ts da LP: mono, caixa alta, cantos de 8px) ─────
+
+.btn {
+    border-radius: .5rem;
+    font-weight: 600;
+    transition: all .3s cubic-bezier(.16, 1, .3, 1);
+}
+
+.btn-primary {
+    background-color: $ivana-primary;
+    border-color: $ivana-primary;
+    color: $ivana-on-primary;
+    box-shadow: $ivana-shadow-primary;
+
+    &:hover,
+    &:focus {
+        background-color: darken($ivana-primary, 6%);
+        border-color: darken($ivana-primary, 6%);
+        color: $ivana-on-primary;
+    }
+
+    &:not(:disabled):not(.disabled):active,
+    &:not(:disabled):not(.disabled).active {
+        background-color: darken($ivana-primary, 10%);
+        border-color: darken($ivana-primary, 10%);
+    }
+}
+
+.btn-secondary {
+    background-color: $ivana-surface-container-lowest;
+    border-color: $ivana-border-subtle;
+    color: $ivana-on-surface-variant;
+
+    &:hover,
+    &:focus {
+        background-color: $ivana-surface-container-high;
+        border-color: $ivana-outline-variant;
+        color: $ivana-on-surface;
+    }
+}
+
+.btn-outline-primary {
+    color: $ivana-primary;
+    border-color: $ivana-primary;
+
+    &:hover {
+        background-color: $ivana-primary;
+        color: $ivana-on-primary;
+    }
+}
+
+.btn-link {
+    color: $ivana-primary;
+}
+
+// Botao grande de acao (login, cadastro, matricula): o "heroPrimary" da LP.
+#loginbtn,
+#id_submitbutton,
+.ivana-btn-cta {
+    font-family: $ivana-font-mono;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-radius: 9999px;
+    padding: .875rem 2rem;
+}
+
+// ─── Formularios ────────────────────────────────────────────────────
+
+.form-control,
+.custom-select {
+    border-color: $ivana-border-subtle;
+    border-radius: .75rem;
+    background-color: $ivana-surface-container-lowest;
+    color: $ivana-on-surface;
+
+    &:focus {
+        border-color: $ivana-primary-container;
+        box-shadow: 0 0 0 .2rem $input-btn-focus-color;
+    }
+}
+
+.input-group > .form-control:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group-append .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: 0 0 0 .2rem $input-btn-focus-color;
+}
+
+// ─── Cartoes e blocos (Card da LP: branco, borda creme, 16px, sombra difusa) ──
+
+.card {
+    background-color: $ivana-surface-container-lowest;
+    border: 1px solid $ivana-surface-container-highest;
+    border-radius: 1rem;
+    box-shadow: $ivana-shadow;
+}
+
+#region-main,
+[data-region="blocks-column"] .block,
+.block {
+    border-radius: 1rem;
+}
+
+#page.drawers .main-inner {
+    border-radius: 1.5rem;
+    box-shadow: $ivana-shadow;
+    border: 1px solid $ivana-border-muted;
+}
+
+// Cards de curso (home, categorias, Meus cursos).
+.dashboard-card {
+    overflow: hidden;
+    transition: transform .3s cubic-bezier(.16, 1, .3, 1), box-shadow .3s cubic-bezier(.16, 1, .3, 1);
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: $ivana-shadow-lg;
+    }
+
+    .card-img.dashboard-card-img {
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+    }
+
+    .coursename {
+        font-family: $ivana-font-serif;
+        font-size: 1.125rem;
+        line-height: 1.4;
+        color: $ivana-on-surface;
+
+        &:hover {
+            color: $ivana-primary;
+        }
+    }
+
+    .course-summary {
+        color: $ivana-on-surface-variant;
+        font-size: .875rem;
+        line-height: 1.5;
+    }
+
+    .course-landing-link {
+        font-family: $ivana-font-mono;
+        font-size: .6875rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+}
+
+// Etiqueta de categoria sobre a imagem: a pilula "cardTag" da LP.
+.dashboard-card .card-img .course-category,
+.card-img.dashboard-card-img .course-category {
+    background-color: rgba($ivana-surface-container-lowest, .9);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    color: $ivana-on-surface;
+    border-radius: 9999px;
+    padding: .25rem .75rem;
+    margin: 1rem;
+    font-size: .6875rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    box-shadow: $ivana-shadow-sm;
+
+    span.categoryname,
+    a {
+        color: $ivana-on-surface;
+    }
+}
+
+// Progresso: linha fina em rosa (DESIGN.md, "Progress Indicators").
+.progress {
+    height: $progress-height;
+    border-radius: 9999px;
+    background-color: $ivana-surface-container-high;
+
+    .progress-bar {
+        background-color: $ivana-primary;
+        border-radius: 9999px;
+    }
+}
+
+// Selos.
+.badge {
+    border-radius: 9999px;
+    font-weight: 600;
+    padding: .3em .7em;
+}
+
+.badge-primary {
+    background-color: $ivana-primary;
+}
+
+.badge-secondary {
+    background-color: $ivana-surface-container-highest;
+    color: $ivana-on-surface-variant;
+}
+
+// ─── Gavetas (indice do curso, blocos) ──────────────────────────────
+
+.drawer {
+    background-color: $ivana-surface-container-low;
+    border-color: $ivana-border-subtle;
+}
+
+.courseindex .courseindex-item.pageitem {
+    background-color: $ivana-primary;
+    color: $ivana-on-primary;
+    border-radius: .5rem;
+
+    a {
+        color: $ivana-on-primary;
+    }
+}
+
+.drawertoggle,
+.btn-drawer {
+    color: $ivana-on-surface-variant;
+}
+
+// ─── Avisos ─────────────────────────────────────────────────────────
+
+.alert {
+    border-radius: 1rem;
+    border-width: 1px;
+}
+
+.alert-danger {
+    background-color: $ivana-error-container;
+    border-color: lighten($ivana-error, 45%);
+    color: darken($ivana-error, 10%);
+}
+
+.alert-info {
+    background-color: $ivana-surface-hero;
+    border-color: $ivana-border-subtle;
+    color: $ivana-on-surface-variant;
+}
+
+// ─── Paginacao e abas ───────────────────────────────────────────────
+
+.page-item.active .page-link {
+    background-color: $ivana-primary;
+    border-color: $ivana-primary;
+}
+
+.page-link {
+    color: $ivana-primary;
+}
+
+.nav-tabs .nav-link.active {
+    color: $ivana-primary;
+}
+
+// ─── Navbar de visitante: o menu principal da LP (NavHeader + SiteNavbar) ──
+
+.ivana-lp-navbar {
+    display: block;
+    padding: 0;
+    height: auto;
+    min-height: $ivana-navbar-height;
+
+    .ivana-lp-navbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        max-width: 1280px;
+        min-height: $ivana-navbar-height;
+        margin: 0 auto;
+        padding: .5rem 1rem;
+
+        @include media-breakpoint-up(md) {
+            padding: .5rem 3rem;
+        }
+    }
+
+    .ivana-lp-brand {
+        display: flex;
+        align-items: center;
+        min-height: 2.75rem;
+        padding: 0 .5rem;
+        flex-shrink: 0;
+    }
+
+    .ivana-lp-logo {
+        height: 2.5rem;
+        width: auto;
+        object-fit: contain;
+
+        @include media-breakpoint-up(md) {
+            height: 3rem;
+        }
+    }
+
+    .ivana-nav-icon {
+        width: 1rem;
+        height: 1rem;
+        color: $ivana-primary;
+        flex-shrink: 0;
+    }
+
+    .ivana-flag {
+        width: 1.125rem;
+        height: .75rem;
+        border-radius: 1px;
+        flex-shrink: 0;
+    }
+
+    .ivana-chevron {
+        width: .875rem;
+        height: .875rem;
+        transition: transform .2s ease;
+    }
+}
+
+// Grupo de pilulas (navGroupClass) e pilula (navPill).
+.ivana-lp-pills {
+    align-items: center;
+    gap: .5rem;
+    padding: .25rem;
+    background-color: $ivana-surface-container;
+    border: 1px solid $ivana-border-subtle;
+    border-radius: 9999px;
+}
+
+.ivana-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    min-height: 2.25rem;
+    padding: .375rem .875rem;
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: $ivana-on-surface-variant;
+    font-family: $ivana-font-sans;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .025em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all .2s ease;
+
+    .ivana-nav-icon {
+        width: .875rem;
+        height: .875rem;
+    }
+
+    &:hover,
+    &:focus {
+        background-color: $ivana-surface-container-high;
+        color: $ivana-on-surface-variant;
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $ivana-primary;
+        outline-offset: 2px;
+    }
+
+    &[aria-expanded="true"] {
+        background-color: $ivana-primary;
+        color: $ivana-on-primary;
+        box-shadow: $ivana-shadow-sm;
+
+        .ivana-nav-icon {
+            color: $ivana-on-primary;
+        }
+
+        .ivana-chevron {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+// Painel suspenso (bg-white rounded-2xl border shadow-lg p-3, w-80 / w-[34rem]).
+.ivana-lp-dropdown .dropdown-menu.ivana-lp-panel {
+    width: 20rem;
+    margin-top: .5rem;
+    padding: .75rem;
+    border-radius: 1rem;
+    border: 1px solid $ivana-border-muted;
+    background-color: #fff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -4px rgba(0, 0, 0, .1);
+
+    &.ivana-lp-panel-wide {
+        width: 34rem;
+    }
+}
+
+.ivana-lp-panel-all {
+    border-bottom: 1px solid $ivana-border-muted;
+    padding-bottom: .5rem;
+    margin-bottom: 1rem;
+}
+
+.ivana-lp-panel-groups {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.ivana-lp-panel-title {
+    margin: 0;
+    padding: 0 .75rem .25rem;
+    font-family: $ivana-font-mono;
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.ivana-lp-panel-link {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 2.75rem;
+    padding: .625rem .75rem;
+    border-radius: .5rem;
+    font-size: .875rem;
+    color: #111827;
+
+    &:hover,
+    &:focus {
+        background-color: $ivana-surface;
+        color: #111827;
+        text-decoration: none;
+    }
+}
+
+.ivana-lp-right {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+// Seletor PT | ES (LangSwitch).
+.ivana-lp-langs {
+    align-items: center;
+    gap: .25rem;
+    padding: .25rem;
+    background-color: $ivana-surface-container;
+    border: 1px solid $ivana-border-subtle;
+    border-radius: 9999px;
+}
+
+.ivana-lang {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 2.75rem;
+    padding: .375rem .75rem;
+    border-radius: 9999px;
+    font-family: $ivana-font-mono;
+    font-size: .75rem;
+    font-weight: 700;
+    color: #4b5563;
+    transition: all .3s ease;
+
+    .ivana-flag {
+        filter: grayscale(1);
+        opacity: .4;
+        transition: all .3s ease;
+    }
+
+    &:hover,
+    &:focus {
+        background-color: rgba(229, 231, 235, .5);
+        color: #4b5563;
+        text-decoration: none;
+
+        .ivana-flag {
+            opacity: .75;
+        }
+    }
+
+    &.active {
+        background-color: $ivana-primary;
+        color: #fff;
+        box-shadow: $ivana-shadow-sm;
+
+        .ivana-flag {
+            filter: none;
+            opacity: .95;
+            transform: scale(1.05);
+        }
+    }
+}
+
+.ivana-lp-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #374151;
+
+    .ivana-nav-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        color: currentColor;
+    }
+
+    &:hover {
+        color: $ivana-primary;
+    }
+
+    .ivana-lp-toggle-close {
+        display: none;
+    }
+
+    &:not(.collapsed) {
+        .ivana-lp-toggle-open {
+            display: none;
+        }
+
+        .ivana-lp-toggle-close {
+            display: inline-flex;
+        }
+    }
+}
+
+// Gaveta do celular.
+.ivana-lp-drawer {
+    background-color: $ivana-surface-hero;
+    border-top: 1px solid $ivana-border-subtle;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, .05);
+    max-height: 80vh;
+    overflow-y: auto;
+
+    .ivana-lp-drawer-inner {
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        padding: 1rem 1.5rem;
+    }
+}
+
+.ivana-lp-drawer-heading {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: .75rem 0 0;
+    font-family: $ivana-font-mono;
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #6b7280;
+
+    .ivana-nav-icon {
+        width: .875rem;
+        height: .875rem;
+    }
+}
+
+.ivana-lp-drawer-subheading {
+    margin: 0;
+    font-size: .6875rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.ivana-lp-drawer-item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 2.75rem;
+    padding: .625rem;
+    border: 1px solid #e5e7eb;
+    border-radius: .5rem;
+    background-color: #fff;
+    font-size: .75rem;
+    font-weight: 600;
+    color: #374151;
+
+    &:hover,
+    &:focus {
+        background-color: $ivana-surface-container-high;
+        color: $ivana-on-surface-variant;
+        text-decoration: none;
+    }
+}
+
+.ivana-lp-drawer .ivana-lp-langs {
+    align-self: flex-start;
+}
+
+// ─── Videos responsivos (YouTube, Vimeo, Google Drive) ──────────────
+// As paginas (mod_page) colam o embed do YouTube com width="560" height="315". No celular o
+// video ficava cortado dentro de uma caixa com rolagem lateral, o play saia da tela e o toque
+// caia no titulo ou em "Assistir no YouTube", que abria o YouTube em outra janela (o "popup").
+// Aqui o embed ocupa a largura disponivel e mantem 16:9, sem editar nenhuma pagina.
+#region-main,
+.course-content,
+.activity-description {
+    iframe[src*="youtube.com"],
+    iframe[src*="youtube-nocookie.com"],
+    iframe[src*="youtu.be"],
+    iframe[src*="player.vimeo.com"],
+    iframe[src*="drive.google.com"] {
+        display: block;
+        width: 100% !important; /* stylelint-disable-line declaration-no-important */
+        max-width: 100%;
+        height: auto !important; /* stylelint-disable-line declaration-no-important */
+        aspect-ratio: 16 / 9;
+        margin-left: auto;
+        margin-right: auto;
+        border: 0;
+        border-radius: 1rem;
+    }
+
+    // Em telas grandes o video nao precisa passar de ~860px (fica centralizado).
+    @include media-breakpoint-up(lg) {
+        iframe[src*="youtube.com"],
+        iframe[src*="youtube-nocookie.com"],
+        iframe[src*="player.vimeo.com"] {
+            max-width: 860px;
+        }
+    }
+}
+
+// Celular: menos moldura em volta do conteudo, para o video e o texto ganharem largura.
+@include media-breakpoint-down(sm) {
+    #page.drawers {
+        padding-left: .5rem;
+        padding-right: .5rem;
+    }
+
+    #page > #page-footer.ivana-lp-footer {
+        margin-left: -.5rem;
+        margin-right: -.5rem;
+    }
+
+    #page.drawers .main-inner {
+        padding: .75rem;
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: 1rem;
+    }
+
+    #region-main .box.generalbox,
+    #region-main [role="main"] > .box {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}

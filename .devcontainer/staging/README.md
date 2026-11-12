@@ -9,7 +9,7 @@ então dá para testar uma branch com os dados reais antes do merge.
 
 | Camada | Proteção |
 |---|---|
-| `config.php` (forçado) | `noemailever`, `cron_enabled=false`, SMTP vazio, push (airnotifier) vazio, webservices off, GA `G-STAGING000`, PayPal sem conta |
+| `config.php` (forçado) | `noemailever`, `cron_enabled=false`, SMTP vazio, push (airnotifier) vazio, webservices off, GA `G-STAGING000`, PayPal sem conta, reCAPTCHA com as chaves de teste do Google (funciona em localhost) |
 | `anonymize.sql` (banco) | e-mails trocados; SMTP, push, tokens de webservice, segredos de plugins (S3/AWS, APIs), OAuth e gateways de pagamento zerados; todas as tarefas agendadas desligadas |
 | container | `CRON_ENABLED=false` (sem crontab); porta só em `127.0.0.1` |
 | `restore.sh` | **aborta** se sobrar algum e-mail que não seja `@staging.invalid` |

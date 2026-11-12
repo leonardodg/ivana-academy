@@ -1,0 +1,299 @@
+.path-login {
+    #page {
+        max-width: 100%;
+    }
+
+    .login-identityprovider-btn.facebook {
+        background-color: $facebook-color;
+        color: #fff;
+    }
+}
+
+#page-login-index {
+    .login-container {
+        background-color: initial;
+        box-shadow: none;
+        padding: 0;
+
+        .loginform {
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 2rem;
+            box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
+            border-radius: 0.5rem;
+
+            .left-column {
+                padding-right: 2rem;
+            }
+
+            .right-column {
+                padding-left: 2rem;
+                border-left: 1px solid $gray-300;
+
+                .column-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100%;
+                }
+            }
+        }
+    }
+}
+
+#page-login-signup {
+    #page-content {
+        padding-top: 2rem;
+    }
+}
+
+@include media-breakpoint-up(md) {
+    #page-login-index {
+        .login-container {
+            max-width: 100%;
+            width: 100% !important; /* stylelint-disable-line declaration-no-important */
+        }
+
+        .loginform {
+            width: 40%;
+
+            &.hastwocolumns {
+                width: 60%;
+            }
+        }
+    }
+
+    .login-container {
+        width: 100% !important; /* stylelint-disable-line declaration-no-important */
+    }
+}
+
+@include media-breakpoint-down(md) {
+    #page-login-index {
+        #page {
+            padding-top: 1rem;
+        }
+
+        .login-container {
+            .loginform {
+                .left-column {
+                    padding-right: 0;
+                }
+
+                .right-column {
+                    padding-left: 0;
+                    border-left: none;
+
+                    .column-content {
+                        display: block;
+
+                        .login-heading {
+                            margin-top: 1rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #page-login-signup #page-content {
+        padding-top: 15px;
+
+        .login-container {
+            max-width: 100%;
+            padding: 1rem;
+
+            .mform {
+                padding: 0;
+
+                #fgroup_id_buttonar {
+                    .col-md-9 {
+                        .d-flex.flex-wrap.align-items-center {
+                            flex-direction: column;
+
+                            #id_submitbutton {
+                                margin-bottom: 1rem;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+// ─── Ivana Academy v2: login, cadastro e lembrete de senha no padrao da LP ──
+// Cartao branco com cantos de 24px e sombra difusa sobre a imagem de fundo (loginbgimg).
+
+.pagelayout-login {
+    #page {
+        background-position: center;
+        background-color: $ivana-surface-hero;
+    }
+
+    .login-wrapper {
+        padding: 2rem 1rem;
+    }
+
+    .login-container,
+    #page-login-index & .login-container .loginform {
+        border-radius: 1.5rem;
+    }
+
+    .login-container {
+        background-color: rgba(255, 255, 255, .97);
+        border: 1px solid $ivana-border-muted;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+        border-radius: 1.5rem;
+        padding: 2.5rem 2rem;
+    }
+
+    .login-logo {
+        margin-bottom: 1.5rem;
+
+        img {
+            max-height: 72px;
+            width: auto;
+        }
+    }
+
+    h1, h2, .login-heading {
+        font-family: $ivana-font-serif;
+        font-weight: 400;
+        color: $ivana-on-surface;
+    }
+
+    .login-heading {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-control {
+        min-height: 2.875rem;
+        padding: .75rem 1rem;
+        border-radius: .75rem;
+        background-color: $ivana-surface-container-lowest;
+    }
+
+    .btn-primary {
+        min-height: 2.875rem;
+    }
+
+    // Rotulo em cima do campo, como no cadastro e nos formularios da LP.
+    .mform .form-group.row,
+    .mform .fitem.row {
+        > .col-md-3,
+        > .col-md-9 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        > .col-md-3 {
+            padding-bottom: .25rem;
+        }
+    }
+
+    .mform .form-control:not([type="checkbox"]):not([type="radio"]),
+    .mform .custom-select {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .login-form-forgotpassword a,
+    .login-signup a,
+    .login-instructions a {
+        font-weight: 600;
+    }
+
+    .login-divider {
+        border-top-color: $ivana-border-muted;
+    }
+
+    .login-identityprovider-btn {
+        border-radius: 9999px;
+        border-color: $ivana-border-subtle;
+    }
+
+    .alert {
+        text-align: left;
+    }
+}
+
+// O cartao do login ja e o .loginform (Moove), sem moldura dupla.
+#page-login-index .login-container {
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+
+    .btn-primary {
+        width: 100%;
+    }
+
+    .loginform {
+        border-radius: 1.5rem;
+        border: 1px solid $ivana-border-muted;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+        padding: 2.5rem 2rem;
+    }
+}
+
+// Cadastro e lembrete de senha: formularios do Moodle (mform) dentro do mesmo cartao.
+#page-login-signup,
+#page-login-forgot_password,
+#page-login-change_password,
+#page-login-confirm {
+    .login-container {
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    .mform {
+        fieldset {
+            border-top: 1px solid $ivana-border-muted;
+            padding-top: 1rem;
+            margin-bottom: 1rem;
+
+            &:first-of-type {
+                border-top: 0;
+                padding-top: 0;
+            }
+        }
+
+        legend,
+        .ftoggler a {
+            font-family: $ivana-font-serif;
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: $ivana-on-surface;
+        }
+
+        .col-form-label {
+            font-weight: 600;
+            color: $ivana-on-surface-variant;
+        }
+
+        #id_submitbutton,
+        #id_submitbuttonemail,
+        #id_submitbuttonusername {
+            width: auto;
+            font-family: $ivana-font-mono;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            border-radius: 9999px;
+            padding: .875rem 2rem;
+        }
+
+        .btn-secondary {
+            border-radius: 9999px;
+            font-family: $ivana-font-mono;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            padding: .875rem 2rem;
+        }
+    }
+}

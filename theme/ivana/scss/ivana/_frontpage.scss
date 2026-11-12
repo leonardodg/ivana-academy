@@ -1,0 +1,150 @@
+.pagelayout-frontpage,
+.pagelayout-coursecategory {
+    .dashboard-card {
+        position: relative;
+        width: calc(33.33% - 2rem) !important;
+        max-width: calc(33.33% - 2rem) !important;
+        margin: 1rem;
+
+        &.dimmed .card-img::after {
+            content: '';
+            position: absolute;
+            background-color: rgba(0,0,0,0.5);
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            border-top-left-radius: .5rem;;
+            border-top-right-radius: .5rem;;
+        }
+
+        .card-img.dashboard-card-img {
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .dashboard-card-footer {
+            border-radius: .5rem;
+        }
+
+        .card-body {
+            padding: .8rem;
+        }
+
+        .customfields {
+            .customfield {
+                font-size: 80%;
+                margin-bottom: .25rem;
+
+                &:last-of-type {
+                    margin-bottom: 0;
+                }
+
+                .customfieldname,
+                .customfieldseparator {
+                    font-weight: 500;
+                }
+            }
+        }
+
+        .enrolmenticons {
+            position: absolute;
+            bottom: 8px;
+            right: 0;
+
+            .enrolmenticon {
+                padding: 4px 8px;
+                background-color: #fff;
+                color: $brand-primary;
+                border-radius: .5rem;
+                margin: 0 4px;
+
+                .icon {
+                    margin-right: 0;
+                }
+            }
+        }
+
+        .course-contacts {
+            padding: 0 0.8rem 0.8rem 0.8rem;
+
+            .contact {
+                display: flex;
+
+                &:not(:first-of-type) {
+                    margin-top: .4rem;
+                }
+
+                img {
+                    width: 48px;
+                    height: 48px;
+                    border: 1px solid $gray-300;
+                }
+
+                p {
+                    margin-left: .4rem;
+                    margin-bottom: 0;
+
+                    &.role {
+                        color: $gray-900;
+                        font-size: 80%;
+                    }
+                }
+            }
+        }
+
+        .dashboard-card-footer {
+            padding: 0 .8rem .8rem .8rem;
+        }
+    }
+}
+
+#page-site-index.notloggedin {
+
+
+
+    #topofscroll {
+        background-color: $ivana-surface;
+        margin-left: -15px;
+        margin-right: -15px;
+
+        #page-content,
+        #region-main {
+            background-color: $ivana-surface;
+        }
+
+        #page-content {
+            padding-left: 0;
+            padding-right: 0;
+            margin-bottom: 0;
+        }
+
+        #frontpage-available-course-list {
+            h2 {
+                text-align: center;;
+            }
+        }
+    }
+
+}
+
+@include media-breakpoint-down(md) {
+    .pagelayout-frontpage .dashboard-card,
+    .pagelayout-coursecategory .dashboard-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 1rem 0;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+
+    #page-site-index.notloggedin {
+        .footer-content-popover .footer-section {
+            text-align: center;
+        }
+
+        .column-right .footer-title {
+            display: none;
+        }
+    }
+}

@@ -1,0 +1,136 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_ivana/lp_navbar
+
+    Visitors navbar: the same main menu as the landing pages (ui/NavHeader.tsx + components/SiteNavbar.tsx
+    of ivana-courses-landing-pages). Data from data/lp.json (classes/util/lp.php).
+
+    Example context (json):
+    {
+        "homeurl": "https://courses.ivana.academy/es-ar/",
+        "homelabel": "Ivana Academy - inicio",
+        "openlabel": "Abrir menú",
+        "closelabel": "Cerrar menú",
+        "mainlabel": "Principal",
+        "dropdowns": [{"id": "agenda", "label": "Agenda", "icon": "", "wide": false,
+            "items": [{"label": "Agenda Brasil", "href": "#", "newtab": false, "icon": ""}]}],
+        "interesse": {"label": "Interés", "href": "#", "icon": ""},
+        "portal": {"label": "Portal del Alumno", "href": "#", "icon": ""},
+        "langs": [{"code": "PT", "title": "Português (Brasil)", "hreflang": "pt-BR", "href": "#", "active": false, "flag": ""}],
+        "icons": {"menu": "", "close": "", "chevron": ""}
+    }
+}}
+<header class="navbar fixed-top ivana-lp-navbar d-print-none" data-region="ivana-lp-navbar">
+    <div class="ivana-lp-navbar-inner">
+        <a href="{{homeurl}}" class="ivana-lp-brand" aria-label="{{homelabel}}">
+            <img src="{{output.get_logo}}" alt="Ivana Academy" class="ivana-lp-logo" width="190" height="48">
+        </a>
+
+        <nav class="ivana-lp-pills d-none d-xl-flex" aria-label="{{mainlabel}}">
+            {{#dropdowns}}
+                <div class="dropdown ivana-lp-dropdown">
+                    <button type="button" class="ivana-pill" id="ivana-lp-{{id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {{{icon}}}
+                        <span>{{label}}</span>
+                        {{{icons.chevron}}}
+                    </button>
+                    <div class="dropdown-menu ivana-lp-panel{{#wide}} ivana-lp-panel-wide{{/wide}}" aria-labelledby="ivana-lp-{{id}}">
+                        {{#all}}
+                            <div class="ivana-lp-panel-all">
+                                <a href="{{href}}" class="ivana-lp-panel-link"{{#newtab}} target="_blank" rel="noreferrer"{{/newtab}}>{{{icon}}}<span>{{label}}</span></a>
+                            </div>
+                        {{/all}}
+                        {{#groups.0}}
+                            <div class="ivana-lp-panel-groups">
+                                {{#groups}}
+                                    <div>
+                                        <p class="ivana-lp-panel-title">{{title}}</p>
+                                        {{#items}}
+                                            <a href="{{href}}" class="ivana-lp-panel-link"{{#newtab}} target="_blank" rel="noreferrer"{{/newtab}}>{{{icon}}}<span>{{label}}</span></a>
+                                        {{/items}}
+                                    </div>
+                                {{/groups}}
+                            </div>
+                        {{/groups.0}}
+                        {{#items}}
+                            <a href="{{href}}" class="ivana-lp-panel-link"{{#newtab}} target="_blank" rel="noreferrer"{{/newtab}}>{{{icon}}}<span>{{label}}</span></a>
+                        {{/items}}
+                    </div>
+                </div>
+            {{/dropdowns}}
+            {{#interesse}}
+                <a href="{{href}}" class="ivana-pill">{{{icon}}}<span>{{label}}</span></a>
+            {{/interesse}}
+            {{#portal}}
+                <a href="{{href}}" class="ivana-pill">{{{icon}}}<span>{{label}}</span></a>
+            {{/portal}}
+        </nav>
+
+        <div class="ivana-lp-right">
+            <div class="ivana-lp-langs d-none d-sm-flex" role="group" aria-label="Idioma / Idioma">
+                {{#langs}}
+                    <a href="{{href}}" hreflang="{{hreflang}}" title="{{title}}" class="ivana-lang{{#active}} active{{/active}}"{{#active}} aria-current="true"{{/active}}>{{{flag}}}<span>{{code}}</span></a>
+                {{/langs}}
+            </div>
+            <button type="button" class="ivana-lp-toggle d-xl-none collapsed" data-toggle="collapse" data-target="#ivana-lp-drawer" aria-controls="ivana-lp-drawer" aria-expanded="false" aria-label="{{openlabel}}" data-label-open="{{openlabel}}" data-label-close="{{closelabel}}">
+                <span class="ivana-lp-toggle-open">{{{icons.menu}}}</span>
+                <span class="ivana-lp-toggle-close">{{{icons.close}}}</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="collapse ivana-lp-drawer d-xl-none" id="ivana-lp-drawer">
+        <div class="ivana-lp-drawer-inner">
+            <div class="ivana-lp-langs d-flex d-sm-none mb-1" role="group" aria-label="Idioma / Idioma">
+                {{#langs}}
+                    <a href="{{href}}" hreflang="{{hreflang}}" title="{{title}}" class="ivana-lang{{#active}} active{{/active}}"{{#active}} aria-current="true"{{/active}}>{{{flag}}}<span>{{code}}</span></a>
+                {{/langs}}
+            </div>
+            {{#dropdowns}}
+                <p class="ivana-lp-drawer-heading">{{{icon}}} {{label}}</p>
+                {{#all}}
+                    <a href="{{href}}" class="ivana-lp-drawer-item"{{#newtab}} target="_blank" rel="noreferrer"{{/newtab}}>{{{icon}}}<span>{{label}}</span></a>
+                {{/all}}
+                {{#groups}}
+                    <p class="ivana-lp-drawer-subheading">{{title}}</p>
+                    {{#items}}
+                        <a href="{{href}}" class="ivana-lp-drawer-item"{{#newtab}} target="_blank" rel="noreferrer"{{/newtab}}>{{{icon}}}<span>{{label}}</span></a>
+                    {{/items}}
+                {{/groups}}
+                {{#items}}
+                    <a href="{{href}}" class="ivana-lp-drawer-item"{{#newtab}} target="_blank" rel="noreferrer"{{/newtab}}>{{{icon}}}<span>{{label}}</span></a>
+                {{/items}}
+            {{/dropdowns}}
+            {{#interesse}}
+                <a href="{{href}}" class="ivana-lp-drawer-item mt-2">{{{icon}}}<span>{{label}}</span></a>
+            {{/interesse}}
+            {{#portal}}
+                <a href="{{href}}" class="ivana-lp-drawer-item">{{{icon}}}<span>{{label}}</span></a>
+            {{/portal}}
+        </div>
+    </div>
+</header>
+{{#js}}
+    require(['jquery'], function($) {
+        var toggle = $('[data-region="ivana-lp-navbar"] .ivana-lp-toggle');
+        $('#ivana-lp-drawer').on('show.bs.collapse hide.bs.collapse', function(e) {
+            var opening = e.type === 'show';
+            toggle.attr('aria-label', toggle.data(opening ? 'label-close' : 'label-open'));
+        });
+    });
+{{/js}}

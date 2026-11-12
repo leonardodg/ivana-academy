@@ -70,6 +70,11 @@ elif echo "$CHANGED" | grep -vE '^(\.devcontainer|\.github)/' | grep -qE '\.php$
 fi
 
 # 5. Caches + teste -----------------------------------------------------------------
+# Plugin apagado do codigo mas ainda instalado (ex.: theme_boost_union): as definicoes de cache
+# dele ficam no MUC e o purge falha ("The override class does not exist"). Reler as definicoes
+# do codigo atual antes resolve; sem plugin removido, nao muda nada. Testado no staging.
+moosh -r 'define("CLI_SCRIPT", true); require "/var/www/html/config.php"; \core_cache\helper::update_definitions();' \
+    || log "⚠  update_definitions falhou (seguindo para o purge)"
 moosh admin/cli/purge_caches.php
 log "🧹 Caches limpos"
 curl -s -o /dev/null -w "   publico: HTTP %{http_code}\n" "$PUBLIC_URL"

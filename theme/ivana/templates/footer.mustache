@@ -1,0 +1,114 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_ivana/footer
+
+    Page footer.
+
+    Example context (json):
+    {
+        "output": {
+            "page_doc_link": "Help and documentation",
+            "supportemail": "<a href=\"#\">Contact site support</a>",
+            "has_popover_links": true,
+            "services_support": "Services and support",
+            "login_info": "You are logged in as cute kitten",
+            "moodle_release": "90210"
+        }
+    }
+}}
+
+
+<footer id="page-footer" class="ivana-lp-footer d-print-none">
+    {{#output.ivana_lp_footer}}
+        <div class="ivana-footer-grid">
+            <div class="ivana-footer-about">
+                <img src="{{logo}}" alt="Ivana Academy" class="ivana-footer-logo" loading="lazy" decoding="async" width="95" height="88">
+                <p>{{about}}</p>
+                <p>{{address}}</p>
+                <ul class="ivana-footer-social" aria-label="{{sociallabel}}">
+                    {{#social}}
+                        <li>
+                            <a href="{{href}}" aria-label="{{label}}" title="{{label}}"{{#newtab}} target="_blank" rel="noreferrer"{{/newtab}}>{{{icon}}}</a>
+                        </li>
+                    {{/social}}
+                </ul>
+            </div>
+
+            {{#groups}}
+                <nav class="ivana-footer-group" aria-label="{{title}}">
+                    <span class="ivana-footer-title">{{title}}</span>
+                    <ul>
+                        {{#links}}
+                            <li><a href="{{href}}"{{#newtab}} target="_blank" rel="noreferrer"{{/newtab}}>{{label}}</a></li>
+                        {{/links}}
+                    </ul>
+                </nav>
+            {{/groups}}
+        </div>
+
+        <div class="ivana-footer-bottom">
+            <nav aria-label="{{legallabel}}" class="ivana-footer-legal">
+                {{#legal}}
+                    <a href="{{href}}">{{label}}</a>
+                {{/legal}}
+                <button type="button" class="ivana-footer-cookies" data-action="ivana-cookie-preferences" hidden>{{cookieslabel}}</button>
+            </nav>
+            <p>{{company}}</p>
+            <p>{{rights}}</p>
+            <p class="ivana-footer-madeby">
+                <span>{{maintainedby}}</span>
+                <a href="https://www.linkedin.com/in/le0dg/" target="_blank" rel="noreferrer" aria-label="LEODG">
+                    <img src="{{leodglogo}}" alt="LEODG" class="ivana-footer-leodg" loading="lazy" decoding="async" width="57" height="22">
+                </a>
+            </p>
+        </div>
+    {{/output.ivana_lp_footer}}
+
+    <div class="footer-content-debugging footer-dark bg-dark text-light">
+        <div class="moove-container-fluid footer-dark-inner">
+            {{{ output.debug_footer_html }}}
+        </div>
+    </div>
+</footer>
+
+{{{ output.standard_end_of_body_html }}}
+
+{{#js}}
+    require(['theme_boost/footer-popover'], function(FooterPopover) {
+        FooterPopover.init();
+    });
+    // YouTube embeds play inside the page on iPhone (without playsinline=1 Safari opens its
+    // full-screen player, which students saw as a popup). Pages keep their pasted embed code.
+    Array.prototype.forEach.call(document.querySelectorAll('iframe[src*="youtube.com/embed/"], iframe[src*="youtube-nocookie.com/embed/"]'),
+        function(frame) {
+            var src = frame.getAttribute('src');
+            if (src && !/[?&]playsinline=/.test(src)) {
+                frame.setAttribute('src', src + (src.indexOf('?') === -1 ? '?' : '&') + 'playsinline=1');
+            }
+        });
+    // "Cookie preferences": reopens the local_seo consent banner (shown only when that banner is on).
+    (function() {
+        var button = document.querySelector('[data-action="ivana-cookie-preferences"]');
+        if (button && typeof window.localSeoConsentOpen === 'function') {
+            button.hidden = false;
+            button.addEventListener('click', function() {
+                window.localSeoConsentOpen();
+            });
+        }
+    })();
+{{/js}}
