@@ -100,6 +100,15 @@ if ($ADMIN->fulltree) {
     $setting->set_updatedcallback('theme_reset_all_caches');
     $page->add($setting);
 
+    // Login page background for phones (portrait).
+    $name = 'theme_ivana/loginbgimgmobile';
+    $title = get_string('loginbgimgmobile', 'theme_ivana');
+    $description = get_string('loginbgimgmobile_desc', 'theme_ivana');
+    $opts = ['accepted_types' => ['.png', '.jpg', '.webp']];
+    $setting = new admin_setting_configstoredfile($name, $title, $description, 'loginbgimgmobile', 0, $opts);
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $page->add($setting);
+
     $name = 'theme_ivana/enablecourseindex';
     $title = get_string('enablecourseindex', 'theme_ivana');
     $description = get_string('enablecourseindex_desc', 'theme_ivana');
