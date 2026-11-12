@@ -312,7 +312,9 @@ class core_renderer extends \theme_boost\output\core_renderer {
             return new moodle_url($favicon);
         }
 
-        return parent::favicon();
+        // Ivana Academy: the landing pages favicon (pix/favicon.ico). Not parent::favicon(), which
+        // prefers the site favicon of Appearance > Logos (the old pink "V" in production).
+        return $this->image_url('favicon', 'theme');
     }
 
     /**
