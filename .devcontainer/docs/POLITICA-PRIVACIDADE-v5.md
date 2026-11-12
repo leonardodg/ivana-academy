@@ -16,6 +16,16 @@ Hoje na produção está a **v4** (id 4). Aplicar **só depois** de o tema `them
 
 ## Como aplicar
 
+**Pelo script (testado no staging em 12/11/2026):**
+
+```bash
+moosh local/seo/cli/update_policy.php --file=.devcontainer/docs/POLITICA-PRIVACIDADE-v5.md --revision=v5          # só mostra
+moosh local/seo/cli/update_policy.php --file=.devcontainer/docs/POLITICA-PRIVACIDADE-v5.md --revision=v5 --run    # nova versão
+# --minor --run  = alteração pequena (sobrescreve a v4, ninguém aceita de novo)
+```
+
+**Ou pela tela:**
+
 *Gerenciar políticas › Política de Privacidade e Cookies › Editar*, colar o **resumo** e o **texto
 completo** abaixo (no editor, botão de código HTML `</>`), e escolher:
 

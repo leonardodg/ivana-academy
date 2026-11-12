@@ -65,7 +65,9 @@ moosh admin/cli/purge_caches.php
   definir o padrão em espanhol: `moosh admin/cli/cfg.php --name=lang --set=es_ar`. O menu e o
   rodapé seguem PT/ES; o aviso de cookies passa a sair no idioma da aluna.
 - **Política de privacidade v5:** `.devcontainer/docs/POLITICA-PRIVACIDADE-v5.md` (a v4 cita
-  Google Fonts, que o tema não usa mais, e não cita o reCAPTCHA).
+  Google Fonts, que o tema não usa mais, e não cita o reCAPTCHA). Aplicar com
+  `moosh local/seo/cli/update_policy.php --file=.devcontainer/docs/POLITICA-PRIVACIDADE-v5.md --revision=v5 --run`
+  (nova versão: todos aceitam de novo no próximo login; `--minor` para não pedir).
 - **Logo:** o tema usa o logo da LP (`theme/ivana/pix/logo.svg`). Não precisa subir nada.
 
 ## Rollback
