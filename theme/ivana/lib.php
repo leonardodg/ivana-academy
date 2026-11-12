@@ -82,6 +82,16 @@ function theme_ivana_get_extra_scss($theme) {
     $content .= "background-image: url('$loginbgimgurl'); background-size: cover;";
     $content .= ' }';
 
+    // Ivana Academy: portrait version for phones and tablets held upright, so the corner details
+    // (candles top left, macrame bottom right) stay visible instead of being cropped by "cover".
+    $mobileurl = $theme->setting_file_url('loginbgimgmobile', 'loginbgimgmobile');
+    if (empty($mobileurl)) {
+        $mobileurl = (new \moodle_url('/theme/ivana/pix/loginbg-mobile.jpg'))->out(false);
+    }
+    $content .= ' @media (max-width: 991.98px) and (orientation: portrait) { body.pagelayout-login #page { ';
+    $content .= "background-image: url('$mobileurl'); background-size: cover; background-position: center;";
+    $content .= ' } }';
+
     // Always return the background image with the scss when we have it.
     return !empty($theme->settings->scss) ? $theme->settings->scss . ' ' . $content : $content;
 }
@@ -132,7 +142,7 @@ function theme_ivana_pluginfile($course, $cm, $context, $filearea, $args, $force
 
     if (
         $context->contextlevel == CONTEXT_SYSTEM &&
-        ($filearea === 'logo' || $filearea === 'loginbgimg' || $filearea == 'favicon')
+        ($filearea === 'logo' || $filearea === 'loginbgimg' || $filearea === 'loginbgimgmobile' || $filearea == 'favicon')
     ) {
         $theme = theme_config::load('ivana');
         // By default, theme files must be cache-able by both browsers and proxies.
