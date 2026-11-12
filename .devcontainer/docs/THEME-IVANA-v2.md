@@ -19,23 +19,21 @@ cores, fontes, logo, menu principal e rodapé. Quem passa da LP para a plataform
 
 Antes de tudo: dump do banco (`/backups/backup.sh` ou manual) e horário de pouco acesso.
 
-### 0. Antes do merge: desinstalar o Boost Union (o código ainda está na produção)
-
-O PR apaga `theme/boost_union`. Ele está instalado e sem uso (nenhum curso, usuário, categoria
-ou coorte usa). Desinstale **enquanto o código existe**:
-
-```bash
-moosh admin/cli/uninstall_plugins.php --plugins=theme_boost_union --run
-```
-
 ### 1. Merge do PR → deploy automático (`production.yml`)
 
-O código sobe sozinho. O `theme_ivana` é plugin novo, então o **upgrade é manual**:
+**Não desinstale o Boost Union antes do merge:** com o código ainda na `main`, o Moodle o veria como
+plugin novo e o reinstalaria no próximo upgrade (repositório e banco desalinhados). Tudo é feito
+depois do merge, quando o código dele já saiu.
+
+O PR apaga `theme/boost_union` (instalado e sem uso). O `deploy.sh` agora roda
+`update_definitions` antes do `purge_caches`; sem isso o purge falhava com "The override class
+does not exist" (definições de cache do plugin apagado). Testado no staging.
+
+Depois do deploy, na VPS:
 
 ```bash
+moosh admin/cli/uninstall_plugins.php --plugins=theme_boost_union --run   # funciona com o código já ausente
 moosh admin/cli/upgrade.php --non-interactive     # instala theme_ivana; copia do Moove: login, GA4, redes
-# Depois de apagar o código do Boost Union, as definições de cache dele ficam no MUC
-# ("The override class does not exist" no purge). No staging isto resolveu:
 moosh -r 'define("CLI_SCRIPT",1); require "/var/www/html/config.php"; \core_cache\helper::update_definitions();'
 moosh admin/cli/purge_caches.php
 ```
