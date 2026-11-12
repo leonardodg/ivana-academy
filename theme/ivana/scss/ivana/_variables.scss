@@ -1,16 +1,113 @@
-$brand-primary: #ffd0e5 !default;
-$green: #64a44e !default;
-$gold: #f7bf29 !default;
-$background: #f2f3f7;
+// Ivana Academy v2: tokens do design system "Artisanal Elegance" da LP
+// (ivana-courses-landing-pages: DESIGN.md e src/styles/index.css). Mudou a LP? Atualize aqui.
+// Este arquivo entra ANTES do preset do Boost, entao estes valores vencem os !default do Bootstrap.
 
-$secondary-menu-color: $brand-primary !default;
+// Cores da LP.
+$ivana-primary: #805252;
+$ivana-on-primary: #ffffff;
+$ivana-primary-container: #d9a1a0;
+$ivana-on-primary-container: #603737;
+$ivana-primary-fixed: #ffdad9;
+$ivana-secondary: #635e55;
+$ivana-secondary-container: #e6dfd4;
+$ivana-tertiary: #805533;
+$ivana-tertiary-container: #daa47d;
 
-$moodle-color: #ffd0e5 !default;
-$facebook-color: #ffd0e5 !default;
-$moodle-color: #ffd0e5 !default;
-$twitter-color: #ffd0e5 !default;
-$youtube-color: #ffd0e5 !default;
-$linkedin-color: #ffd0e5 !default;
-$instagram-color: #ffd0e5 !default;
-$whatsapp-color: #ffd0e5 !default;
-$telegram-color: #ffd0e5 !default;
+$ivana-surface: #fcf9f5;            // surface-cream: fundo das paginas
+$ivana-surface-hero: #f7efe4;       // creme do heroi e do rodape
+$ivana-surface-container-lowest: #ffffff;
+$ivana-surface-container-low: #f6f3ef;
+$ivana-surface-container: #f0ede9;  // surface-form: grupos de pilulas, campos
+$ivana-surface-container-high: #eae8e4;
+$ivana-surface-container-highest: #e5e2de;
+
+$ivana-on-surface: #1c1c1a;
+$ivana-on-surface-variant: #514443;
+$ivana-outline: #837373;
+$ivana-outline-variant: #d5c2c1;
+$ivana-border-subtle: #e1deda;
+$ivana-border-muted: #eae8e4;
+
+$ivana-error: #ba1a1a;
+$ivana-error-container: #ffdad6;
+
+// Fontes da LP (fonts/, ver _fonts.scss).
+$ivana-font-serif: "Libre Caslon Text", Georgia, serif;
+$ivana-font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$ivana-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+// Sombra "ambiente" da LP: difusa e de baixa opacidade.
+$ivana-shadow-sm: 0 1px 2px rgba(0, 0, 0, .05);
+$ivana-shadow: 0 10px 30px rgba(0, 0, 0, .04);
+$ivana-shadow-lg: 0 12px 35px rgba(0, 0, 0, .06);
+$ivana-shadow-primary: 0 4px 10px rgba(128, 82, 82, .15);
+
+// Altura da navbar fixa e da barra secundaria (Moove usa 70 + 60).
+$ivana-navbar-height: 70px;
+
+// Variaveis do Moove (usadas nos parciais herdados).
+$brand-primary: $ivana-primary;
+$secondary-menu-color: $ivana-surface-hero;
+$background: $ivana-surface;
+$green: #64a44e;
+$gold: #f7bf29;
+
+$moodle-color: $ivana-primary;
+$facebook-color: $ivana-primary;
+$twitter-color: $ivana-primary;
+$youtube-color: $ivana-primary;
+$linkedin-color: $ivana-primary;
+$instagram-color: $ivana-primary;
+$whatsapp-color: $ivana-primary;
+$telegram-color: $ivana-primary;
+
+// Bootstrap 4 (Moodle 4.5).
+$primary: $ivana-primary;
+$secondary: $ivana-surface-container-highest;
+$info: #5b7a8c;
+$success: #4f7a4a;
+$warning: #b7791f;
+$danger: $ivana-error;
+$light: $ivana-surface-container-low;
+$dark: $ivana-on-surface;
+
+$body-bg: $ivana-surface;
+$body-color: $ivana-on-surface;
+$text-muted: #6b5f5e;
+$link-color: $ivana-primary;
+$link-hover-color: darken($ivana-primary, 10%);
+
+$font-family-sans-serif: $ivana-font-sans;
+$font-family-monospace: $ivana-font-mono;
+$font-size-base: .9375rem;
+$headings-font-family: $ivana-font-serif;
+$headings-font-weight: 400;
+$headings-color: $ivana-on-surface;
+
+$border-color: $ivana-border-subtle;
+$border-radius: .5rem;
+$border-radius-lg: 1rem;
+$border-radius-sm: .25rem;
+
+$card-border-color: $ivana-surface-container-highest;
+$card-border-radius: 1rem;
+$card-cap-bg: $ivana-surface-container-low;
+
+$input-border-color: $ivana-border-subtle;
+$input-focus-border-color: $ivana-primary-container;
+$input-btn-focus-color: rgba($ivana-primary, .25);
+$input-placeholder-color: #8a7f7e;
+
+$dropdown-border-color: $ivana-border-muted;
+$dropdown-link-hover-bg: $ivana-surface-container-high;
+$dropdown-link-active-bg: $ivana-primary;
+
+$navbar-light-color: $ivana-on-surface-variant;
+$navbar-light-hover-color: $ivana-primary;
+$navbar-light-active-color: $ivana-primary;
+
+$progress-bg: $ivana-surface-container-high;
+$progress-bar-bg: $ivana-primary;
+$progress-height: .375rem;
+
+$badge-border-radius: 9999px;

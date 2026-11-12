@@ -104,7 +104,7 @@
 }
 
 @include media-breakpoint-down(md) {
-    .block-myoverview .dashboard-card-deck:not(.fixed-width-cards) .dashboard-card {
+    .block_myoverview .dashboard-card-deck:not(.fixed-width-cards) .dashboard-card {
         width: calc(100%);
         margin: 1rem 0;
     }

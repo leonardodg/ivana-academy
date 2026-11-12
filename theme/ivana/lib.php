@@ -94,32 +94,7 @@ function theme_ivana_get_extra_scss($theme) {
  */
 function theme_ivana_get_pre_scss($theme) {
     $scss = '';
-    $configurable = [
-        // Config key => [variableName, ...].
-        'brandcolor' => ['brand-primary'],
-        'secondarymenucolor' => 'secondary-menu-color',
-        'fontsite' => 'font-family-sans-serif',
-    ];
-
-    // Prepend variables first.
-    foreach ($configurable as $configkey => $targets) {
-        $value = isset($theme->settings->{$configkey}) ? $theme->settings->{$configkey} : null;
-        if (empty($value)) {
-            continue;
-        }
-
-        if ($configkey == 'fontsite' && $value == 'Moodle') {
-            continue;
-        }
-
-        array_map(function ($target) use (&$scss, $value) {
-            if ($target == 'fontsite') {
-                $scss .= '$' . $target . ': "' . $value . '", sans-serif !default' . ";\n";
-            } else {
-                $scss .= '$' . $target . ': ' . $value . ";\n";
-            }
-        }, (array) $targets);
-    }
+    // Colours and fonts come from the landing pages design system (scss/ivana/_variables.scss).
 
     // Prepend pre-scss.
     if (!empty($theme->settings->scsspre)) {
@@ -169,26 +144,6 @@ function theme_ivana_pluginfile($course, $cm, $context, $filearea, $args, $force
 
     if ($filearea === 'hvp') {
         return theme_ivana_serve_hvp_css($args[1], $theme);
-    }
-
-    if ($context->contextlevel == CONTEXT_SYSTEM && preg_match("/^sliderimage[1-9][0-9]?$/", $filearea) !== false) {
-        return $theme->setting_file_serve($filearea, $args, $forcedownload, $options);
-    }
-
-    if ($context->contextlevel == CONTEXT_SYSTEM && $filearea === 'marketing1icon') {
-        return $theme->setting_file_serve('marketing1icon', $args, $forcedownload, $options);
-    }
-
-    if ($context->contextlevel == CONTEXT_SYSTEM && $filearea === 'marketing2icon') {
-        return $theme->setting_file_serve('marketing2icon', $args, $forcedownload, $options);
-    }
-
-    if ($context->contextlevel == CONTEXT_SYSTEM && $filearea === 'marketing3icon') {
-        return $theme->setting_file_serve('marketing3icon', $args, $forcedownload, $options);
-    }
-
-    if ($context->contextlevel == CONTEXT_SYSTEM && $filearea === 'marketing4icon') {
-        return $theme->setting_file_serve('marketing4icon', $args, $forcedownload, $options);
     }
 
     send_file_not_found();

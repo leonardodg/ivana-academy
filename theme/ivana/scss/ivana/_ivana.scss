@@ -1,0 +1,481 @@
+// Ivana Academy v2: camada do design system da LP sobre o Moove/Boost.
+// Entra por ultimo em default.scss, entao vence os parciais herdados do Moove.
+// Referencia visual: courses.ivana.academy (NavHeader, Card, styles.ts, index.css).
+
+// ─── Base e tipografia ──────────────────────────────────────────────
+
+body {
+    font-family: $ivana-font-sans;
+    color: $ivana-on-surface;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4,
+.h1, .h2, .h3, .h4 {
+    font-family: $ivana-font-serif;
+    font-weight: 400;
+    color: $ivana-on-surface;
+    letter-spacing: -.01em;
+}
+
+h5, h6, .h5, .h6 {
+    font-family: $ivana-font-sans;
+    font-weight: 600;
+}
+
+// Titulo da pagina (Hi, Admin! / Site administration / nome do curso).
+#page-header h1,
+.page-header-headings h1,
+#page-site-index #region-main h2 {
+    font-family: $ivana-font-serif;
+    font-weight: 400;
+}
+
+a {
+    color: $ivana-primary;
+
+    &:hover,
+    &:focus {
+        color: darken($ivana-primary, 10%);
+    }
+}
+
+::selection {
+    background-color: $ivana-primary-fixed;
+    color: $ivana-on-primary-container;
+}
+
+hr {
+    border-top-color: $ivana-border-muted;
+}
+
+.text-muted {
+    color: $text-muted !important; /* stylelint-disable-line declaration-no-important */
+}
+
+// Etiquetas pequenas da LP (mono, caixa alta).
+.ivana-label {
+    font-family: $ivana-font-mono;
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+// ─── Navbar fixa (logo + navegacao principal + menu do usuario) ─────
+
+.navbar.fixed-top {
+    background-color: rgba($ivana-surface, .95) !important; /* stylelint-disable-line declaration-no-important */
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid $ivana-border-subtle;
+    box-shadow: $ivana-shadow-sm !important; /* stylelint-disable-line declaration-no-important */
+
+    .navbar-brand .logo {
+        max-height: 48px;
+        width: auto;
+    }
+
+    // Home / My courses / Site administration como as pilulas do menu da LP.
+    .primary-navigation {
+        display: flex;
+        align-items: center;
+
+        .navigation {
+            height: auto;
+            align-items: center;
+            gap: .25rem;
+            padding: .25rem;
+            background-color: $ivana-surface-container;
+            border: 1px solid $ivana-border-subtle;
+            border-radius: 9999px;
+
+            .nav-link {
+                height: auto;
+                min-height: 2.25rem;
+                display: inline-flex;
+                align-items: center;
+                padding: .375rem .875rem;
+                border: none;
+                border-radius: 9999px;
+                font-size: .8125rem;
+                font-weight: 600;
+                letter-spacing: .01em;
+                color: $ivana-on-surface-variant;
+                background-color: transparent;
+                transition: background-color .2s ease, color .2s ease;
+
+                &:hover,
+                &:focus {
+                    background-color: $ivana-surface-container-high;
+                    color: $ivana-on-surface;
+                }
+
+                &.active {
+                    font-weight: 600;
+                    border-bottom: none;
+                    background-color: $ivana-primary;
+                    color: $ivana-on-primary;
+                    box-shadow: $ivana-shadow-sm;
+                }
+
+                &:focus-visible {
+                    box-shadow: 0 0 0 .2rem $input-btn-focus-color;
+                }
+            }
+
+            .dropdown-menu {
+                border-radius: 1rem;
+            }
+        }
+    }
+
+    .usermenu .avatar.current,
+    .usermenu .userinitials {
+        background-color: $ivana-primary-fixed;
+        color: $ivana-on-primary-container;
+        border: 1px solid $ivana-border-subtle;
+    }
+
+    .popover-region-toggle .icon,
+    .usermenu .dropdown-toggle,
+    .editmode-switch-form label {
+        color: $ivana-on-surface-variant;
+    }
+
+    .divider {
+        border-color: $ivana-border-subtle !important; /* stylelint-disable-line declaration-no-important */
+    }
+}
+
+// Interruptor "Edit mode".
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: $ivana-primary;
+    border-color: $ivana-primary;
+}
+
+// ─── Barra secundaria (Settings, Participants, Reports...) ─────────
+
+.secondary-navigation {
+    background-color: $ivana-surface-hero;
+    border-bottom: 1px solid $ivana-border-subtle;
+    filter: none;
+    box-shadow: $ivana-shadow-sm;
+
+    .moremenu .nav-tabs .nav-link {
+        color: $ivana-on-surface-variant;
+        font-size: .875rem;
+        font-weight: 600;
+
+        &.active {
+            color: $ivana-primary;
+            border-bottom: 2px solid $ivana-primary;
+            font-weight: 700;
+        }
+
+        &:hover,
+        &:focus {
+            background-color: $ivana-surface-container-high;
+            color: $ivana-on-surface;
+        }
+    }
+}
+
+// ─── Menus suspensos ────────────────────────────────────────────────
+
+.dropdown-menu {
+    border: 1px solid $ivana-border-muted;
+    border-radius: 1rem;
+    box-shadow: $ivana-shadow-lg;
+    padding: .5rem;
+
+    .dropdown-item {
+        border-radius: .5rem;
+        color: $ivana-on-surface;
+        padding: .5rem .75rem;
+    }
+
+    .dropdown-divider {
+        border-top-color: $ivana-border-muted;
+    }
+}
+
+.dropdown-item:active,
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item:focus-within {
+    background-color: $ivana-surface-container-high;
+    color: $ivana-on-surface;
+}
+
+.dropdown-item.active,
+.dropdown-item[aria-current="true"] {
+    background-color: $ivana-primary;
+    color: $ivana-on-primary;
+}
+
+// ─── Botoes (styles.ts da LP: mono, caixa alta, cantos de 8px) ─────
+
+.btn {
+    border-radius: .5rem;
+    font-weight: 600;
+    transition: all .3s cubic-bezier(.16, 1, .3, 1);
+}
+
+.btn-primary {
+    background-color: $ivana-primary;
+    border-color: $ivana-primary;
+    color: $ivana-on-primary;
+    box-shadow: $ivana-shadow-primary;
+
+    &:hover,
+    &:focus {
+        background-color: darken($ivana-primary, 6%);
+        border-color: darken($ivana-primary, 6%);
+        color: $ivana-on-primary;
+    }
+
+    &:not(:disabled):not(.disabled):active,
+    &:not(:disabled):not(.disabled).active {
+        background-color: darken($ivana-primary, 10%);
+        border-color: darken($ivana-primary, 10%);
+    }
+}
+
+.btn-secondary {
+    background-color: $ivana-surface-container-lowest;
+    border-color: $ivana-border-subtle;
+    color: $ivana-on-surface-variant;
+
+    &:hover,
+    &:focus {
+        background-color: $ivana-surface-container-high;
+        border-color: $ivana-outline-variant;
+        color: $ivana-on-surface;
+    }
+}
+
+.btn-outline-primary {
+    color: $ivana-primary;
+    border-color: $ivana-primary;
+
+    &:hover {
+        background-color: $ivana-primary;
+        color: $ivana-on-primary;
+    }
+}
+
+.btn-link {
+    color: $ivana-primary;
+}
+
+// Botao grande de acao (login, cadastro, matricula): o "heroPrimary" da LP.
+#loginbtn,
+#id_submitbutton,
+.ivana-btn-cta {
+    font-family: $ivana-font-mono;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-radius: 9999px;
+    padding: .875rem 2rem;
+}
+
+// ─── Formularios ────────────────────────────────────────────────────
+
+.form-control,
+.custom-select {
+    border-color: $ivana-border-subtle;
+    border-radius: .75rem;
+    background-color: $ivana-surface-container-lowest;
+    color: $ivana-on-surface;
+
+    &:focus {
+        border-color: $ivana-primary-container;
+        box-shadow: 0 0 0 .2rem $input-btn-focus-color;
+    }
+}
+
+.input-group > .form-control:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group-append .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: 0 0 0 .2rem $input-btn-focus-color;
+}
+
+// ─── Cartoes e blocos (Card da LP: branco, borda creme, 16px, sombra difusa) ──
+
+.card {
+    background-color: $ivana-surface-container-lowest;
+    border: 1px solid $ivana-surface-container-highest;
+    border-radius: 1rem;
+    box-shadow: $ivana-shadow;
+}
+
+#region-main,
+[data-region="blocks-column"] .block,
+.block {
+    border-radius: 1rem;
+}
+
+#page.drawers .main-inner {
+    border-radius: 1.5rem;
+    box-shadow: $ivana-shadow;
+    border: 1px solid $ivana-border-muted;
+}
+
+// Cards de curso (home, categorias, Meus cursos).
+.dashboard-card {
+    overflow: hidden;
+    transition: transform .3s cubic-bezier(.16, 1, .3, 1), box-shadow .3s cubic-bezier(.16, 1, .3, 1);
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: $ivana-shadow-lg;
+    }
+
+    .card-img.dashboard-card-img {
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+    }
+
+    .coursename {
+        font-family: $ivana-font-serif;
+        font-size: 1.125rem;
+        line-height: 1.4;
+        color: $ivana-on-surface;
+
+        &:hover {
+            color: $ivana-primary;
+        }
+    }
+
+    .course-summary {
+        color: $ivana-on-surface-variant;
+        font-size: .875rem;
+        line-height: 1.5;
+    }
+
+    .course-landing-link {
+        font-family: $ivana-font-mono;
+        font-size: .6875rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+}
+
+// Etiqueta de categoria sobre a imagem: a pilula "cardTag" da LP.
+.dashboard-card .card-img .course-category,
+.card-img.dashboard-card-img .course-category {
+    background-color: rgba($ivana-surface-container-lowest, .9);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    color: $ivana-on-surface;
+    border-radius: 9999px;
+    padding: .25rem .75rem;
+    margin: 1rem;
+    font-size: .6875rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    box-shadow: $ivana-shadow-sm;
+
+    span.categoryname,
+    a {
+        color: $ivana-on-surface;
+    }
+}
+
+// Progresso: linha fina em rosa (DESIGN.md, "Progress Indicators").
+.progress {
+    height: $progress-height;
+    border-radius: 9999px;
+    background-color: $ivana-surface-container-high;
+
+    .progress-bar {
+        background-color: $ivana-primary;
+        border-radius: 9999px;
+    }
+}
+
+// Selos.
+.badge {
+    border-radius: 9999px;
+    font-weight: 600;
+    padding: .3em .7em;
+}
+
+.badge-primary {
+    background-color: $ivana-primary;
+}
+
+.badge-secondary {
+    background-color: $ivana-surface-container-highest;
+    color: $ivana-on-surface-variant;
+}
+
+// ─── Gavetas (indice do curso, blocos) ──────────────────────────────
+
+.drawer {
+    background-color: $ivana-surface-container-low;
+    border-color: $ivana-border-subtle;
+}
+
+.courseindex .courseindex-item.pageitem {
+    background-color: $ivana-primary;
+    color: $ivana-on-primary;
+    border-radius: .5rem;
+
+    a {
+        color: $ivana-on-primary;
+    }
+}
+
+.drawertoggle,
+.btn-drawer {
+    color: $ivana-on-surface-variant;
+}
+
+// ─── Avisos ─────────────────────────────────────────────────────────
+
+.alert {
+    border-radius: 1rem;
+    border-width: 1px;
+}
+
+.alert-danger {
+    background-color: $ivana-error-container;
+    border-color: lighten($ivana-error, 45%);
+    color: darken($ivana-error, 10%);
+}
+
+.alert-info {
+    background-color: $ivana-surface-hero;
+    border-color: $ivana-border-subtle;
+    color: $ivana-on-surface-variant;
+}
+
+// ─── Paginacao e abas ───────────────────────────────────────────────
+
+.page-item.active .page-link {
+    background-color: $ivana-primary;
+    border-color: $ivana-primary;
+}
+
+.page-link {
+    color: $ivana-primary;
+}
+
+.nav-tabs .nav-link.active {
+    color: $ivana-primary;
+}

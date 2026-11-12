@@ -7,4 +7,25 @@
     <version>3</version>
     <licenseversion>1.1</licenseversion>
   </library>
+  <library>
+    <location>fonts</location>
+    <name>Libre Caslon Text</name>
+    <license>SIL-OFL</license>
+    <version>5.3.0 (@fontsource)</version>
+    <licenseversion>1.1</licenseversion>
+  </library>
+  <library>
+    <location>fonts</location>
+    <name>Plus Jakarta Sans</name>
+    <license>SIL-OFL</license>
+    <version>5.3.0 (@fontsource-variable)</version>
+    <licenseversion>1.1</licenseversion>
+  </library>
+  <library>
+    <location>fonts</location>
+    <name>JetBrains Mono</name>
+    <license>SIL-OFL</license>
+    <version>5.3.0 (@fontsource-variable)</version>
+    <licenseversion>1.1</licenseversion>
+  </library>
 </libraries>

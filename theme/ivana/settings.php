@@ -100,49 +100,6 @@ if ($ADMIN->fulltree) {
     $setting->set_updatedcallback('theme_reset_all_caches');
     $page->add($setting);
 
-    // Variable $brand-color.
-    // We use an empty default value because the default colour should come from the preset.
-    $name = 'theme_ivana/brandcolor';
-    $title = get_string('brandcolor', 'theme_ivana');
-    $description = get_string('brandcolor_desc', 'theme_ivana');
-    $setting = new admin_setting_configcolourpicker($name, $title, $description, '#0f47ad');
-    $setting->set_updatedcallback('theme_reset_all_caches');
-    $page->add($setting);
-
-    // Variable $navbar-header-color.
-    // We use an empty default value because the default colour should come from the preset.
-    $name = 'theme_ivana/secondarymenucolor';
-    $title = get_string('secondarymenucolor', 'theme_ivana');
-    $description = get_string('secondarymenucolor_desc', 'theme_ivana');
-    $setting = new admin_setting_configcolourpicker($name, $title, $description, '#0f47ad');
-    $setting->set_updatedcallback('theme_reset_all_caches');
-    $page->add($setting);
-
-    $fontsarr = [
-        'Moodle' => 'Moodle Font',
-        'Roboto' => 'Roboto',
-        'Poppins' => 'Poppins',
-        'Montserrat' => 'Montserrat',
-        'Open Sans' => 'Open Sans',
-        'Lato' => 'Lato',
-        'Raleway' => 'Raleway',
-        'Inter' => 'Inter',
-        'Nunito' => 'Nunito',
-        'Encode Sans' => 'Encode Sans',
-        'Work Sans' => 'Work Sans',
-        'Oxygen' => 'Oxygen',
-        'Manrope' => 'Manrope',
-        'Sora' => 'Sora',
-        'Epilogue' => 'Epilogue',
-    ];
-
-    $name = 'theme_ivana/fontsite';
-    $title = get_string('fontsite', 'theme_ivana');
-    $description = get_string('fontsite_desc', 'theme_ivana');
-    $setting = new admin_setting_configselect($name, $title, $description, 'Roboto', $fontsarr);
-    $setting->set_updatedcallback('theme_reset_all_caches');
-    $page->add($setting);
-
     $name = 'theme_ivana/enablecourseindex';
     $title = get_string('enablecourseindex', 'theme_ivana');
     $description = get_string('enablecourseindex_desc', 'theme_ivana');
