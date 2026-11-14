@@ -7,6 +7,7 @@
 #   .devcontainer/tools/moodle-upstream-update.sh v4.5.17    # ate uma tag
 #
 # Rode num branch novo criado a partir da main. Nada e commitado: revise e commite voce.
+# Procedimento completo (staging, validacao, producao): .devcontainer/docs/MOODLE-UPSTREAM-UPDATE.md
 set -euo pipefail
 
 STABLE=MOODLE_405_STABLE
