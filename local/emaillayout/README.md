@@ -80,4 +80,14 @@ matricular um usuário de teste num curso com autoinscrição).
 
 Código: o deploy normal (merge em `main`) já purga os caches, e o layout passa a valer.
 Para registrar o plugin, rodar na VPS `php admin/cli/upgrade.php --non-interactive`.
+Assinatura dos e-mails do core ("Admin User" + "Contact site support", de
+`generate_email_signoff()`): vem das configurações de suporte, não do layout. Desligadas em
+*Administração > Servidor > Suporte*, ou na VPS:
+
+```bash
+php admin/cli/cfg.php --name=supportname --set=""
+php admin/cli/cfg.php --name=supportavailability --set=0   # Desabilitado (some também do rodapé do site)
+php admin/cli/purge_caches.php
+```
+
 Rollback: apagar os dois overrides `theme/*/templates/core/email_html.mustache` + purge.
