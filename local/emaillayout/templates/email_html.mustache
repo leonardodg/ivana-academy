@@ -1,0 +1,96 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_emaillayout/email_html
+
+    Ivana Academy wrapper for every HTML e-mail. It is included by the
+    themes' override of core/email_html (theme/ivana and theme/moove), so
+    the context is exactly the one email_to_user() builds in lib/moodlelib.php.
+
+    Inline styles on every element: Gmail/Outlook drop or ignore <style>
+    in many cases. The <style> block only adds niceties (links, mobile).
+
+    Context variables (from email_to_user()):
+    * sitefullname, siteshortname, sitewwwroot
+    * subject, prefix
+    * to, toname, touserid, tousername
+    * from, fromname, replyto, replytoname
+    * body - already formatted HTML of the message (triple braces)
+
+    Example context (json):
+    {
+        "sitefullname": "Ivana Academy",
+        "siteshortname": "Ivana",
+        "sitewwwroot": "https://ivana.academy",
+        "subject": "Bienvenido a Ivana Academy",
+        "prefix": "",
+        "body": "<p>Hola Ana,</p><p>Bienvenida.</p>"
+    }
+}}
+<!DOCTYPE html>
+<html lang="{{#str}}iso6391, langconfig{{/str}}">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="x-apple-disable-message-reformatting">
+<title>{{subject}}</title>
+<style type="text/css">
+body{margin:0;padding:0;}
+.ia-content a{color:#805252;}
+.ia-content img{max-width:100%;height:auto;}
+.ia-content p{margin:0 0 12px;}
+.ia-content h1,.ia-content h2,.ia-content h3{font-family:Georgia,"Times New Roman",serif;font-weight:400;color:#1c1c1a;line-height:1.25;}
+.ia-content table{max-width:100%;}
+@media only screen and (max-width:620px){
+  .ia-main{width:100% !important;}
+  .ia-pad{padding-left:20px !important;padding-right:20px !important;}
+}
+</style>
+</head>
+<body style="margin:0;padding:0;background:#f7efe4;color:#1c1c1a;font-family:'Plus Jakarta Sans',Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#f7efe4;">
+    <tr>
+        <td align="center" style="padding:24px 0 30px;vertical-align:top;">
+            <table role="presentation" class="ia-main" width="600" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:600px;max-width:600px;margin:0 auto;background:#ffffff;text-align:left;">
+                <tr>
+                    <td class="ia-pad" style="background:#fcf9f5;padding:28px 32px;border-bottom:1px solid #e1deda;vertical-align:top;">
+                        <a href="{{sitewwwroot}}" style="text-decoration:none;">
+                            <img src="{{sitewwwroot}}/local/emaillayout/pix/logo_email.png" alt="{{sitefullname}}" width="180" border="0" style="display:block;width:180px;max-width:180px;height:auto;border:0;outline:none;text-decoration:none;">
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="ia-pad ia-content" style="padding:32px;vertical-align:top;color:#1c1c1a;font-family:'Plus Jakarta Sans',Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;">
+                        {{{body}}}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="ia-pad" style="background:#f7efe4;color:#514443;padding:24px 32px;font-size:12px;line-height:1.5;border-top:1px solid #e1deda;font-family:'Plus Jakarta Sans',Arial,Helvetica,sans-serif;vertical-align:top;">
+                        <p style="margin:0 0 8px;color:#101828;font-family:'Courier New',Courier,monospace;font-weight:700;letter-spacing:1px;text-transform:uppercase;">{{sitefullname}}</p>
+                        <p style="margin:4px 0;">{{#str}}footersent, local_emaillayout{{/str}}</p>
+                        <p style="margin:4px 0;"><a href="{{sitewwwroot}}" style="color:#805252;text-decoration:none;">{{sitewwwroot}}</a></p>
+                        {{#touserid}}
+                        <p style="margin:4px 0;"><a href="{{sitewwwroot}}/message/notificationpreferences.php" style="color:#805252;text-decoration:underline;">{{#str}}footerpreferences, local_emaillayout{{/str}}</a></p>
+                        {{/touserid}}
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
