@@ -16,6 +16,7 @@ template `core/email_html`. O Moodle procura esse template primeiro no tema ativ
 | `theme/moove/templates/core/email_html.mustache` | o mesmo, para o rollback de tema manter o layout |
 | `local/emaillayout/pix/logo_email.png` | logo (kit da marca, 363×91, exibido a 180px) servido em `/local/emaillayout/pix/` |
 | `lang/{en,es,pt_br}` | textos do rodapé (es_ar herda de es) |
+| `classes/hook_callbacks.php` + `db/hooks.php` | boas-vindas ao curso no idioma do aluno (ver abaixo) |
 
 Limites (o contexto do template é fixo, definido pelo core):
 - Só vale para quem recebe HTML (`mailformat = 1`; hoje 650 de 650 usuários). A versão texto não muda.
@@ -23,6 +24,15 @@ Limites (o contexto do template é fixo, definido pelo core):
   matrícula, senha, cadastro) é o do próprio aluno; em tarefas em massa do cron pode cair no
   padrão do site (es_ar).
 - Sem configurações no painel: cores/textos ficam no template e nas strings.
+
+## Idioma das boas-vindas ao curso
+
+As matrículas feitas pela loja chegam pelo webservice (`enrol_manual_enrol_users`). Por isso o
+core monta a mensagem de boas-vindas (assunto, texto padrão, link do app, rodapé) no idioma da
+conta do webservice, e não no do aluno. Quem envia as boas-vindas são callbacks do hook
+`core_enrol\hook\after_user_enrolled` (enrol_manual, enrol_self). O plugin registra dois
+callbacks no mesmo hook: um antes deles (prioridade 10000), que força o idioma do aluno
+matriculado, e outro depois de todos (-10000), que devolve o idioma anterior.
 
 ## Levantamento dos e-mails (staging = cópia da produção de 12/11/2026)
 
